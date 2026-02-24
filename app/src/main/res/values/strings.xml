@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ReservasApp</string>
+    <string name="titulo_principal">Sistema de Reservas</string>
+    <string name="reservar">Reservar</string>
+    <string name="mis_reservas">Mis reservas</string>
+    <string name="editar_reservas">Editar reservas</string>
+    <string name="selecciona_dia">Selecciona un día para tu reserva</string>
+    <string name="continuar">Continuar</string>
+    <string name="detalle_reserva">Detalle de la reserva</string>
+    <string name="comida_principal">Comida principal</string>
+    <string name="postre">Postre</string>
+    <string name="confirmar_reserva">Confirmar reserva</string>
+    <string name="fecha_seleccionada">Fecha seleccionada: %1$s</string>
+    <string name="resumen_reserva">Reserva confirmada\nFecha: %1$s\nComida: %2$s\nPostre: %3$s</string>
+    <string name="mensaje_mis_reservas">Aquí se mostrarán tus reservas actuales.</string>
+    <string name="mensaje_editar_reservas">Aquí podrás editar las reservas realizadas.</string>
+</resources>

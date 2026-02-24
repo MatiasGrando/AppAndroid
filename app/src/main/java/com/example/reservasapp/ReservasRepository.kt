@@ -4,10 +4,30 @@ import java.util.Calendar
 
 object ReservasRepository {
     private val reservas = mutableListOf<Reserva>()
+    private var nextId = 1L
 
-    fun agregarReserva(reserva: Reserva) {
+    fun agregarReserva(fechaMillis: Long, comida: String, postre: String): Reserva {
+        val reserva = Reserva(
+            id = nextId++,
+            fechaMillis = fechaMillis,
+            comida = comida,
+            postre = postre
+        )
         reservas.add(reserva)
+        return reserva
     }
+
+    fun actualizarReserva(id: Long, comida: String, postre: String): Reserva? {
+        val index = reservas.indexOfFirst { it.id == id }
+        if (index == -1) return null
+
+        val actual = reservas[index]
+        val actualizada = actual.copy(comida = comida, postre = postre)
+        reservas[index] = actualizada
+        return actualizada
+    }
+
+    fun obtenerReservaPorId(id: Long): Reserva? = reservas.firstOrNull { it.id == id }
 
     fun obtenerReservasProximosSieteDias(): List<Reserva> {
         val inicioHoy = Calendar.getInstance().apply {

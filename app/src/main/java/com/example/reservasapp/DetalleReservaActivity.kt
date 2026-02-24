@@ -44,12 +44,11 @@ class DetalleReservaActivity : AppCompatActivity() {
         )
 
         confirmarButton.setOnClickListener {
-            val reserva = Reserva(
+            val reserva = ReservasRepository.agregarReserva(
                 fechaMillis = selectedDateMillis,
                 comida = comidaSpinner.selectedItem.toString(),
                 postre = postreSpinner.selectedItem.toString()
             )
-            ReservasRepository.agregarReserva(reserva)
 
             val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
                 putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)

@@ -3,35 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="24dp">
 
     <TextView
-        android:id="@+id/tvTituloMisReservas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/titulo_mis_reservas"
-        android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
+        android:text="@string/titulo_confirmacion_edicion"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
     <TextView
-        android:id="@+id/tvSinReservas"
+        android:id="@+id/tvDetalleEdicion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/sin_reservas_proximas"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@+id/listReservas"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1" />
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
     <Button
-        android:id="@+id/btnVolverMenuMisReservas"
+        android:id="@+id/btnVolverMenuEdicion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="24dp"
         android:text="@string/volver_menu" />
 
 </LinearLayout>

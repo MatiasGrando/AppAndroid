@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/mensaje_editar_reservas"
-        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+        android:text="@string/titulo_editar_reservas"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tvSinReservasEditar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/sin_reservas_editar"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/listReservasEditar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/btnVolverMenuEditar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/volver_menu" />
+
+</LinearLayout>

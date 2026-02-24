@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">ReservasApp</string>
+    <string name="titulo_principal">Sistema de Reservas</string>
+    <string name="reservar">Reservar</string>
+    <string name="mis_reservas">Mis reservas</string>
+    <string name="editar_reservas">Editar reservas</string>
+    <string name="selecciona_dia">Selecciona un día para tu reserva</string>
+    <string name="continuar">Continuar</string>
+    <string name="detalle_reserva">Detalle de la reserva</string>
+    <string name="comida_principal">Comida principal</string>
+    <string name="postre">Postre</string>
+    <string name="confirmar_reserva">Confirmar reserva</string>
+    <string name="confirmar_edicion">Confirmar edición</string>
+    <string name="fecha_seleccionada">Fecha seleccionada: %1$s</string>
+    <string name="resumen_reserva">Reserva confirmada\nFecha: %1$s\nComida: %2$s\nPostre: %3$s</string>
+    <string name="resumen_edicion">Reserva actualizada\nFecha: %1$s\nComida: %2$s\nPostre: %3$s</string>
+    <string name="titulo_confirmacion">Reserva confirmada</string>
+    <string name="titulo_confirmacion_edicion">Edición confirmada</string>
+    <string name="volver_menu">Volver al menú principal</string>
+    <string name="titulo_mis_reservas">Reservas de hoy y próximos 6 días</string>
+    <string name="sin_reservas_proximas">No tienes reservas para hoy ni para los próximos 6 días.</string>
+    <string name="item_reserva">%1$s - Comida: %2$s - Postre: %3$s</string>
+    <string name="titulo_editar_reservas">Selecciona una reserva para editar</string>
+    <string name="sin_reservas_editar">No hay reservas disponibles para editar.</string>
+    <string name="item_reserva_con_id">#%1$d - %2$s - Comida: %3$s - Postre: %4$s</string>
+    <string name="titulo_editar_detalle">Editar detalle de la reserva</string>
+</resources>

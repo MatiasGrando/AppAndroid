@@ -2,13 +2,12 @@ package com.example.reservasapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,8 +23,9 @@ class DetalleReservaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_detalle_reserva)
 
         val dateText = findViewById<TextView>(R.id.tvFechaSeleccionada)
-        val container = findViewById<LinearLayout>(R.id.containerSecciones)
-        val confirmarButton = findViewById<Button>(R.id.btnConfirmar)
+        val tabLayout = findViewById<TabLayout>(R.id.tabSections)
+        val recycler = findViewById<RecyclerView>(R.id.recyclerMenuOptions)
+        val btnConfirmar = findViewById<Button>(R.id.btnConfirmar)
 
         val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -33,40 +33,43 @@ class DetalleReservaActivity : AppCompatActivity() {
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
         val secciones = MenuRepository.obtenerSecciones()
-        val spinnersPorSeccion = linkedMapOf<String, Spinner>()
+        val selecciones = linkedMapOf<String, String>()
 
-        secciones.forEach { section ->
-            val title = TextView(this).apply {
-                text = section.nombre
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = 20 }
+        val adapter = MenuOptionAdapter(emptyList()) { option ->
+            val sectionName = tabLayout.getTabAt(tabLayout.selectedTabPosition)?.text?.toString().orEmpty()
+            if (sectionName.isNotEmpty()) {
+                selecciones[sectionName] = option.name
             }
-
-            val spinner = Spinner(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                adapter = ArrayAdapter(
-                    this@DetalleReservaActivity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    section.opciones
-                )
-            }
-
-            container.addView(title)
-            container.addView(spinner)
-            spinnersPorSeccion[section.nombre] = spinner
         }
 
-        confirmarButton.setOnClickListener {
-            val selecciones = spinnersPorSeccion.mapValues { (_, spinner) ->
-                spinner.selectedItem?.toString().orEmpty()
+        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.adapter = adapter
+
+        secciones.forEach { section ->
+            tabLayout.addTab(tabLayout.newTab().setText(section.nombre))
+        }
+
+        fun showSection(position: Int) {
+            val section = secciones.getOrNull(position) ?: return
+            val items = MenuVisualRepository.buildItemsForSection(section.nombre, section.opciones)
+            adapter.updateItems(items)
+            items.firstOrNull()?.let { selecciones[section.nombre] = it.name }
+        }
+
+        if (secciones.isNotEmpty()) {
+            showSection(0)
+        }
+
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                showSection(tab.position)
             }
 
+            override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+            override fun onTabReselected(tab: TabLayout.Tab) = Unit
+        })
+
+        btnConfirmar.setOnClickListener {
             val reserva = ReservasRepository.agregarReserva(
                 fechaMillis = selectedDateMillis,
                 selecciones = selecciones

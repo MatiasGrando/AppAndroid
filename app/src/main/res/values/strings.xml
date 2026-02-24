@@ -36,4 +36,7 @@
     <string name="mensaje_seccion_agregada">Nueva sección agregada correctamente.</string>
     <string name="error_opciones_vacias">Las opciones de comida principal y postre no pueden quedar vacías.</string>
     <string name="error_seccion_invalida">Ingresa un nombre de sección y opciones válidas.</string>
+    <string name="titulo_estilo_menu">Lunch Box</string>
+    <string name="selecciona_items">Selecciona tus opciones</string>
+    <string name="ver_pedido">Ver pedido</string>
 </resources>

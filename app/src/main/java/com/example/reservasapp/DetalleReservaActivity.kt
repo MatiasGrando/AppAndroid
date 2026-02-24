@@ -31,16 +31,19 @@ class DetalleReservaActivity : AppCompatActivity() {
         val fechaFormateada = formatter.format(Date(selectedDateMillis))
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
+        val opcionesComida = MenuRepository.obtenerOpcionesPorSeccion("Comida principal").ifEmpty { listOf("Pollo", "Carne") }
+        val opcionesPostre = MenuRepository.obtenerOpcionesPorSeccion("Postre").ifEmpty { listOf("Helado", "Alfajor") }
+
         comidaSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            listOf("Pollo", "Carne")
+            opcionesComida
         )
 
         postreSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            listOf("Helado", "Alfajor")
+            opcionesPostre
         )
 
         confirmarButton.setOnClickListener {

@@ -34,8 +34,8 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
         val spinnerPostre = findViewById<Spinner>(R.id.spinnerPostreEditar)
         val btnConfirmar = findViewById<Button>(R.id.btnConfirmarEdicion)
 
-        val comidas = listOf("Pollo", "Carne")
-        val postres = listOf("Helado", "Alfajor")
+        val comidas = MenuRepository.obtenerOpcionesPorSeccion("Comida principal").ifEmpty { listOf("Pollo", "Carne") }
+        val postres = MenuRepository.obtenerOpcionesPorSeccion("Postre").ifEmpty { listOf("Helado", "Alfajor") }
 
         spinnerComida.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, comidas)
         spinnerPostre.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, postres)

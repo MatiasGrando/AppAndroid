@@ -7,6 +7,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReservasApp">
         <activity
+            android:name=".ConfirmacionReservaActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditarReservasActivity"
             android:exported="false" />
         <activity

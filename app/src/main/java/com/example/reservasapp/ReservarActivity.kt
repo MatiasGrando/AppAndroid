@@ -5,12 +5,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.CalendarView
 import androidx.appcompat.app.AppCompatActivity
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 class ReservarActivity : AppCompatActivity() {
-    private var selectedDate: String = ""
+    private var selectedDateMillis: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,19 +16,18 @@ class ReservarActivity : AppCompatActivity() {
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
         val continueButton = findViewById<Button>(R.id.btnContinuar)
 
-        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        selectedDate = formatter.format(calendarView.date)
+        selectedDateMillis = calendarView.date
 
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val calendar = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth)
-            }
-            selectedDate = formatter.format(calendar.time)
+            selectedDateMillis = java.util.Calendar.getInstance().apply {
+                set(year, month, dayOfMonth, 0, 0, 0)
+                set(java.util.Calendar.MILLISECOND, 0)
+            }.timeInMillis
         }
 
         continueButton.setOnClickListener {
             val intent = Intent(this, DetalleReservaActivity::class.java)
-            intent.putExtra(DetalleReservaActivity.EXTRA_DATE, selectedDate)
+            intent.putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, selectedDateMillis)
             startActivity(intent)
         }
     }

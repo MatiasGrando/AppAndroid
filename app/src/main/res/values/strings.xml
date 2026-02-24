@@ -12,6 +12,10 @@
     <string name="confirmar_reserva">Confirmar reserva</string>
     <string name="fecha_seleccionada">Fecha seleccionada: %1$s</string>
     <string name="resumen_reserva">Reserva confirmada\nFecha: %1$s\nComida: %2$s\nPostre: %3$s</string>
-    <string name="mensaje_mis_reservas">Aquí se mostrarán tus reservas actuales.</string>
     <string name="mensaje_editar_reservas">Aquí podrás editar las reservas realizadas.</string>
+    <string name="titulo_confirmacion">Reserva confirmada</string>
+    <string name="volver_menu">Volver al menú inicial</string>
+    <string name="titulo_mis_reservas">Reservas de hoy y próximos 6 días</string>
+    <string name="sin_reservas_proximas">No tienes reservas para hoy ni para los próximos 6 días.</string>
+    <string name="item_reserva">%1$s - Comida: %2$s - Postre: %3$s</string>
 </resources>

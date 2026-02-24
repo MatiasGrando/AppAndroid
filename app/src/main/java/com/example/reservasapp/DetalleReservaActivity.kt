@@ -1,17 +1,20 @@
 package com.example.reservasapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DetalleReservaActivity : AppCompatActivity() {
 
     companion object {
-        const val EXTRA_DATE = "extra_date"
+        const val EXTRA_DATE_MILLIS = "extra_date_millis"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +26,10 @@ class DetalleReservaActivity : AppCompatActivity() {
         val postreSpinner = findViewById<Spinner>(R.id.spinnerPostre)
         val confirmarButton = findViewById<Button>(R.id.btnConfirmar)
 
-        val selectedDate = intent.getStringExtra(EXTRA_DATE).orEmpty()
-        dateText.text = getString(R.string.fecha_seleccionada, selectedDate)
+        val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val fechaFormateada = formatter.format(Date(selectedDateMillis))
+        dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
         comidaSpinner.adapter = ArrayAdapter(
             this,
@@ -39,13 +44,19 @@ class DetalleReservaActivity : AppCompatActivity() {
         )
 
         confirmarButton.setOnClickListener {
-            val resumen = getString(
-                R.string.resumen_reserva,
-                selectedDate,
-                comidaSpinner.selectedItem.toString(),
-                postreSpinner.selectedItem.toString()
+            val reserva = Reserva(
+                fechaMillis = selectedDateMillis,
+                comida = comidaSpinner.selectedItem.toString(),
+                postre = postreSpinner.selectedItem.toString()
             )
-            Toast.makeText(this, resumen, Toast.LENGTH_LONG).show()
+            ReservasRepository.agregarReserva(reserva)
+
+            val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                putExtra(ConfirmacionReservaActivity.EXTRA_COMIDA, reserva.comida)
+                putExtra(ConfirmacionReservaActivity.EXTRA_POSTRE, reserva.postre)
+            }
+            startActivity(intent)
         }
     }
 }

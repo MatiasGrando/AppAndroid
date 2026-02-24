@@ -25,7 +25,8 @@ class MisReservasActivity : AppCompatActivity() {
 
         val items = ReservasRepository.obtenerReservasProximosSieteDias().map {
             val fecha = formatter.format(Date(it.fechaMillis))
-            getString(R.string.item_reserva, fecha, it.comida, it.postre)
+            val detalle = ReservasRepository.formatearSelecciones(it.selecciones)
+            getString(R.string.item_reserva_generico, fecha, detalle)
         }
 
         if (items.isEmpty()) {

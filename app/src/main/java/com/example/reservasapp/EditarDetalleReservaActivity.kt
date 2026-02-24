@@ -2,8 +2,10 @@ package com.example.reservasapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -30,34 +32,62 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
         }
 
         val tvFecha = findViewById<TextView>(R.id.tvFechaEditar)
-        val spinnerComida = findViewById<Spinner>(R.id.spinnerComidaEditar)
-        val spinnerPostre = findViewById<Spinner>(R.id.spinnerPostreEditar)
+        val container = findViewById<LinearLayout>(R.id.containerSeccionesEditar)
         val btnConfirmar = findViewById<Button>(R.id.btnConfirmarEdicion)
-
-        val comidas = MenuRepository.obtenerOpcionesPorSeccion("Comida principal").ifEmpty { listOf("Pollo", "Carne") }
-        val postres = MenuRepository.obtenerOpcionesPorSeccion("Postre").ifEmpty { listOf("Helado", "Alfajor") }
-
-        spinnerComida.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, comidas)
-        spinnerPostre.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, postres)
-
-        spinnerComida.setSelection(comidas.indexOf(reserva.comida).coerceAtLeast(0))
-        spinnerPostre.setSelection(postres.indexOf(reserva.postre).coerceAtLeast(0))
 
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val fechaFormateada = formatter.format(Date(reserva.fechaMillis))
         tvFecha.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
+        val secciones = MenuRepository.obtenerSecciones()
+        val spinnersPorSeccion = linkedMapOf<String, Spinner>()
+
+        secciones.forEach { section ->
+            val title = TextView(this).apply {
+                text = section.nombre
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = 20 }
+            }
+
+            val spinner = Spinner(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                adapter = ArrayAdapter(
+                    this@EditarDetalleReservaActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    section.opciones
+                )
+            }
+
+            val actual = reserva.selecciones[section.nombre]
+            val index = section.opciones.indexOf(actual).coerceAtLeast(0)
+            spinner.setSelection(index)
+
+            container.addView(title)
+            container.addView(spinner)
+            spinnersPorSeccion[section.nombre] = spinner
+        }
+
         btnConfirmar.setOnClickListener {
+            val selecciones = spinnersPorSeccion.mapValues { (_, spinner) ->
+                spinner.selectedItem?.toString().orEmpty()
+            }
+
             val actualizada = ReservasRepository.actualizarReserva(
                 id = reserva.id,
-                comida = spinnerComida.selectedItem.toString(),
-                postre = spinnerPostre.selectedItem.toString()
+                selecciones = selecciones
             ) ?: return@setOnClickListener
+
+            val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
 
             val intent = Intent(this, ConfirmacionEdicionActivity::class.java).apply {
                 putExtra(ConfirmacionEdicionActivity.EXTRA_FECHA, fechaFormateada)
-                putExtra(ConfirmacionEdicionActivity.EXTRA_COMIDA, actualizada.comida)
-                putExtra(ConfirmacionEdicionActivity.EXTRA_POSTRE, actualizada.postre)
+                putExtra(ConfirmacionEdicionActivity.EXTRA_DETALLE, resumen)
             }
             startActivity(intent)
         }

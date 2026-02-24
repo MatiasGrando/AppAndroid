@@ -10,8 +10,7 @@ class ConfirmacionEdicionActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_FECHA = "extra_fecha"
-        const val EXTRA_COMIDA = "extra_comida"
-        const val EXTRA_POSTRE = "extra_postre"
+        const val EXTRA_DETALLE = "extra_detalle"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,13 +18,12 @@ class ConfirmacionEdicionActivity : AppCompatActivity() {
         setContentView(R.layout.activity_confirmacion_edicion)
 
         val fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty()
-        val comida = intent.getStringExtra(EXTRA_COMIDA).orEmpty()
-        val postre = intent.getStringExtra(EXTRA_POSTRE).orEmpty()
+        val detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty()
 
         val detalle = findViewById<TextView>(R.id.tvDetalleEdicion)
         val volverMenu = findViewById<Button>(R.id.btnVolverMenuEdicion)
 
-        detalle.text = getString(R.string.resumen_edicion, fecha, comida, postre)
+        detalle.text = getString(R.string.resumen_edicion_generico, fecha, detalleSeleccion)
 
         volverMenu.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java).apply {

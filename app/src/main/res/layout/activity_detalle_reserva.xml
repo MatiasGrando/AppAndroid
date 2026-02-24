@@ -23,31 +23,11 @@
             android:layout_marginTop="8dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/containerSecciones"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/comida_principal"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinnerComida"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/postre"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinnerPostre"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:orientation="vertical" />
 
         <Button
             android:id="@+id/btnConfirmar"

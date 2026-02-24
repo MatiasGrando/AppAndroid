@@ -26,7 +26,8 @@ class EditarReservasActivity : AppCompatActivity() {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val items = reservas.map {
             val fecha = formatter.format(Date(it.fechaMillis))
-            getString(R.string.item_reserva_con_id, it.id, fecha, it.comida, it.postre)
+            val detalle = ReservasRepository.formatearSelecciones(it.selecciones)
+            getString(R.string.item_reserva_con_id_generico, it.id, fecha, detalle)
         }
 
         if (items.isEmpty()) {

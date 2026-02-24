@@ -6,21 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.google.android.material.card.MaterialCardView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 
 class MenuOptionAdapter(
     private var items: List<MenuItemOption>,
     private val onSelected: (MenuItemOption) -> Unit
 ) : RecyclerView.Adapter<MenuOptionAdapter.MenuOptionViewHolder>() {
 
-    private var selectedPosition = 0
+    private var selectedPosition = RecyclerView.NO_POSITION
 
-    fun updateItems(newItems: List<MenuItemOption>) {
+    fun updateItems(newItems: List<MenuItemOption>, selectedName: String?) {
         items = newItems
-        selectedPosition = 0
+        selectedPosition = selectedName?.let { name ->
+            items.indexOfFirst { it.name == name }
+        }?.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
         notifyDataSetChanged()
-        items.firstOrNull()?.let { onSelected(it) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuOptionViewHolder {
@@ -35,7 +36,7 @@ class MenuOptionAdapter(
         holder.itemView.setOnClickListener {
             val prev = selectedPosition
             selectedPosition = holder.bindingAdapterPosition
-            notifyItemChanged(prev)
+            if (prev != RecyclerView.NO_POSITION) notifyItemChanged(prev)
             notifyItemChanged(selectedPosition)
             onSelected(item)
         }
@@ -48,13 +49,11 @@ class MenuOptionAdapter(
         private val image = itemView.findViewById<ImageView>(R.id.ivMenu)
         private val title = itemView.findViewById<TextView>(R.id.tvMenuTitle)
         private val description = itemView.findViewById<TextView>(R.id.tvMenuDescription)
-        private val price = itemView.findViewById<TextView>(R.id.tvPrice)
 
         fun bind(item: MenuItemOption, isSelected: Boolean) {
             image.setImageResource(item.imageRes)
             title.text = item.name
             description.text = item.description
-            price.text = item.price
 
             card.setCardBackgroundColor(if (isSelected) Color.parseColor("#F0FFFA") else Color.WHITE)
             card.strokeColor = if (isSelected) Color.parseColor("#25B78C") else Color.parseColor("#E3E3E3")

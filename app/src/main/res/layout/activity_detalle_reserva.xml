@@ -84,7 +84,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="#31C394"
             android:paddingHorizontal="20dp"
-            android:text="@string/ver_pedido"
+            android:text="@string/continuar"
             android:textAllCaps="false" />
 
     </LinearLayout>

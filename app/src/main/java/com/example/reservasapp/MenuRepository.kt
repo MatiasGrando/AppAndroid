@@ -2,8 +2,18 @@ package com.example.reservasapp
 
 object MenuRepository {
     private val secciones = mutableListOf(
-        MenuSection("Comida principal", mutableListOf("Pollo", "Carne")),
-        MenuSection("Postre", mutableListOf("Helado", "Alfajor"))
+        MenuSection(
+            "Plato principal",
+            mutableListOf("Pollo al horno", "Milanesa Napolitana", "Empanadas")
+        ),
+        MenuSection(
+            "Guarniciones",
+            mutableListOf("Pure de papas", "Papas al horno", "Ensalada mixta")
+        ),
+        MenuSection(
+            "Postres",
+            mutableListOf("Flan", "Gelatina", "Alfajor", "Fruta")
+        )
     )
 
     fun obtenerSecciones(): List<MenuSection> = secciones.map {

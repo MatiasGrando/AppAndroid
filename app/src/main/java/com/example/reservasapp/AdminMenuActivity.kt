@@ -24,8 +24,8 @@ class AdminMenuActivity : AppCompatActivity() {
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
 
-        val principalesActuales = MenuRepository.obtenerOpcionesPorSeccion("Comida principal")
-        val postresActuales = MenuRepository.obtenerOpcionesPorSeccion("Postre")
+        val principalesActuales = MenuRepository.obtenerOpcionesPorSeccion("Plato principal")
+        val postresActuales = MenuRepository.obtenerOpcionesPorSeccion("Postres")
         etPrincipales.setText(principalesActuales.joinToString(", "))
         etPostres.setText(postresActuales.joinToString(", "))
 
@@ -47,8 +47,8 @@ class AdminMenuActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            MenuRepository.actualizarOpciones("Comida principal", principales)
-            MenuRepository.actualizarOpciones("Postre", postres)
+            MenuRepository.actualizarOpciones("Plato principal", principales)
+            MenuRepository.actualizarOpciones("Postres", postres)
             refrescarListadoSecciones()
             Toast.makeText(this, R.string.mensaje_menus_actualizados, Toast.LENGTH_SHORT).show()
         }

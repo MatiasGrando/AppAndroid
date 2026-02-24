@@ -25,7 +25,7 @@ class DetalleReservaActivity : AppCompatActivity() {
         val dateText = findViewById<TextView>(R.id.tvFechaSeleccionada)
         val tabLayout = findViewById<TabLayout>(R.id.tabSections)
         val recycler = findViewById<RecyclerView>(R.id.recyclerMenuOptions)
-        val btnConfirmar = findViewById<Button>(R.id.btnConfirmar)
+        val btnContinuar = findViewById<Button>(R.id.btnConfirmar)
 
         val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -34,12 +34,13 @@ class DetalleReservaActivity : AppCompatActivity() {
 
         val secciones = MenuRepository.obtenerSecciones()
         val selecciones = linkedMapOf<String, String>()
+        var currentSectionIndex = 0
 
         val adapter = MenuOptionAdapter(emptyList()) { option ->
-            val sectionName = tabLayout.getTabAt(tabLayout.selectedTabPosition)?.text?.toString().orEmpty()
-            if (sectionName.isNotEmpty()) {
-                selecciones[sectionName] = option.name
-            }
+            val section = secciones.getOrNull(currentSectionIndex) ?: return@MenuOptionAdapter
+            selecciones[section.nombre] = option.name
+            btnContinuar.isEnabled = true
+            btnContinuar.alpha = 1f
         }
 
         recycler.layoutManager = LinearLayoutManager(this)
@@ -51,9 +52,13 @@ class DetalleReservaActivity : AppCompatActivity() {
 
         fun showSection(position: Int) {
             val section = secciones.getOrNull(position) ?: return
+            currentSectionIndex = position
             val items = MenuVisualRepository.buildItemsForSection(section.nombre, section.opciones)
-            adapter.updateItems(items)
-            items.firstOrNull()?.let { selecciones[section.nombre] = it.name }
+            adapter.updateItems(items, selecciones[section.nombre])
+            val isSelected = selecciones.containsKey(section.nombre)
+            btnContinuar.isEnabled = isSelected
+            btnContinuar.alpha = if (isSelected) 1f else 0.5f
+            btnContinuar.text = getString(R.string.continuar)
         }
 
         if (secciones.isNotEmpty()) {
@@ -69,19 +74,27 @@ class DetalleReservaActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab) = Unit
         })
 
-        btnConfirmar.setOnClickListener {
-            val reserva = ReservasRepository.agregarReserva(
-                fechaMillis = selectedDateMillis,
-                selecciones = selecciones
-            )
+        btnContinuar.setOnClickListener {
+            val section = secciones.getOrNull(currentSectionIndex) ?: return@setOnClickListener
+            if (!selecciones.containsKey(section.nombre)) return@setOnClickListener
 
-            val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
+            if (currentSectionIndex < secciones.lastIndex) {
+                currentSectionIndex += 1
+                tabLayout.getTabAt(currentSectionIndex)?.select()
+            } else {
+                val reserva = ReservasRepository.agregarReserva(
+                    fechaMillis = selectedDateMillis,
+                    selecciones = selecciones
+                )
 
-            val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
-                putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
-                putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
+
+                val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                    putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
         }
     }
 }

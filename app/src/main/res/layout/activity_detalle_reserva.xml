@@ -3,13 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F6F8">
+    android:background="@drawable/landing_background">
 
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="14dp"
+        android:background="#D9101A24"
         android:orientation="vertical"
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,7 +25,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/titulo_estilo_menu"
-            android:textColor="#1A1A1A"
+            android:textColor="#F6E9C5"
             android:textSize="34sp"
             android:textStyle="bold" />
 
@@ -30,20 +33,21 @@
             android:id="@+id/tvFechaSeleccionada"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="4dp"
-            android:textColor="#6B7280" />
+            android:gravity="center"
+            android:textColor="#D9D2C1" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabSections"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            app:tabIndicatorColor="#1FA4D2"
+            android:background="#00000000"
+            app:tabIndicatorColor="#F1DDAD"
             app:tabIndicatorFullWidth="false"
             app:tabMode="scrollable"
-            app:tabSelectedTextColor="#0B84AE"
-            app:tabTextColor="#6B7280" />
+            app:tabSelectedTextColor="#F1DDAD"
+            app:tabTextColor="#B7BFD1" />
 
     </LinearLayout>
 
@@ -62,7 +66,10 @@
         android:id="@+id/bottomBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="14dp"
+        android:background="#D9101A24"
         android:orientation="horizontal"
         android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,17 +82,18 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:text="@string/selecciona_items"
-            android:textColor="#25B78C"
+            android:textColor="#F1DDAD"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnConfirmar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#31C394"
+            android:backgroundTint="#A86C3D"
             android:paddingHorizontal="20dp"
             android:text="@string/continuar"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="#F6E9C5" />
 
     </LinearLayout>
 

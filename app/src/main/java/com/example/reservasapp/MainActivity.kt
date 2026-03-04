@@ -17,13 +17,5 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnMisReservas).setOnClickListener {
             startActivity(Intent(this, MisReservasActivity::class.java))
         }
-
-        findViewById<Button>(R.id.btnEditarReservas).setOnClickListener {
-            startActivity(Intent(this, EditarReservasActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.btnModoAdministrador).setOnClickListener {
-            startActivity(Intent(this, AdminMenuActivity::class.java))
-        }
     }
 }

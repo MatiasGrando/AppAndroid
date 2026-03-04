@@ -3,39 +3,33 @@ package com.example.reservasapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MisReservasActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mis_reservas)
 
-        val listView = findViewById<ListView>(R.id.listReservas)
+        val recyclerView = findViewById<RecyclerView>(R.id.rvReservas)
         val emptyText = findViewById<TextView>(R.id.tvSinReservas)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuMisReservas)
 
-        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val reservas = ReservasRepository.obtenerReservasProximosSieteDias()
+        val adapter = MisReservasAdapter(reservas)
 
-        val items = ReservasRepository.obtenerReservasProximosSieteDias().map {
-            val fecha = formatter.format(Date(it.fechaMillis))
-            val detalle = ReservasRepository.formatearSelecciones(it.selecciones)
-            getString(R.string.item_reserva_generico, fecha, detalle)
-        }
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
 
-        if (items.isEmpty()) {
+        if (reservas.isEmpty()) {
             emptyText.visibility = View.VISIBLE
-            listView.visibility = View.GONE
+            recyclerView.visibility = View.GONE
         } else {
             emptyText.visibility = View.GONE
-            listView.visibility = View.VISIBLE
-            listView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
+            recyclerView.visibility = View.VISIBLE
         }
 
         btnVolverMenu.setOnClickListener {

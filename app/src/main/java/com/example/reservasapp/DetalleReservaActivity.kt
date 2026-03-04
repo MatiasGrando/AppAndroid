@@ -92,6 +92,7 @@ class DetalleReservaActivity : AppCompatActivity() {
                 val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
                     putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
                     putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reserva.id)
                 }
                 startActivity(intent)
             }

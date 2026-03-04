@@ -29,6 +29,7 @@ class ReservarActivity : AppCompatActivity() {
         set(Calendar.DAY_OF_MONTH, 1)
     }
     private var selectedDateMillis: Long = today.timeInMillis
+    private var reservedDates: Set<Long> = emptySet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +70,7 @@ class ReservarActivity : AppCompatActivity() {
         maxReservableDate = (today.clone() as Calendar).apply {
             add(Calendar.DAY_OF_YEAR, 6)
         }
+        reservedDates = ReservasRepository.obtenerFechasReservadas()
 
         if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
             selectedDateMillis = today.timeInMillis
@@ -126,6 +128,7 @@ class ReservarActivity : AppCompatActivity() {
         val isReservable = dayDate.timeInMillis in today.timeInMillis..maxReservableDate.timeInMillis
         val isSelected = dayDate.timeInMillis == selectedDateMillis
         val isToday = dayDate.timeInMillis == today.timeInMillis
+        val isReserved = dayDate.timeInMillis in reservedDates
 
         val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -149,7 +152,7 @@ class ReservarActivity : AppCompatActivity() {
             }
             setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
             visibility = if (isReservable) View.VISIBLE else View.INVISIBLE
-            setBackgroundColor(0xFF3FC77AL.toInt())
+            setBackgroundColor(if (isReserved) 0xFFE67E22.toInt() else 0xFF3FC77AL.toInt())
         }
 
         val dayText = TextView(this).apply {
@@ -159,6 +162,7 @@ class ReservarActivity : AppCompatActivity() {
             setTextColor(
                 when {
                     isSelected -> 0xFFF9E5B4.toInt()
+                    isReserved -> 0xFFFFE0BF.toInt()
                     isReservable -> 0xFFDAECCE.toInt()
                     else -> 0xFFE8CF9F.toInt()
                 }
@@ -168,6 +172,7 @@ class ReservarActivity : AppCompatActivity() {
                 context,
                 when {
                     isSelected -> R.drawable.bg_day_selected
+                    isReserved -> R.drawable.bg_day_reserved
                     isToday -> R.drawable.bg_day_today
                     isReservable -> R.drawable.bg_day_available
                     else -> R.drawable.bg_day_default

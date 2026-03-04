@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="12dp"
     app:cardBackgroundColor="#B3231815"
-    app:cardCornerRadius="20dp"
+    app:cardCornerRadius="18dp"
     app:cardElevation="0dp"
     app:strokeColor="#F0E7DD"
     app:strokeWidth="2dp">
@@ -21,9 +21,9 @@
             android:layout_height="wrap_content"
             android:background="#B85E22"
             android:gravity="center"
-            android:paddingVertical="10dp"
+            android:paddingVertical="8dp"
             android:textColor="#F8E7C8"
-            android:textSize="30sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -42,30 +42,30 @@
                     android:layout_height="wrap_content"
                     android:background="#E8DBC7"
                     android:gravity="center"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="6dp"
                     android:text="PLATO PRINCIPAL"
                     android:textColor="#5A1212"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvPlatoPrincipalNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
                     android:textColor="#FFFFFF"
-                    android:textSize="30sp" />
+                    android:textSize="22sp" />
 
                 <ImageView
                     android:id="@+id/ivPlatoPrincipal"
-                    android:layout_width="108dp"
-                    android:layout_height="108dp"
+                    android:layout_width="86dp"
+                    android:layout_height="86dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="14dp"
+                    android:layout_marginVertical="8dp"
                     android:background="@android:color/white"
-                    android:padding="10dp"
+                    android:padding="8dp"
                     android:src="@drawable/ic_food_main" />
             </LinearLayout>
 
@@ -85,30 +85,30 @@
                     android:layout_height="wrap_content"
                     android:background="#E8DBC7"
                     android:gravity="center"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="6dp"
                     android:text="GUARNICIÓN"
                     android:textColor="#5A1212"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvGuarnicionNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
                     android:textColor="#FFFFFF"
-                    android:textSize="24sp" />
+                    android:textSize="18sp" />
 
                 <ImageView
                     android:id="@+id/ivGuarnicion"
-                    android:layout_width="92dp"
-                    android:layout_height="92dp"
+                    android:layout_width="78dp"
+                    android:layout_height="78dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="10dp"
+                    android:layout_marginVertical="8dp"
                     android:background="@android:color/white"
-                    android:padding="10dp"
+                    android:padding="8dp"
                     android:src="@drawable/ic_side_dish" />
 
                 <TextView
@@ -116,30 +116,30 @@
                     android:layout_height="wrap_content"
                     android:background="#E8DBC7"
                     android:gravity="center"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="6dp"
                     android:text="POSTRE"
                     android:textColor="#5A1212"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvPostreNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
                     android:textColor="#FFFFFF"
-                    android:textSize="24sp" />
+                    android:textSize="18sp" />
 
                 <ImageView
                     android:id="@+id/ivPostre"
-                    android:layout_width="92dp"
-                    android:layout_height="92dp"
+                    android:layout_width="78dp"
+                    android:layout_height="78dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="10dp"
+                    android:layout_marginVertical="8dp"
                     android:background="@android:color/white"
-                    android:padding="10dp"
+                    android:padding="8dp"
                     android:src="@drawable/ic_dessert" />
             </LinearLayout>
         </LinearLayout>

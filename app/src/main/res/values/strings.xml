@@ -17,6 +17,7 @@
     <string name="confirmar_edicion">Confirmar edición</string>
     <string name="fecha_seleccionada">Fecha seleccionada: %1$s</string>
     <string name="resumen_reserva_generico">Reserva confirmada\nFecha: %1$s\nSelección: %2$s</string>
+    <string name="resumen_confirmacion_fecha">Tu encargo fue confirmado para %1$s</string>
     <string name="resumen_edicion_generico">Reserva actualizada\nFecha: %1$s\nSelección: %2$s</string>
     <string name="titulo_confirmacion">Reserva confirmada</string>
     <string name="titulo_confirmacion_edicion">Edición confirmada</string>

@@ -55,8 +55,8 @@ class MenuOptionAdapter(
             title.text = item.name
             description.text = item.description
 
-            card.setCardBackgroundColor(if (isSelected) Color.parseColor("#F0FFFA") else Color.WHITE)
-            card.strokeColor = if (isSelected) Color.parseColor("#25B78C") else Color.parseColor("#E3E3E3")
+            card.setCardBackgroundColor(if (isSelected) Color.parseColor("#1E3142") else Color.parseColor("#D9101A24"))
+            card.strokeColor = if (isSelected) Color.parseColor("#F1DDAD") else Color.parseColor("#37506A")
             card.strokeWidth = if (isSelected) 3 else 1
         }
     }

@@ -30,14 +30,12 @@ object MenuVisualRepository {
 
     private fun imageFor(option: String, section: String): Int {
         return when {
-            option.contains("pollo", true) -> android.R.drawable.ic_menu_camera
-            option.contains("milanesa", true) || option.contains("carne", true) -> android.R.drawable.ic_menu_compass
-            option.contains("empan", true) -> android.R.drawable.ic_menu_gallery
-            option.contains("pure", true) || option.contains("papas", true) -> android.R.drawable.ic_menu_agenda
-            option.contains("ensalada", true) || option.contains("fruta", true) -> android.R.drawable.ic_menu_myplaces
-            option.contains("flan", true) || option.contains("gelatina", true) || option.contains("alfajor", true) -> android.R.drawable.ic_menu_crop
-            section.contains("postre", true) -> android.R.drawable.ic_menu_crop
-            else -> android.R.drawable.ic_menu_report_image
+            option.contains("pollo", true) || option.contains("milanesa", true) || option.contains("empan", true) -> R.drawable.ic_food_main
+            option.contains("pure", true) || option.contains("papas", true) || option.contains("ensalada", true) -> R.drawable.ic_side_dish
+            option.contains("flan", true) || option.contains("gelatina", true) || option.contains("alfajor", true) || option.contains("fruta", true) -> R.drawable.ic_dessert
+            section.contains("guarn", true) -> R.drawable.ic_side_dish
+            section.contains("postre", true) -> R.drawable.ic_dessert
+            else -> R.drawable.ic_food_main
         }
     }
 }

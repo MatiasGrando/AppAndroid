@@ -28,6 +28,18 @@ object ReservasRepository {
 
     fun obtenerReservaPorId(id: Long): Reserva? = reservas.firstOrNull { it.id == id }
 
+    fun obtenerFechasReservadas(): Set<Long> = reservas
+        .map { millis ->
+            Calendar.getInstance().apply {
+                timeInMillis = millis.fechaMillis
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        }
+        .toSet()
+
     fun obtenerReservasProximosSieteDias(): List<Reserva> {
         val inicioHoy = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)

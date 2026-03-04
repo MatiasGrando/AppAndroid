@@ -7,7 +7,7 @@ object MenuVisualRepository {
             MenuItemOption(
                 name = option,
                 description = descriptionFor(option, sectionName),
-                imageRes = imageFor(option, sectionName)
+                imageRes = imageForSelection(sectionName, option)
             )
         }
     }
@@ -28,11 +28,22 @@ object MenuVisualRepository {
         }
     }
 
+    fun imageForSelection(section: String, option: String?): Int {
+        if (option.isNullOrBlank()) return fallbackForSection(section)
+        return imageFor(option, section)
+    }
+
     private fun imageFor(option: String, section: String): Int {
         return when {
             option.contains("pollo", true) || option.contains("milanesa", true) || option.contains("empan", true) -> R.drawable.ic_food_main
             option.contains("pure", true) || option.contains("papas", true) || option.contains("ensalada", true) -> R.drawable.ic_side_dish
             option.contains("flan", true) || option.contains("gelatina", true) || option.contains("alfajor", true) || option.contains("fruta", true) -> R.drawable.ic_dessert
+            else -> fallbackForSection(section)
+        }
+    }
+
+    private fun fallbackForSection(section: String): Int {
+        return when {
             section.contains("guarn", true) -> R.drawable.ic_side_dish
             section.contains("postre", true) -> R.drawable.ic_dessert
             else -> R.drawable.ic_food_main

@@ -20,8 +20,8 @@ class ReservarActivity : AppCompatActivity() {
     private lateinit var gridDays: GridLayout
     private lateinit var continueButton: Button
 
-    private val today: Calendar = Calendar.getInstance().clearTime()
-    private val maxReservableDate: Calendar = Calendar.getInstance().clearTime().apply {
+    private var today: Calendar = Calendar.getInstance().clearTime()
+    private var maxReservableDate: Calendar = Calendar.getInstance().clearTime().apply {
         add(Calendar.DAY_OF_YEAR, 6)
     }
 
@@ -55,6 +55,23 @@ class ReservarActivity : AppCompatActivity() {
             startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
                 putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, selectedDateMillis)
             })
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshCurrentDateRange()
+        renderCalendar()
+    }
+
+    private fun refreshCurrentDateRange() {
+        today = Calendar.getInstance().clearTime()
+        maxReservableDate = (today.clone() as Calendar).apply {
+            add(Calendar.DAY_OF_YEAR, 6)
+        }
+
+        if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
+            selectedDateMillis = today.timeInMillis
         }
     }
 

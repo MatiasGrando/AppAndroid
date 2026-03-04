@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">ReservasApp</string>
     <string name="titulo_principal">Sistema de Reservas</string>
+    <string name="titulo_landing">PUNTO LUNCH</string>
+    <string name="encargar_viandas">ENCARGAR VIANDAS</string>
+    <string name="ver_encargos">VER ENCARGOS</string>
     <string name="reservar">Reservar</string>
     <string name="mis_reservas">Mis reservas</string>
     <string name="editar_reservas">Editar reservas</string>

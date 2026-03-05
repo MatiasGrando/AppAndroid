@@ -14,8 +14,6 @@ import java.util.Locale
 
 class DetalleReservaActivity : AppCompatActivity() {
 
-    private val firestoreRepository = FirestoreRepository()
-
     companion object {
         const val EXTRA_DATE_MILLIS = "extra_date_millis"
     }
@@ -90,18 +88,6 @@ class DetalleReservaActivity : AppCompatActivity() {
                 )
 
                 val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
-                val usuario = AppSession.currentUsuario
-                if (usuario != null) {
-                    val pedido = Pedido(
-                        userId = usuario.userId,
-                        nombreUsuario = "${usuario.nombre} ${usuario.apellido}".trim(),
-                        fecha = selectedDateMillis,
-                        items = reserva.selecciones.map { (seccion, item) -> "$seccion: $item" },
-                        total = reserva.selecciones.size * 2500.0,
-                        estadoPedido = Pedido.ESTADO_PENDIENTE
-                    )
-                    firestoreRepository.guardarPedido(pedido) { }
-                }
 
                 val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
                     putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)

@@ -6,6 +6,7 @@ object ComidaImageRepository {
 
     private val imagenesComida: Map<String, Int> = mapOf(
         normalizarNombre("Pollo al horno") to R.drawable.pollo_horno,
+        normalizarNombre("Empanadas") to R.drawable.empanada,
         normalizarNombre("Milanesa Napolitana") to R.drawable.milanesa_napolitana,
         normalizarNombre("Pure de papas") to R.drawable.pure_papas,
         normalizarNombre("Papas al horno") to R.drawable.papas_horno,

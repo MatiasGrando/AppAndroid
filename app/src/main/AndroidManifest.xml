@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.reservasapp">
-
-    <uses-permission android:name="android.permission.INTERNET" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -10,7 +7,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ReservasApp">
         <activity
-            android:name="com.example.reservasapp.LauncherActivity"
+            android:name=".AdminMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfirmacionEdicionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditarDetalleReservaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfirmacionReservaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditarReservasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MisReservasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetalleReservaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ReservarActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,42 +39,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.example.reservasapp.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.RegistroUsuarioActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.PedidosActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.AdminMenuActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.ConfirmacionEdicionActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.EditarDetalleReservaActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.ConfirmacionReservaActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.EditarReservasActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.MisReservasActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.DetalleReservaActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.ReservarActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.reservasapp.MainActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

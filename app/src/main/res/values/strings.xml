@@ -42,4 +42,25 @@
     <string name="error_seccion_invalida">Ingresa un nombre de sección y opciones válidas.</string>
     <string name="titulo_estilo_menu">Lunch Box</string>
     <string name="selecciona_items">Selecciona una opción para continuar</string>
+
+    <string name="login_titulo">Inicia sesión para continuar</string>
+    <string name="iniciar_con_google">Iniciar sesión con Google</string>
+    <string name="registro_titulo">Completa tu registro</string>
+    <string name="nombre">Nombre</string>
+    <string name="apellido">Apellido</string>
+    <string name="dni">DNI</string>
+    <string name="guardar_registro">Guardar registro</string>
+    <string name="error_login_google">No fue posible iniciar sesión con Google.</string>
+    <string name="error_nombre_apellido">Nombre y apellido son obligatorios.</string>
+    <string name="error_dni">El DNI debe tener 7 u 8 dígitos.</string>
+    <string name="error_guardar_usuario">No fue posible guardar el usuario.</string>
+    <string name="pedidos_titulo">Pedidos</string>
+    <string name="sin_pedidos">No hay pedidos para mostrar.</string>
+    <string name="total_formato">Total: $ %1$.2f</string>
+    <string name="error_actualizar_estado">No se pudo actualizar el estado del pedido.</string>
+    <string name="error_cargar_pedidos">No se pudieron cargar los pedidos.</string>
+    <string name="ver_todos_pedidos">Ver todos los pedidos (admin)</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="default_web_client_id">REEMPLAZAR_CON_WEB_CLIENT_ID</string>
+
 </resources>

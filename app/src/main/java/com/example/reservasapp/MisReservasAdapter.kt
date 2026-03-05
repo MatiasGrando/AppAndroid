@@ -53,9 +53,9 @@ class MisReservasAdapter(
             tvGuarnicionNombre.text = guarnicion ?: "-"
             tvPostreNombre.text = postre ?: "-"
 
-            ivPrincipal.setImageResource(MenuVisualRepository.imageForSelection("Plato principal", principal))
-            ivGuarnicion.setImageResource(MenuVisualRepository.imageForSelection("Guarnición", guarnicion))
-            ivPostre.setImageResource(MenuVisualRepository.imageForSelection("Postre", postre))
+            ivPrincipal.setImageResource(imageForSelection(principal))
+            ivGuarnicion.setImageResource(imageForSelection(guarnicion))
+            ivPostre.setImageResource(imageForSelection(postre))
         }
 
         private fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {

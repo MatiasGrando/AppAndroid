@@ -4,7 +4,7 @@ import java.util.Locale
 
 object ComidaImageRepository {
 
-    private val imagenesComida = mapOf(
+    private val imagenesComida: Map<String, Int> = mapOf(
         normalizarNombre("Pollo al horno") to R.drawable.pollo_horno,
         normalizarNombre("Milanesa Napolitana") to R.drawable.milanesa_napolitana,
         normalizarNombre("Pure de papas") to R.drawable.pure_papas,
@@ -19,6 +19,18 @@ object ComidaImageRepository {
     }
 
     private fun normalizarNombre(nombre: String): String {
-        return nombre.trim().lowercase(Locale.ROOT)
+        return nombre
+            .trim()
+            .lowercase(Locale.ROOT)
+            .replace("\\s+".toRegex(), " ")
+    }
+}
+
+fun imageForSelection(selectedOption: String?): Int {
+    val opcionNormalizada = selectedOption?.trim().orEmpty()
+    return if (opcionNormalizada.isBlank()) {
+        R.drawable.placeholder_comida
+    } else {
+        ComidaImageRepository.obtenerImagenComida(opcionNormalizada)
     }
 }

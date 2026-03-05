@@ -51,9 +51,9 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
             tvGuarnicion.text = guarnicion ?: "-"
             tvPostre.text = postre ?: "-"
 
-            ivPrincipal.setImageResource(MenuVisualRepository.imageForSelection("Plato principal", principal))
-            ivGuarnicion.setImageResource(MenuVisualRepository.imageForSelection("Guarnición", guarnicion))
-            ivPostre.setImageResource(MenuVisualRepository.imageForSelection("Postre", postre))
+            ivPrincipal.setImageResource(imageForSelection(principal))
+            ivGuarnicion.setImageResource(imageForSelection(guarnicion))
+            ivPostre.setImageResource(imageForSelection(postre))
 
             detalle.text = getString(R.string.resumen_confirmacion_fecha, fecha)
         } else {

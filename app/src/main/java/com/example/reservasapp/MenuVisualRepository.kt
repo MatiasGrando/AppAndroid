@@ -35,6 +35,7 @@ object MenuVisualRepository {
 
     private fun imageFor(option: String, section: String): Int {
         return when {
+            option.equals("pollo al horno", true) -> R.drawable.pollo_al_horno
             option.contains("pollo", true) || option.contains("milanesa", true) || option.contains("empan", true) -> R.drawable.ic_food_main
             option.contains("pure", true) || option.contains("papas", true) || option.contains("ensalada", true) -> R.drawable.ic_side_dish
             option.contains("flan", true) || option.contains("gelatina", true) || option.contains("alfajor", true) || option.contains("fruta", true) -> R.drawable.ic_dessert

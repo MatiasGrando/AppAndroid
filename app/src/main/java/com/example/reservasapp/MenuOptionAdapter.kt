@@ -51,7 +51,7 @@ class MenuOptionAdapter(
         private val description = itemView.findViewById<TextView>(R.id.tvMenuDescription)
 
         fun bind(item: MenuItemOption, isSelected: Boolean) {
-            image.setImageResource(item.imageRes)
+            image.setImageResource(ComidaImageRepository.obtenerImagenComida(item.name))
             title.text = item.name
             description.text = item.description
 

@@ -51,4 +51,7 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="login_google_title">Inicia sesión con Google</string>
+    <string name="error_google_login">No se pudo iniciar sesión con Google. Intenta nuevamente.</string>
+    <string name="error_google_login_cancelled">Inicio de sesión cancelado.</string>
 </resources>

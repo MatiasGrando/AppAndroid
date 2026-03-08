@@ -45,6 +45,7 @@
     <string name="titulo_login">Inicia sesión para continuar</string>
     <string name="iniciar_con_google">Continuar con Google</string>
     <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="boton_cerrar_sesion">Cerrar sesión</string>
     <string name="error_autenticacion_google">No se pudo autenticar con Google.</string>
     <string name="error_login_google">Error al iniciar con Google (%1$d)</string>
     <string name="default_web_client_id">TU_WEB_CLIENT_ID_DE_FIREBASE</string>

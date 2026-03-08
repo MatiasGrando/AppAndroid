@@ -26,4 +26,9 @@ object MenuVisualRepository {
             else -> "Opción especial de $section para tu pedido"
         }
     }
+
+    fun imageForSelection(sectionName: String, selectedOption: String?): Int {
+        val option = selectedOption?.takeIf { it.isNotBlank() } ?: return R.drawable.placeholder_comida
+        return ComidaImageRepository.obtenerImagenComida(option)
+    }
 }

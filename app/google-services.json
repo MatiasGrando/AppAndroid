@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "481195326232",
+    "project_id": "lunch-point",
+    "storage_bucket": "lunch-point.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481195326232:android:b293cfb632b28e03ed7c6d",
+        "android_client_info": {
+          "package_name": "com.example.reservasapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "481195326232-p850v3jl8g8ivmv1dlgd39pc45m9mgrr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reservasapp",
+            "certificate_hash": "d45f857a73aeaea6e2a5ad88d690f6350bc8b67f"
+          }
+        },
+        {
+          "client_id": "481195326232-g2ks22mvnf7nml2d5ues08u24ffv8r1s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6cG9UCeo4BCBiYtHN1WgOpdPPkK9GydI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "481195326232-g2ks22mvnf7nml2d5ues08u24ffv8r1s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

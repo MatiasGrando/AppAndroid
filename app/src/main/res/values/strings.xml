@@ -42,16 +42,16 @@
     <string name="error_seccion_invalida">Ingresa un nombre de sección y opciones válidas.</string>
     <string name="titulo_estilo_menu">Lunch Box</string>
     <string name="selecciona_items">Selecciona una opción para continuar</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="titulo_login">Inicia sesión para continuar</string>
+    <string name="iniciar_con_google">Continuar con Google</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="boton_cerrar_sesion">Cerrar sesión</string>
+    <string name="error_autenticacion_google">No se pudo autenticar con Google.</string>
+    <string name="error_login_google">Error al iniciar con Google (%1$d)</string>
+    <string name="default_web_client_id">TU_WEB_CLIENT_ID_DE_FIREBASE</string>
+
+    <!-- Google Login Strings -->
     <string name="login_google_title">Inicia sesión con Google</string>
-    <string name="error_google_login">No se pudo iniciar sesión con Google. Intenta nuevamente.</string>
-    <string name="error_google_login_cancelled">Inicio de sesión cancelado.</string>
+    <string name="error_google_login">Error al autenticar con Firebase</string>
+    <string name="error_google_login_cancelled">Inicio de sesión cancelado o fallido</string>
 </resources>

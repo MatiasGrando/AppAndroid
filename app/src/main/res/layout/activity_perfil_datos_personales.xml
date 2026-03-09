@@ -9,7 +9,7 @@
         android:id="@+id/topAppBarPerfil"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="@android:color/black"
         app:title="@string/profile_data_title"
         app:titleTextColor="@android:color/white" />
 

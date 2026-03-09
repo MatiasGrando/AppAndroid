@@ -9,6 +9,9 @@ object ReservasRepository {
     private const val FIELD_USER_ID = "userId"
     private const val FIELD_FECHA_MILLIS = "fechaMillis"
     private const val FIELD_SELECCIONES = "selecciones"
+    private const val FIELD_NOMBRE = "nombre"
+    private const val FIELD_APELLIDO = "apellido"
+    private const val FIELD_EMPRESA = "empresa"
 
     private val reservas = mutableListOf<Reserva>()
     private val firestore by lazy { FirebaseFirestore.getInstance() }
@@ -65,27 +68,32 @@ object ReservasRepository {
             return
         }
 
-        val payload = mapOf(
-            FIELD_USER_ID to uid,
-            FIELD_FECHA_MILLIS to fechaMillis,
-            FIELD_SELECCIONES to selecciones.toMap()
-        )
+        PerfilRepository.cargarPerfil { perfil ->
+            val payload = mutableMapOf<String, Any>(
+                FIELD_USER_ID to uid,
+                FIELD_FECHA_MILLIS to fechaMillis,
+                FIELD_SELECCIONES to selecciones.toMap(),
+                FIELD_NOMBRE to perfil?.nombre.orEmpty(),
+                FIELD_APELLIDO to perfil?.apellido.orEmpty(),
+                FIELD_EMPRESA to perfil?.empresa.orEmpty()
+            )
 
-        firestore.collection(COLLECTION_RESERVAS)
-            .add(payload)
-            .addOnSuccessListener { docRef ->
-                val reserva = Reserva(
-                    id = docRef.id,
-                    fechaMillis = fechaMillis,
-                    selecciones = selecciones.toMap(),
-                    userId = uid
-                )
-                reservas.add(reserva)
-                onComplete(reserva)
-            }
-            .addOnFailureListener {
-                onComplete(null)
-            }
+            firestore.collection(COLLECTION_RESERVAS)
+                .add(payload)
+                .addOnSuccessListener { docRef ->
+                    val reserva = Reserva(
+                        id = docRef.id,
+                        fechaMillis = fechaMillis,
+                        selecciones = selecciones.toMap(),
+                        userId = uid
+                    )
+                    reservas.add(reserva)
+                    onComplete(reserva)
+                }
+                .addOnFailureListener {
+                    onComplete(null)
+                }
+        }
     }
 
     fun actualizarReserva(

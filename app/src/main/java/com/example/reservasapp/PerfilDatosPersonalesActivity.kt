@@ -1,8 +1,10 @@
 package com.example.reservasapp
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.appbar.MaterialToolbar
@@ -11,7 +13,7 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
 
     private lateinit var etNombre: EditText
     private lateinit var etApellido: EditText
-    private lateinit var etEmpresa: EditText
+    private lateinit var spinnerEmpresa: Spinner
     private lateinit var etDni: EditText
     private lateinit var btnGuardar: Button
 
@@ -26,9 +28,18 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
 
         etNombre = findViewById(R.id.etNombre)
         etApellido = findViewById(R.id.etApellido)
-        etEmpresa = findViewById(R.id.etEmpresa)
+        spinnerEmpresa = findViewById(R.id.spinnerEmpresa)
         etDni = findViewById(R.id.etDni)
         btnGuardar = findViewById(R.id.btnGuardarPerfil)
+
+        val empresas = resources.getStringArray(R.array.profile_company_options)
+        spinnerEmpresa.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            empresas
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
 
         cargarPerfil()
 
@@ -36,7 +47,7 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
             val perfil = PerfilUsuario(
                 nombre = etNombre.text.toString(),
                 apellido = etApellido.text.toString(),
-                empresa = etEmpresa.text.toString(),
+                empresa = spinnerEmpresa.selectedItem?.toString().orEmpty(),
                 dni = etDni.text.toString()
             )
 
@@ -68,7 +79,9 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
 
                 etNombre.setText(perfil.nombre)
                 etApellido.setText(perfil.apellido)
-                etEmpresa.setText(perfil.empresa)
+                val empresas = resources.getStringArray(R.array.profile_company_options)
+                val index = empresas.indexOf(perfil.empresa).takeIf { it >= 0 } ?: 0
+                spinnerEmpresa.setSelection(index)
                 etDni.setText(perfil.dni)
             }
         }

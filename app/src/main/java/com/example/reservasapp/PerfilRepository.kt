@@ -10,6 +10,13 @@ data class PerfilUsuario(
     val dni: String = ""
 )
 
+fun PerfilUsuario.estaCompleto(): Boolean {
+    return nombre.isNotBlank() &&
+        apellido.isNotBlank() &&
+        empresa.isNotBlank() &&
+        dni.isNotBlank()
+}
+
 object PerfilRepository {
     private const val COLLECTION_PERFILES = "perfiles"
     private const val FIELD_NOMBRE = "nombre"

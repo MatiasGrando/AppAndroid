@@ -62,12 +62,37 @@ class ReservarActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ReservasRepository.cargarReservasUsuario { ok ->
-            if (!ok) {
-                Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+        validarPerfilAntesDeReservar { puedeReservar ->
+            if (!puedeReservar) {
+                finish()
+                return@validarPerfilAntesDeReservar
             }
-            refreshCurrentDateRange()
-            renderCalendar()
+
+            ReservasRepository.cargarReservasUsuario { ok ->
+                if (!ok) {
+                    Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+                }
+                refreshCurrentDateRange()
+                renderCalendar()
+            }
+        }
+    }
+
+
+    private fun validarPerfilAntesDeReservar(onResult: (Boolean) -> Unit) {
+        PerfilRepository.cargarPerfil { perfil ->
+            runOnUiThread {
+                val completo = perfil?.estaCompleto() == true
+                if (!completo) {
+                    Toast.makeText(this, R.string.profile_required_for_booking, Toast.LENGTH_LONG).show()
+                    startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java).apply {
+                        putExtra(EXTRA_OPENED_FROM_BOOKING, true)
+                    })
+                    onResult(false)
+                    return@runOnUiThread
+                }
+                onResult(true)
+            }
         }
     }
 
@@ -208,4 +233,8 @@ class ReservarActivity : AppCompatActivity() {
     }
 
     private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
+
+    companion object {
+        const val EXTRA_OPENED_FROM_BOOKING = "opened_from_booking"
+    }
 }

@@ -15,6 +15,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIconTint="@android:color/white"
+        app:title="" />
+
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
@@ -27,7 +39,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/topAppBar" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnReservar"

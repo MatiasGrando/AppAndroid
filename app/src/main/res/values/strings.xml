@@ -27,7 +27,7 @@
     <string name="item_reserva_generico">%1$s - %2$s</string>
     <string name="titulo_editar_reservas">Selecciona una reserva para editar</string>
     <string name="sin_reservas_editar">No hay reservas disponibles para editar.</string>
-    <string name="item_reserva_con_id_generico">#%1$d - %2$s - %3$s</string>
+    <string name="item_reserva_con_id_generico">#%1$s - %2$s - %3$s</string>
     <string name="titulo_editar_detalle">Editar detalle de la reserva</string>
     <string name="titulo_admin_menu">Administrador de menú</string>
     <string name="hint_opciones_por_coma">Opciones separadas por coma</string>
@@ -47,11 +47,14 @@
     <string name="cerrar_sesion">Cerrar sesión</string>
     <string name="boton_cerrar_sesion">Cerrar sesión</string>
     <string name="error_autenticacion_google">No se pudo autenticar con Google.</string>
-    <string name="error_login_google">Error al iniciar con Google (%1$d)</string>
+    <string name="error_login_google">Error al iniciar con Google (%1$s)</string>
     <string name="default_web_client_id">TU_WEB_CLIENT_ID_DE_FIREBASE</string>
 
     <!-- Google Login Strings -->
     <string name="login_google_title">Inicia sesión con Google</string>
     <string name="error_google_login">Error al autenticar con Firebase</string>
     <string name="error_google_login_cancelled">Inicio de sesión cancelado o fallido</string>
+    <string name="error_guardar_reserva">No se pudo guardar la reserva. Inténtalo nuevamente.</string>
+    <string name="error_cargar_reservas">No se pudieron cargar tus reservas.</string>
+    <string name="error_actualizar_reserva">No se pudo actualizar la reserva.</string>
 </resources>

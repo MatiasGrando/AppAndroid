@@ -24,7 +24,7 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
 
         val fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty()
         val detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty()
-        val reservaId = intent.getLongExtra(EXTRA_RESERVA_ID, -1L)
+        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
         val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
 
         val titulo = findViewById<TextView>(R.id.tvTituloConfirmacion)

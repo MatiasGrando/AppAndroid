@@ -30,7 +30,9 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { signInTask ->
                         setLoading(false)
                         if (signInTask.isSuccessful) {
-                            openMainScreen()
+                            ReservasRepository.cargarReservasUsuario {
+                                openMainScreen()
+                            }
                         } else {
                             showError(getString(R.string.error_google_login))
                         }
@@ -46,7 +48,9 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            openMainScreen()
+            ReservasRepository.cargarReservasUsuario {
+                openMainScreen()
+            }
             return
         }
 

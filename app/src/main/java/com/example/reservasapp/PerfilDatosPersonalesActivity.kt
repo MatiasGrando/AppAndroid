@@ -11,6 +11,10 @@ import com.google.android.material.appbar.MaterialToolbar
 
 class PerfilDatosPersonalesActivity : AppCompatActivity() {
 
+    private companion object {
+        const val EMPRESA_PLACEHOLDER_INDEX = 0
+    }
+
     private lateinit var etNombre: EditText
     private lateinit var etApellido: EditText
     private lateinit var spinnerEmpresa: Spinner
@@ -44,10 +48,16 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
         cargarPerfil()
 
         btnGuardar.setOnClickListener {
+            val empresaSeleccionada = if (spinnerEmpresa.selectedItemPosition == EMPRESA_PLACEHOLDER_INDEX) {
+                ""
+            } else {
+                spinnerEmpresa.selectedItem?.toString().orEmpty()
+            }
+
             val perfil = PerfilUsuario(
                 nombre = etNombre.text.toString(),
                 apellido = etApellido.text.toString(),
-                empresa = spinnerEmpresa.selectedItem?.toString().orEmpty(),
+                empresa = empresaSeleccionada,
                 dni = etDni.text.toString()
             )
 
@@ -80,7 +90,11 @@ class PerfilDatosPersonalesActivity : AppCompatActivity() {
                 etNombre.setText(perfil.nombre)
                 etApellido.setText(perfil.apellido)
                 val empresas = resources.getStringArray(R.array.profile_company_options)
-                val index = empresas.indexOf(perfil.empresa).takeIf { it >= 0 } ?: 0
+                val index = if (perfil.empresa.isBlank()) {
+                    EMPRESA_PLACEHOLDER_INDEX
+                } else {
+                    empresas.indexOf(perfil.empresa).takeIf { it >= 0 } ?: EMPRESA_PLACEHOLDER_INDEX
+                }
                 spinnerEmpresa.setSelection(index)
                 etDni.setText(perfil.dni)
             }

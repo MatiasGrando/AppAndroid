@@ -30,8 +30,10 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { signInTask ->
                         setLoading(false)
                         if (signInTask.isSuccessful) {
-                            ReservasRepository.cargarReservasUsuario {
-                                openMainScreen()
+                            PerfilRepository.sincronizarPerfilConGoogle {
+                                ReservasRepository.cargarReservasUsuario {
+                                    openMainScreen()
+                                }
                             }
                         } else {
                             showError(getString(R.string.error_google_login))
@@ -48,8 +50,10 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            ReservasRepository.cargarReservasUsuario {
-                openMainScreen()
+            PerfilRepository.sincronizarPerfilConGoogle {
+                ReservasRepository.cargarReservasUsuario {
+                    openMainScreen()
+                }
             }
             return
         }

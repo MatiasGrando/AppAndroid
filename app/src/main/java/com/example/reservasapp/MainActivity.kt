@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_profile -> {
-                showProfileDialog()
+                startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java))
                 true
             }
 
@@ -60,23 +59,6 @@ class MainActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun showProfileDialog() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val profileMessage = getString(
-            R.string.profile_data_message,
-            currentUser?.email ?: getString(R.string.not_available),
-            getString(R.string.empty_field),
-            getString(R.string.empty_field),
-            getString(R.string.empty_field)
-        )
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.profile_data_title)
-            .setMessage(profileMessage)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
     }
 
     private fun logout() {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="profile_company_options">
+        <item>Mamuschka</item>
+        <item>Laboratorio Optica</item>
+    </string-array>
+</resources>

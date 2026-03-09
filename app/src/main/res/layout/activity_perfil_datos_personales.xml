@@ -38,13 +38,11 @@
                 android:hint="@string/profile_apellido"
                 android:inputType="textPersonName" />
 
-            <EditText
-                android:id="@+id/etEmpresa"
+            <Spinner
+                android:id="@+id/spinnerEmpresa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/profile_empresa"
-                android:inputType="textCapWords" />
+                android:layout_marginTop="12dp" />
 
             <EditText
                 android:id="@+id/etDni"

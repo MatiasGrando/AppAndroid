@@ -73,4 +73,5 @@ DNI: %4$s</string>
     <string name="profile_saved">Datos guardados correctamente.</string>
     <string name="profile_save_error">No se pudieron guardar los datos.</string>
     <string name="profile_load_error">No se pudieron cargar los datos del perfil.</string>
+    <string name="profile_required_for_booking">Completa todos los datos del perfil para poder reservar.</string>
 </resources>

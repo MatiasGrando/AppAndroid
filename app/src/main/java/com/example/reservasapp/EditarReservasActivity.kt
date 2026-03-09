@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -14,14 +15,37 @@ import java.util.Locale
 
 class EditarReservasActivity : AppCompatActivity() {
 
+    private lateinit var listView: ListView
+    private lateinit var emptyText: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editar_reservas)
 
-        val listView = findViewById<ListView>(R.id.listReservasEditar)
-        val emptyText = findViewById<TextView>(R.id.tvSinReservasEditar)
+        listView = findViewById(R.id.listReservasEditar)
+        emptyText = findViewById(R.id.tvSinReservasEditar)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuEditar)
 
+        btnVolverMenu.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
+            finish()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ReservasRepository.cargarReservasUsuario { ok ->
+            if (!ok) {
+                Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+            }
+            renderReservas()
+        }
+    }
+
+    private fun renderReservas() {
         val reservas = ReservasRepository.obtenerReservasProximosSieteDias()
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val items = reservas.map {
@@ -45,14 +69,6 @@ class EditarReservasActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             }
-        }
-
-        btnVolverMenu.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            startActivity(intent)
-            finish()
         }
     }
 }

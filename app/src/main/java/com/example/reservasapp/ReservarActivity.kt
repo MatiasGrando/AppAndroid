@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -61,8 +62,13 @@ class ReservarActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        refreshCurrentDateRange()
-        renderCalendar()
+        ReservasRepository.cargarReservasUsuario { ok ->
+            if (!ok) {
+                Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+            }
+            refreshCurrentDateRange()
+            renderCalendar()
+        }
     }
 
     private fun refreshCurrentDateRange() {

@@ -1,37 +1,123 @@
 package com.example.reservasapp
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 
 object ReservasRepository {
+    private const val COLLECTION_RESERVAS = "reservas"
+    private const val FIELD_USER_ID = "userId"
+    private const val FIELD_FECHA_MILLIS = "fechaMillis"
+    private const val FIELD_SELECCIONES = "selecciones"
+
     private val reservas = mutableListOf<Reserva>()
-    private var nextId = 1L
+    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val auth by lazy { FirebaseAuth.getInstance() }
 
-    fun agregarReserva(fechaMillis: Long, selecciones: Map<String, String>): Reserva {
-        val reserva = Reserva(
-            id = nextId++,
-            fechaMillis = fechaMillis,
-            selecciones = selecciones.toMap()
+    fun cargarReservasUsuario(onComplete: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            reservas.clear()
+            onComplete(false)
+            return
+        }
+
+        firestore.collection(COLLECTION_RESERVAS)
+            .whereEqualTo(FIELD_USER_ID, uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val nuevasReservas = snapshot.documents.mapNotNull { doc ->
+                    val fechaMillis = doc.getLong(FIELD_FECHA_MILLIS) ?: return@mapNotNull null
+                    val selecciones = (doc.get(FIELD_SELECCIONES) as? Map<*, *>)
+                        ?.mapNotNull { (k, v) ->
+                            val key = k as? String ?: return@mapNotNull null
+                            val value = v as? String ?: return@mapNotNull null
+                            key to value
+                        }
+                        ?.toMap()
+                        ?: emptyMap()
+
+                    Reserva(
+                        id = doc.id,
+                        fechaMillis = fechaMillis,
+                        selecciones = selecciones,
+                        userId = uid
+                    )
+                }.sortedBy { it.fechaMillis }
+
+                reservas.clear()
+                reservas.addAll(nuevasReservas)
+                onComplete(true)
+            }
+            .addOnFailureListener {
+                onComplete(false)
+            }
+    }
+
+    fun agregarReserva(
+        fechaMillis: Long,
+        selecciones: Map<String, String>,
+        onComplete: (Reserva?) -> Unit
+    ) {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            onComplete(null)
+            return
+        }
+
+        val payload = mapOf(
+            FIELD_USER_ID to uid,
+            FIELD_FECHA_MILLIS to fechaMillis,
+            FIELD_SELECCIONES to selecciones.toMap()
         )
-        reservas.add(reserva)
-        return reserva
+
+        firestore.collection(COLLECTION_RESERVAS)
+            .add(payload)
+            .addOnSuccessListener { docRef ->
+                val reserva = Reserva(
+                    id = docRef.id,
+                    fechaMillis = fechaMillis,
+                    selecciones = selecciones.toMap(),
+                    userId = uid
+                )
+                reservas.add(reserva)
+                onComplete(reserva)
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
     }
 
-    fun actualizarReserva(id: Long, selecciones: Map<String, String>): Reserva? {
+    fun actualizarReserva(
+        id: String,
+        selecciones: Map<String, String>,
+        onComplete: (Reserva?) -> Unit
+    ) {
         val index = reservas.indexOfFirst { it.id == id }
-        if (index == -1) return null
+        if (index == -1) {
+            onComplete(null)
+            return
+        }
 
-        val actual = reservas[index]
-        val actualizada = actual.copy(selecciones = selecciones.toMap())
-        reservas[index] = actualizada
-        return actualizada
+        firestore.collection(COLLECTION_RESERVAS)
+            .document(id)
+            .update(FIELD_SELECCIONES, selecciones.toMap())
+            .addOnSuccessListener {
+                val actualizada = reservas[index].copy(selecciones = selecciones.toMap())
+                reservas[index] = actualizada
+                onComplete(actualizada)
+            }
+            .addOnFailureListener {
+                onComplete(null)
+            }
     }
 
-    fun obtenerReservaPorId(id: Long): Reserva? = reservas.firstOrNull { it.id == id }
+    fun obtenerReservaPorId(id: String): Reserva? = reservas.firstOrNull { it.id == id }
 
     fun obtenerFechasReservadas(): Set<Long> = reservas
-        .map { millis ->
+        .map { reserva ->
             Calendar.getInstance().apply {
-                timeInMillis = millis.fechaMillis
+                timeInMillis = reserva.fechaMillis
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)

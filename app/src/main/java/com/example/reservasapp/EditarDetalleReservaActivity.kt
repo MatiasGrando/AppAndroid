@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,7 +24,7 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editar_detalle_reserva)
 
-        val reservaId = intent.getLongExtra(EXTRA_RESERVA_ID, -1L)
+        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
         val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
 
         if (reserva == null) {
@@ -78,18 +79,22 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
                 spinner.selectedItem?.toString().orEmpty()
             }
 
-            val actualizada = ReservasRepository.actualizarReserva(
+            ReservasRepository.actualizarReserva(
                 id = reserva.id,
                 selecciones = selecciones
-            ) ?: return@setOnClickListener
+            ) { actualizada ->
+                if (actualizada == null) {
+                    Toast.makeText(this, R.string.error_actualizar_reserva, Toast.LENGTH_LONG).show()
+                    return@actualizarReserva
+                }
 
-            val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
-
-            val intent = Intent(this, ConfirmacionEdicionActivity::class.java).apply {
-                putExtra(ConfirmacionEdicionActivity.EXTRA_FECHA, fechaFormateada)
-                putExtra(ConfirmacionEdicionActivity.EXTRA_DETALLE, resumen)
+                val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
+                val intent = Intent(this, ConfirmacionEdicionActivity::class.java).apply {
+                    putExtra(ConfirmacionEdicionActivity.EXTRA_FECHA, fechaFormateada)
+                    putExtra(ConfirmacionEdicionActivity.EXTRA_DETALLE, resumen)
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
         }
     }
 }

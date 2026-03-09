@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -82,19 +83,23 @@ class DetalleReservaActivity : AppCompatActivity() {
                 currentSectionIndex += 1
                 tabLayout.getTabAt(currentSectionIndex)?.select()
             } else {
-                val reserva = ReservasRepository.agregarReserva(
+                ReservasRepository.agregarReserva(
                     fechaMillis = selectedDateMillis,
                     selecciones = selecciones
-                )
+                ) { reserva ->
+                    if (reserva == null) {
+                        Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
+                        return@agregarReserva
+                    }
 
-                val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
-
-                val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
-                    putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
-                    putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
-                    putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                    val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
+                    val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                        putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                        putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                        putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
             }
         }
     }

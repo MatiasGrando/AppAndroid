@@ -8,6 +8,7 @@ object MenuRepository {
     private const val FIELD_NAME = "name"
     private const val FIELD_DETAIL = "detail"
     private const val FIELD_IMAGE_URL = "imageUrl"
+    private const val FIELD_URL_IMAGE = "urlImage"
     private const val FIELD_GUARNICION = "guarnicion"
 
     private val firestore by lazy { FirebaseFirestore.getInstance() }
@@ -34,7 +35,9 @@ object MenuRepository {
                     val section = doc.getString(FIELD_SECTION)?.trim().orEmpty()
                     val name = doc.getString(FIELD_NAME)?.trim().orEmpty()
                     val detail = doc.getString(FIELD_DETAIL)?.trim().orEmpty()
-                    val imageUrl = doc.getString(FIELD_IMAGE_URL)?.trim().orEmpty()
+                    val imageUrl = doc.getString(FIELD_URL_IMAGE)?.trim()
+                        ?.takeIf { it.isNotBlank() }
+                        ?: doc.getString(FIELD_IMAGE_URL)?.trim().orEmpty()
                     val guarnicion = doc.getBoolean(FIELD_GUARNICION) ?: false
 
                     if (section.isBlank() || name.isBlank()) return@forEach
@@ -82,6 +85,7 @@ object MenuRepository {
             FIELD_SECTION to seccionNormalizada,
             FIELD_NAME to nombreNormalizado,
             FIELD_DETAIL to detalle.trim(),
+            FIELD_URL_IMAGE to imageUrl.trim(),
             FIELD_IMAGE_URL to imageUrl.trim(),
             FIELD_GUARNICION to guarnicion
         )

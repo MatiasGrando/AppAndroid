@@ -19,58 +19,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/comida_principal" />
+            android:text="@string/label_seccion" />
 
-        <EditText
-            android:id="@+id/etPlatosPrincipales"
+        <AutoCompleteTextView
+            android:id="@+id/actvSeccionPlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_opciones_por_coma" />
+            android:hint="@string/hint_nombre_seccion"
+            android:inputType="none" />
 
-        <TextView
+        <EditText
+            android:id="@+id/etNombrePlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="@string/postre" />
+            android:hint="@string/hint_nombre_plato" />
 
         <EditText
-            android:id="@+id/etPostres"
+            android:id="@+id/etDetallePlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_opciones_por_coma" />
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_detalle_plato" />
+
+        <EditText
+            android:id="@+id/etImagenUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_url_imagen" />
 
         <Button
-            android:id="@+id/btnGuardarMenusBase"
+            android:id="@+id/btnCrearPlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="@string/guardar_menus_base" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/agregar_nueva_seccion"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/etNuevaSeccion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_nombre_seccion" />
-
-        <EditText
-            android:id="@+id/etOpcionesNuevaSeccion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/hint_opciones_por_coma" />
-
-        <Button
-            android:id="@+id/btnAgregarSeccion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/agregar_seccion" />
+            android:text="@string/crear_plato" />
 
         <TextView
             android:layout_width="match_parent"

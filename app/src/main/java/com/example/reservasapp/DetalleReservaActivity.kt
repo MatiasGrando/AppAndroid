@@ -33,7 +33,7 @@ class DetalleReservaActivity : AppCompatActivity() {
         val fechaFormateada = formatter.format(Date(selectedDateMillis))
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
-        val secciones = MenuRepository.obtenerSecciones()
+        var secciones = MenuRepository.obtenerSeccionesCache()
         val selecciones = linkedMapOf<String, String>()
         var currentSectionIndex = 0
 
@@ -54,7 +54,7 @@ class DetalleReservaActivity : AppCompatActivity() {
         fun showSection(position: Int) {
             val section = secciones.getOrNull(position) ?: return
             currentSectionIndex = position
-            val items = MenuVisualRepository.buildItemsForSection(section.nombre, section.opciones)
+            val items = MenuVisualRepository.buildItemsForSection(section.opciones)
             adapter.updateItems(items, selecciones[section.nombre])
             val isSelected = selecciones.containsKey(section.nombre)
             btnContinuar.isEnabled = isSelected
@@ -62,8 +62,23 @@ class DetalleReservaActivity : AppCompatActivity() {
             btnContinuar.text = getString(R.string.continuar)
         }
 
-        if (secciones.isNotEmpty()) {
-            showSection(0)
+        MenuRepository.cargarSecciones { ok, loadedSections ->
+            runOnUiThread {
+                secciones = loadedSections
+                tabLayout.removeAllTabs()
+                secciones.forEach { section ->
+                    tabLayout.addTab(tabLayout.newTab().setText(section.nombre))
+                }
+
+                if (secciones.isNotEmpty()) {
+                    currentSectionIndex = 0
+                    showSection(0)
+                }
+
+                if (!ok) {
+                    Toast.makeText(this, R.string.error_cargar_menu, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

@@ -40,38 +40,52 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
         val fechaFormateada = formatter.format(Date(reserva.fechaMillis))
         tvFecha.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
-        val secciones = MenuRepository.obtenerSecciones()
         val spinnersPorSeccion = linkedMapOf<String, Spinner>()
 
-        secciones.forEach { section ->
-            val title = TextView(this).apply {
-                text = section.nombre
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = 20 }
+        fun renderSecciones(secciones: List<MenuSection>) {
+            container.removeAllViews()
+            spinnersPorSeccion.clear()
+
+            secciones.forEach { section ->
+                val title = TextView(this).apply {
+                    text = section.nombre
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { topMargin = 20 }
+                }
+
+                val opciones = section.opciones.map { it.nombre }
+                val spinner = Spinner(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    adapter = ArrayAdapter(
+                        this@EditarDetalleReservaActivity,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        opciones
+                    )
+                }
+
+                val actual = reserva.selecciones[section.nombre]
+                val index = opciones.indexOf(actual).coerceAtLeast(0)
+                spinner.setSelection(index)
+
+                container.addView(title)
+                container.addView(spinner)
+                spinnersPorSeccion[section.nombre] = spinner
             }
+        }
 
-            val spinner = Spinner(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                adapter = ArrayAdapter(
-                    this@EditarDetalleReservaActivity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    section.opciones
-                )
+        MenuRepository.cargarSecciones { ok, secciones ->
+            runOnUiThread {
+                renderSecciones(secciones)
+                if (!ok) {
+                    Toast.makeText(this, R.string.error_cargar_menu, Toast.LENGTH_SHORT).show()
+                }
             }
-
-            val actual = reserva.selecciones[section.nombre]
-            val index = section.opciones.indexOf(actual).coerceAtLeast(0)
-            spinner.setSelection(index)
-
-            container.addView(title)
-            container.addView(spinner)
-            spinnersPorSeccion[section.nombre] = spinner
         }
 
         btnConfirmar.setOnClickListener {

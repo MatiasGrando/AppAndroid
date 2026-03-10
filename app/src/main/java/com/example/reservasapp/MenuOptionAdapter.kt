@@ -51,6 +51,7 @@ class MenuOptionAdapter(
         private val description = itemView.findViewById<TextView>(R.id.tvMenuDescription)
 
         fun bind(item: MenuItemOption, isSelected: Boolean) {
+            // TODO: cargar item.imageUrl con una librería de imágenes remotas (ej. Glide/Coil)
             image.setImageResource(ComidaImageRepository.obtenerImagenComida(item.name))
             title.text = item.name
             description.text = item.description

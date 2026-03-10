@@ -71,6 +71,7 @@
     <string name="menu_profile">Perfil</string>
     <string name="admin_panel_menu">Panel Administrador</string>
     <string name="admin_panel_title">Panel Administrador</string>
+    <string name="admin_panel_add_menu">Add menu</string>
     <string name="admin_panel_placeholder">Aquí irán las funciones administrativas.</string>
     <string name="profile_data_title">Perfil / datos personales</string>
     <string name="profile_data_message">Email: %1$s

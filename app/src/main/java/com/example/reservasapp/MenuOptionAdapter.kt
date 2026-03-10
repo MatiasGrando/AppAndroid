@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 
 class MenuOptionAdapter(
@@ -51,8 +52,16 @@ class MenuOptionAdapter(
         private val description = itemView.findViewById<TextView>(R.id.tvMenuDescription)
 
         fun bind(item: MenuItemOption, isSelected: Boolean) {
-            // TODO: cargar item.imageUrl con una librería de imágenes remotas (ej. Glide/Coil)
-            image.setImageResource(ComidaImageRepository.obtenerImagenComida(item.name))
+            val fallbackImage = ComidaImageRepository.obtenerImagenComida(item.name)
+            if (item.imageUrl.isNotBlank()) {
+                Glide.with(itemView)
+                    .load(item.imageUrl)
+                    .placeholder(fallbackImage)
+                    .error(fallbackImage)
+                    .into(image)
+            } else {
+                image.setImageResource(fallbackImage)
+            }
             title.text = item.name
             description.text = item.description
 

@@ -11,6 +11,9 @@
             android:name=".AdminMenuActivity"
             android:exported="false" />
         <activity
+            android:name=".AdminActivity"
+            android:exported="false" />
+        <activity
             android:name=".ConfirmacionEdicionActivity"
             android:exported="false" />
         <activity

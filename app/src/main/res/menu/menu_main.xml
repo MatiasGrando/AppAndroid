@@ -8,6 +8,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_admin_panel"
+        android:title="@string/admin_panel_menu"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_logout"
         android:title="@string/cerrar_sesion"
         app:showAsAction="never" />

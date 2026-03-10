@@ -30,11 +30,7 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { signInTask ->
                         setLoading(false)
                         if (signInTask.isSuccessful) {
-                            PerfilRepository.sincronizarPerfilConGoogle {
-                                ReservasRepository.cargarReservasUsuario {
-                                    openMainScreen()
-                                }
-                            }
+                            cargarDatosInicialesYEntrar()
                         } else {
                             showError(getString(R.string.error_google_login))
                         }
@@ -50,11 +46,7 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            PerfilRepository.sincronizarPerfilConGoogle {
-                ReservasRepository.cargarReservasUsuario {
-                    openMainScreen()
-                }
-            }
+            cargarDatosInicialesYEntrar()
             return
         }
 
@@ -83,6 +75,17 @@ class LoginActivity : AppCompatActivity() {
     private fun openMainScreen() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
+    }
+
+    private fun cargarDatosInicialesYEntrar() {
+        PerfilRepository.sincronizarPerfilConGoogle {
+            ReservasRepository.cargarReservasUsuario {
+                UsuariosRepository.sincronizarUsuarioYObtenerRol { esAdmin ->
+                    UserSession.esAdmin = esAdmin
+                    openMainScreen()
+                }
+            }
+        }
     }
 
     private fun setLoading(show: Boolean) {

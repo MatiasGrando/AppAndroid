@@ -12,6 +12,13 @@
         android:text="@string/admin_panel_title"
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
+    <Button
+        android:id="@+id/btnAddMenuAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/admin_panel_add_menu" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

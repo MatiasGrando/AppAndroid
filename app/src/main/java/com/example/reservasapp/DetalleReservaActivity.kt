@@ -34,8 +34,9 @@ class DetalleReservaActivity : AppCompatActivity() {
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
         var secciones = MenuRepository.obtenerSeccionesCache()
-        val selecciones = linkedMapOf<String, String>()
+        val selecciones = linkedMapOf<String, String?>()
         var currentSectionIndex = 0
+        var principalPermiteGuarnicion = true
 
         val adapter = MenuOptionAdapter(emptyList()) { option ->
             val section = secciones.getOrNull(currentSectionIndex) ?: return@MenuOptionAdapter
@@ -51,12 +52,50 @@ class DetalleReservaActivity : AppCompatActivity() {
             tabLayout.addTab(tabLayout.newTab().setText(section.nombre))
         }
 
+        fun obtenerIndiceSeccion(nombre: String): Int {
+            return secciones.indexOfFirst { it.nombre.equals(nombre, ignoreCase = true) }
+        }
+
+        fun actualizarDisponibilidadGuarniciones() {
+            val indiceGuarnicion = obtenerIndiceSeccion("Guarniciones")
+            if (indiceGuarnicion == -1) return
+
+            val tabGuarnicion = tabLayout.getTabAt(indiceGuarnicion) ?: return
+            tabGuarnicion.view.isEnabled = principalPermiteGuarnicion
+            tabGuarnicion.view.alpha = if (principalPermiteGuarnicion) 1f else 0.4f
+        }
+
+        fun avanzarASiguienteSeccionValida() {
+            val indiceGuarnicion = obtenerIndiceSeccion("Guarniciones")
+            val indicePostre = obtenerIndiceSeccion("Postres")
+
+            if (!principalPermiteGuarnicion && currentSectionIndex == indiceGuarnicion && indicePostre != -1) {
+                currentSectionIndex = indicePostre
+                tabLayout.getTabAt(currentSectionIndex)?.select()
+                return
+            }
+
+            if (currentSectionIndex < secciones.lastIndex) {
+                currentSectionIndex += 1
+                if (!principalPermiteGuarnicion && currentSectionIndex == indiceGuarnicion && indicePostre != -1) {
+                    currentSectionIndex = indicePostre
+                }
+                tabLayout.getTabAt(currentSectionIndex)?.select()
+            }
+        }
+
         fun showSection(position: Int) {
             val section = secciones.getOrNull(position) ?: return
+
+            if (!principalPermiteGuarnicion && section.nombre.equals("Guarniciones", ignoreCase = true)) {
+                avanzarASiguienteSeccionValida()
+                return
+            }
+
             currentSectionIndex = position
             val items = MenuVisualRepository.buildItemsForSection(section.opciones)
             adapter.updateItems(items, selecciones[section.nombre])
-            val isSelected = selecciones.containsKey(section.nombre)
+            val isSelected = !selecciones[section.nombre].isNullOrBlank()
             btnContinuar.isEnabled = isSelected
             btnContinuar.alpha = if (isSelected) 1f else 0.5f
             btnContinuar.text = getString(R.string.continuar)
@@ -72,6 +111,7 @@ class DetalleReservaActivity : AppCompatActivity() {
 
                 if (secciones.isNotEmpty()) {
                     currentSectionIndex = 0
+                    actualizarDisponibilidadGuarniciones()
                     showSection(0)
                 }
 
@@ -92,15 +132,29 @@ class DetalleReservaActivity : AppCompatActivity() {
 
         btnContinuar.setOnClickListener {
             val section = secciones.getOrNull(currentSectionIndex) ?: return@setOnClickListener
-            if (!selecciones.containsKey(section.nombre)) return@setOnClickListener
+
+            if (selecciones[section.nombre].isNullOrBlank()) return@setOnClickListener
+
+            if (section.nombre.equals("Plato principal", ignoreCase = true)) {
+                val principalSeleccionado = selecciones[section.nombre]
+                val platoPrincipal = section.opciones.firstOrNull { it.nombre == principalSeleccionado }
+                principalPermiteGuarnicion = platoPrincipal?.guarnicion == true
+
+                selecciones["Guarniciones"] = null
+                actualizarDisponibilidadGuarniciones()
+
+                avanzarASiguienteSeccionValida()
+                return@setOnClickListener
+            }
 
             if (currentSectionIndex < secciones.lastIndex) {
-                currentSectionIndex += 1
-                tabLayout.getTabAt(currentSectionIndex)?.select()
+                avanzarASiguienteSeccionValida()
             } else {
                 ReservasRepository.agregarReserva(
                     fechaMillis = selectedDateMillis,
                     selecciones = selecciones
+                        .filterValues { !it.isNullOrBlank() }
+                        .mapValues { it.value.orEmpty() }
                 ) { reserva ->
                     if (reserva == null) {
                         Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()

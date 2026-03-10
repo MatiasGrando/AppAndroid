@@ -116,4 +116,22 @@ object PerfilRepository {
                 guardarPerfil(fallback, onComplete)
             }
     }
+
+    fun obtenerEsAdmin(onComplete: (Boolean) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            onComplete(false)
+            return
+        }
+
+        firestore.collection(COLLECTION_PERFILES)
+            .document(uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onComplete(snapshot.getBoolean(FIELD_ADMIN) ?: false)
+            }
+            .addOnFailureListener {
+                onComplete(false)
+            }
+    }
 }

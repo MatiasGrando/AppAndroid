@@ -2,6 +2,7 @@ package com.example.reservasapp
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 data class PerfilUsuario(
     val nombre: String = "",
@@ -23,6 +24,7 @@ object PerfilRepository {
     private const val FIELD_APELLIDO = "apellido"
     private const val FIELD_EMPRESA = "empresa"
     private const val FIELD_DNI = "dni"
+    private const val FIELD_ADMIN = "admin"
 
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val auth by lazy { FirebaseAuth.getInstance() }
@@ -58,17 +60,24 @@ object PerfilRepository {
             return
         }
 
-        val payload = mapOf(
+        val payload = mutableMapOf<String, Any>(
             FIELD_NOMBRE to perfil.nombre.trim(),
             FIELD_APELLIDO to perfil.apellido.trim(),
             FIELD_EMPRESA to perfil.empresa.trim(),
             FIELD_DNI to perfil.dni.trim()
         )
 
-        firestore.collection(COLLECTION_PERFILES)
-            .document(uid)
-            .set(payload)
-            .addOnSuccessListener { onComplete(true) }
+        val docRef = firestore.collection(COLLECTION_PERFILES).document(uid)
+        docRef.get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.contains(FIELD_ADMIN)) {
+                    payload[FIELD_ADMIN] = false
+                }
+
+                docRef.set(payload, SetOptions.merge())
+                    .addOnSuccessListener { onComplete(true) }
+                    .addOnFailureListener { onComplete(false) }
+            }
             .addOnFailureListener { onComplete(false) }
     }
 

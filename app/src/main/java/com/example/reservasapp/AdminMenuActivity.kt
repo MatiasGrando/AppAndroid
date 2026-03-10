@@ -6,7 +6,9 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -23,25 +25,34 @@ class AdminMenuActivity : AppCompatActivity() {
         val etImagenUrl = findViewById<EditText>(R.id.etImagenUrl)
         val selectorSeccion = findViewById<AutoCompleteTextView>(R.id.actvSeccionPlato)
         val tvGuarnicion = findViewById<TextView>(R.id.tvGuarnicion)
-        val selectorGuarnicion = findViewById<AutoCompleteTextView>(R.id.actvGuarnicion)
+        val layoutGuarnicionChecks = findViewById<LinearLayout>(R.id.layoutGuarnicionChecks)
+        val cbGuarnicionSi = findViewById<CheckBox>(R.id.cbGuarnicionSi)
+        val cbGuarnicionNo = findViewById<CheckBox>(R.id.cbGuarnicionNo)
         val btnCrearPlato = findViewById<Button>(R.id.btnCrearPlato)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
 
         val secciones = MenuRepository.seccionesPermitidas()
-        val opcionesGuarnicion = listOf(getString(R.string.si), getString(R.string.no))
 
         selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
         selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
 
-        selectorGuarnicion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, opcionesGuarnicion))
+        cbGuarnicionSi.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) cbGuarnicionNo.isChecked = false
+        }
+        cbGuarnicionNo.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) cbGuarnicionSi.isChecked = false
+        }
 
         fun actualizarVisibilidadGuarnicion() {
             val esPrincipal = selectorSeccion.text.toString().trim() == "Plato principal"
             val visibilidad = if (esPrincipal) View.VISIBLE else View.GONE
             tvGuarnicion.visibility = visibilidad
-            selectorGuarnicion.visibility = visibilidad
-            if (!esPrincipal) selectorGuarnicion.setText("", false)
+            layoutGuarnicionChecks.visibility = visibilidad
+            if (!esPrincipal) {
+                cbGuarnicionSi.isChecked = false
+                cbGuarnicionNo.isChecked = false
+            }
         }
 
         selectorSeccion.setOnItemClickListener { _, _, _, _ -> actualizarVisibilidadGuarnicion() }
@@ -82,15 +93,15 @@ class AdminMenuActivity : AppCompatActivity() {
             val detalle = etDetallePlato.text.toString().trim()
             val imageUrl = etImagenUrl.text.toString().trim()
 
-            if (seccion.isBlank() || nombre.isBlank() || detalle.isBlank() || imageUrl.isBlank()) {
+            if (seccion.isBlank() || nombre.isBlank()) {
                 Toast.makeText(this, R.string.error_plato_invalido, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val guarnicion = if (seccion == "Plato principal") {
-                when (selectorGuarnicion.text.toString().trim()) {
-                    getString(R.string.si) -> true
-                    getString(R.string.no) -> false
+                when {
+                    cbGuarnicionSi.isChecked -> true
+                    cbGuarnicionNo.isChecked -> false
                     else -> {
                         Toast.makeText(this, R.string.error_guarnicion_requerida, Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
@@ -117,7 +128,8 @@ class AdminMenuActivity : AppCompatActivity() {
                     etDetallePlato.setText("")
                     etImagenUrl.setText("")
                     selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
-                    selectorGuarnicion.setText("", false)
+                    cbGuarnicionSi.isChecked = false
+                    cbGuarnicionNo.isChecked = false
                     actualizarVisibilidadGuarnicion()
                     refrescarListadoSecciones()
                     Toast.makeText(this, R.string.mensaje_plato_agregado, Toast.LENGTH_SHORT).show()

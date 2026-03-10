@@ -49,6 +49,22 @@
             android:layout_marginTop="8dp"
             android:hint="@string/hint_url_imagen" />
 
+        <TextView
+            android:id="@+id/tvGuarnicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/label_guarnicion"
+            android:visibility="gone" />
+
+        <AutoCompleteTextView
+            android:id="@+id/actvGuarnicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_guarnicion"
+            android:inputType="none"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/btnCrearPlato"
             android:layout_width="match_parent"

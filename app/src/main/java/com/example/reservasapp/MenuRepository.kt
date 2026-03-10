@@ -8,6 +8,7 @@ object MenuRepository {
     private const val FIELD_NAME = "name"
     private const val FIELD_DETAIL = "detail"
     private const val FIELD_IMAGE_URL = "imageUrl"
+    private const val FIELD_GUARNICION = "guarnicion"
 
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val secciones = mutableListOf<MenuSection>()
@@ -34,6 +35,7 @@ object MenuRepository {
                     val name = doc.getString(FIELD_NAME)?.trim().orEmpty()
                     val detail = doc.getString(FIELD_DETAIL)?.trim().orEmpty()
                     val imageUrl = doc.getString(FIELD_IMAGE_URL)?.trim().orEmpty()
+                    val guarnicion = doc.getBoolean(FIELD_GUARNICION) ?: false
 
                     if (section.isBlank() || name.isBlank()) return@forEach
                     if (!agrupadas.containsKey(section)) return@forEach
@@ -42,7 +44,8 @@ object MenuRepository {
                         MenuDish(
                             nombre = name,
                             detalle = detail,
-                            imageUrl = imageUrl
+                            imageUrl = imageUrl,
+                            guarnicion = guarnicion
                         )
                     )
                 }
@@ -65,6 +68,7 @@ object MenuRepository {
         nombre: String,
         detalle: String,
         imageUrl: String,
+        guarnicion: Boolean,
         onComplete: (Boolean) -> Unit
     ) {
         val seccionNormalizada = seccion.trim()
@@ -78,7 +82,8 @@ object MenuRepository {
             FIELD_SECTION to seccionNormalizada,
             FIELD_NAME to nombreNormalizado,
             FIELD_DETAIL to detalle.trim(),
-            FIELD_IMAGE_URL to imageUrl.trim()
+            FIELD_IMAGE_URL to imageUrl.trim(),
+            FIELD_GUARNICION to guarnicion
         )
 
         firestore.collection(COLLECTION_MENU)

@@ -2,11 +2,13 @@ package com.example.reservasapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -20,13 +22,30 @@ class AdminMenuActivity : AppCompatActivity() {
         val etDetallePlato = findViewById<EditText>(R.id.etDetallePlato)
         val etImagenUrl = findViewById<EditText>(R.id.etImagenUrl)
         val selectorSeccion = findViewById<AutoCompleteTextView>(R.id.actvSeccionPlato)
+        val tvGuarnicion = findViewById<TextView>(R.id.tvGuarnicion)
+        val selectorGuarnicion = findViewById<AutoCompleteTextView>(R.id.actvGuarnicion)
         val btnCrearPlato = findViewById<Button>(R.id.btnCrearPlato)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
 
         val secciones = MenuRepository.seccionesPermitidas()
+        val opcionesGuarnicion = listOf(getString(R.string.si), getString(R.string.no))
+
         selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
         selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
+
+        selectorGuarnicion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, opcionesGuarnicion))
+
+        fun actualizarVisibilidadGuarnicion() {
+            val esPrincipal = selectorSeccion.text.toString().trim() == "Plato principal"
+            val visibilidad = if (esPrincipal) View.VISIBLE else View.GONE
+            tvGuarnicion.visibility = visibilidad
+            selectorGuarnicion.visibility = visibilidad
+            if (!esPrincipal) selectorGuarnicion.setText("", false)
+        }
+
+        selectorSeccion.setOnItemClickListener { _, _, _, _ -> actualizarVisibilidadGuarnicion() }
+        actualizarVisibilidadGuarnicion()
 
         fun refrescarListadoSecciones() {
             MenuRepository.cargarSecciones { ok, loadedSections ->
@@ -36,7 +55,12 @@ class AdminMenuActivity : AppCompatActivity() {
                             "(sin platos)"
                         } else {
                             section.opciones.joinToString(" | ") { plato ->
-                                "${plato.nombre} - ${plato.detalle}"
+                                val detalleGuarnicion = if (section.nombre == "Plato principal") {
+                                    " (Guarnición: ${if (plato.guarnicion) getString(R.string.si) else getString(R.string.no)})"
+                                } else {
+                                    ""
+                                }
+                                "${plato.nombre} - ${plato.detalle}$detalleGuarnicion"
                             }
                         }
                         "${section.nombre}: $platos"
@@ -63,11 +87,25 @@ class AdminMenuActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val guarnicion = if (seccion == "Plato principal") {
+                when (selectorGuarnicion.text.toString().trim()) {
+                    getString(R.string.si) -> true
+                    getString(R.string.no) -> false
+                    else -> {
+                        Toast.makeText(this, R.string.error_guarnicion_requerida, Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                }
+            } else {
+                false
+            }
+
             MenuRepository.agregarPlato(
                 seccion = seccion,
                 nombre = nombre,
                 detalle = detalle,
-                imageUrl = imageUrl
+                imageUrl = imageUrl,
+                guarnicion = guarnicion
             ) { ok ->
                 runOnUiThread {
                     if (!ok) {
@@ -79,6 +117,8 @@ class AdminMenuActivity : AppCompatActivity() {
                     etDetallePlato.setText("")
                     etImagenUrl.setText("")
                     selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
+                    selectorGuarnicion.setText("", false)
+                    actualizarVisibilidadGuarnicion()
                     refrescarListadoSecciones()
                     Toast.makeText(this, R.string.mensaje_plato_agregado, Toast.LENGTH_SHORT).show()
                 }

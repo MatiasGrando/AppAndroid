@@ -55,6 +55,9 @@
     <string name="error_google_login">Error al autenticar con Firebase</string>
     <string name="error_google_login_cancelled">Inicio de sesión cancelado o fallido</string>
     <string name="menu_profile">Perfil</string>
+    <string name="admin_panel_menu">Panel Administrador</string>
+    <string name="admin_panel_title">Panel Administrador</string>
+    <string name="admin_panel_placeholder">Aquí irán las funciones administrativas.</string>
     <string name="profile_data_title">Perfil / datos personales</string>
     <string name="profile_data_message">Email: %1$s
 Nombre y apellido: %2$s

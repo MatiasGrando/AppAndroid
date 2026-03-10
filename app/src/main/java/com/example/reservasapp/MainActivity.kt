@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.esAdmin
         return true
     }
 
@@ -57,11 +58,17 @@ class MainActivity : AppCompatActivity() {
                 true
             }
 
+            R.id.action_admin_panel -> {
+                startActivity(Intent(this, AdminActivity::class.java))
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun logout() {
+        UserSession.esAdmin = false
         FirebaseAuth.getInstance().signOut()
         googleSignInClient.signOut().addOnCompleteListener {
             val intent = Intent(this, LoginActivity::class.java)

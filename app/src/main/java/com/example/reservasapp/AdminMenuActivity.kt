@@ -2,10 +2,13 @@ package com.example.reservasapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -15,58 +18,111 @@ class AdminMenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_menu)
 
-        val etPrincipales = findViewById<EditText>(R.id.etPlatosPrincipales)
-        val etPostres = findViewById<EditText>(R.id.etPostres)
-        val etNuevaSeccion = findViewById<EditText>(R.id.etNuevaSeccion)
-        val etOpcionesNuevaSeccion = findViewById<EditText>(R.id.etOpcionesNuevaSeccion)
-        val btnGuardarBase = findViewById<Button>(R.id.btnGuardarMenusBase)
-        val btnAgregarSeccion = findViewById<Button>(R.id.btnAgregarSeccion)
+        val etNombrePlato = findViewById<EditText>(R.id.etNombrePlato)
+        val etDetallePlato = findViewById<EditText>(R.id.etDetallePlato)
+        val etImagenUrl = findViewById<EditText>(R.id.etImagenUrl)
+        val selectorSeccion = findViewById<AutoCompleteTextView>(R.id.actvSeccionPlato)
+        val tvGuarnicion = findViewById<TextView>(R.id.tvGuarnicion)
+        val selectorGuarnicion = findViewById<AutoCompleteTextView>(R.id.actvGuarnicion)
+        val btnCrearPlato = findViewById<Button>(R.id.btnCrearPlato)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
 
-        val principalesActuales = MenuRepository.obtenerOpcionesPorSeccion("Plato principal")
-        val postresActuales = MenuRepository.obtenerOpcionesPorSeccion("Postres")
-        etPrincipales.setText(principalesActuales.joinToString(", "))
-        etPostres.setText(postresActuales.joinToString(", "))
+        val secciones = MenuRepository.seccionesPermitidas()
+        val opcionesGuarnicion = listOf(getString(R.string.si), getString(R.string.no))
+
+        selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
+        selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
+
+        selectorGuarnicion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, opcionesGuarnicion))
+
+        fun actualizarVisibilidadGuarnicion() {
+            val esPrincipal = selectorSeccion.text.toString().trim() == "Plato principal"
+            val visibilidad = if (esPrincipal) View.VISIBLE else View.GONE
+            tvGuarnicion.visibility = visibilidad
+            selectorGuarnicion.visibility = visibilidad
+            if (!esPrincipal) selectorGuarnicion.setText("", false)
+        }
+
+        selectorSeccion.setOnItemClickListener { _, _, _, _ -> actualizarVisibilidadGuarnicion() }
+        actualizarVisibilidadGuarnicion()
 
         fun refrescarListadoSecciones() {
-            val items = MenuRepository.obtenerSecciones().map {
-                "${it.nombre}: ${it.opciones.joinToString(", ")}"
+            MenuRepository.cargarSecciones { ok, loadedSections ->
+                runOnUiThread {
+                    val items = loadedSections.map { section ->
+                        val platos = if (section.opciones.isEmpty()) {
+                            "(sin platos)"
+                        } else {
+                            section.opciones.joinToString(" | ") { plato ->
+                                val detalleGuarnicion = if (section.nombre == "Plato principal") {
+                                    " (Guarnición: ${if (plato.guarnicion) getString(R.string.si) else getString(R.string.no)})"
+                                } else {
+                                    ""
+                                }
+                                "${plato.nombre} - ${plato.detalle}$detalleGuarnicion"
+                            }
+                        }
+                        "${section.nombre}: $platos"
+                    }
+                    listSecciones.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
+
+                    if (!ok) {
+                        Toast.makeText(this, R.string.error_cargar_menu, Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
-            listSecciones.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
         }
 
         refrescarListadoSecciones()
 
-        btnGuardarBase.setOnClickListener {
-            val principales = etPrincipales.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
-            val postres = etPostres.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
+        btnCrearPlato.setOnClickListener {
+            val seccion = selectorSeccion.text.toString().trim()
+            val nombre = etNombrePlato.text.toString().trim()
+            val detalle = etDetallePlato.text.toString().trim()
+            val imageUrl = etImagenUrl.text.toString().trim()
 
-            if (principales.isEmpty() || postres.isEmpty()) {
-                Toast.makeText(this, R.string.error_opciones_vacias, Toast.LENGTH_SHORT).show()
+            if (seccion.isBlank() || nombre.isBlank() || detalle.isBlank() || imageUrl.isBlank()) {
+                Toast.makeText(this, R.string.error_plato_invalido, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            MenuRepository.actualizarOpciones("Plato principal", principales)
-            MenuRepository.actualizarOpciones("Postres", postres)
-            refrescarListadoSecciones()
-            Toast.makeText(this, R.string.mensaje_menus_actualizados, Toast.LENGTH_SHORT).show()
-        }
-
-        btnAgregarSeccion.setOnClickListener {
-            val nombre = etNuevaSeccion.text.toString().trim()
-            val opciones = etOpcionesNuevaSeccion.text.toString().split(",").map { it.trim() }.filter { it.isNotBlank() }
-
-            if (nombre.isBlank() || opciones.isEmpty()) {
-                Toast.makeText(this, R.string.error_seccion_invalida, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            val guarnicion = if (seccion == "Plato principal") {
+                when (selectorGuarnicion.text.toString().trim()) {
+                    getString(R.string.si) -> true
+                    getString(R.string.no) -> false
+                    else -> {
+                        Toast.makeText(this, R.string.error_guarnicion_requerida, Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                }
+            } else {
+                false
             }
 
-            MenuRepository.agregarSeccion(nombre, opciones)
-            etNuevaSeccion.setText("")
-            etOpcionesNuevaSeccion.setText("")
-            refrescarListadoSecciones()
-            Toast.makeText(this, R.string.mensaje_seccion_agregada, Toast.LENGTH_SHORT).show()
+            MenuRepository.agregarPlato(
+                seccion = seccion,
+                nombre = nombre,
+                detalle = detalle,
+                imageUrl = imageUrl,
+                guarnicion = guarnicion
+            ) { ok ->
+                runOnUiThread {
+                    if (!ok) {
+                        Toast.makeText(this, R.string.error_guardar_menu, Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
+
+                    etNombrePlato.setText("")
+                    etDetallePlato.setText("")
+                    etImagenUrl.setText("")
+                    selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
+                    selectorGuarnicion.setText("", false)
+                    actualizarVisibilidadGuarnicion()
+                    refrescarListadoSecciones()
+                    Toast.makeText(this, R.string.mensaje_plato_agregado, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         btnVolverMenu.setOnClickListener {

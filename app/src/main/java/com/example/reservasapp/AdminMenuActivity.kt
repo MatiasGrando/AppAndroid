@@ -35,6 +35,13 @@ class AdminMenuActivity : AppCompatActivity() {
         val secciones = MenuRepository.seccionesPermitidas()
 
         selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
+        selectorSeccion.threshold = 0
+        selectorSeccion.setOnClickListener { selectorSeccion.showDropDown() }
+        selectorSeccion.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                selectorSeccion.showDropDown()
+            }
+        }
         selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
 
         cbGuarnicionSi.setOnCheckedChangeListener { _, isChecked ->

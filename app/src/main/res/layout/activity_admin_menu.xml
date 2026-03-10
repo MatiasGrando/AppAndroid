@@ -57,13 +57,26 @@
             android:text="@string/label_guarnicion"
             android:visibility="gone" />
 
-        <AutoCompleteTextView
-            android:id="@+id/actvGuarnicion"
+        <LinearLayout
+            android:id="@+id/layoutGuarnicionChecks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_guarnicion"
-            android:inputType="none"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <CheckBox
+                android:id="@+id/cbGuarnicionSi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/si" />
+
+            <CheckBox
+                android:id="@+id/cbGuarnicionNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/no" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnCrearPlato"

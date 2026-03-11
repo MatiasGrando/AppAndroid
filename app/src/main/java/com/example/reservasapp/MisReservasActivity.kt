@@ -36,17 +36,26 @@ class MisReservasActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        ReservasRepository.cargarReservasUsuario { ok ->
-            if (!ok) {
-                Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+        MenuRepository.cargarSecciones { _, _ ->
+            ReservasRepository.cargarReservasUsuario { ok ->
+                if (!ok) {
+                    Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+                }
+                renderReservas()
             }
-            renderReservas()
         }
     }
 
     private fun renderReservas() {
         val reservas = ReservasRepository.obtenerReservasProximosSieteDias()
-        recyclerView.adapter = MisReservasAdapter(reservas)
+        val imageUrlsByDish = MenuRepository.obtenerSecciones()
+            .flatMap { seccion -> seccion.opciones }
+            .associate { plato -> plato.nombre to plato.imageUrl }
+
+        recyclerView.adapter = MisReservasAdapter(
+            reservas = reservas,
+            imageUrlsByDish = imageUrlsByDish
+        )
 
         if (reservas.isEmpty()) {
             emptyText.visibility = View.VISIBLE

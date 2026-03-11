@@ -1,16 +1,22 @@
 package com.example.reservasapp
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class ConfirmacionReservaActivity : AppCompatActivity() {
+
+    private val storage by lazy { FirebaseStorage.getInstance() }
+    private var imageByDishNormalized: Map<String, String> = emptyMap()
 
     companion object {
         const val EXTRA_FECHA = "extra_fecha"
@@ -55,6 +61,15 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
             ivGuarnicion.setImageResource(imageForSelection(guarnicion))
             ivPostre.setImageResource(imageForSelection(postre))
 
+            cargarImagenesMenuDesdeStorage(
+                principal = principal,
+                guarnicion = guarnicion,
+                postre = postre,
+                ivPrincipal = ivPrincipal,
+                ivGuarnicion = ivGuarnicion,
+                ivPostre = ivPostre
+            )
+
             detalle.text = getString(R.string.resumen_confirmacion_fecha, fecha)
         } else {
             detalle.text = getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
@@ -75,4 +90,107 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
             aliases.all { keyNormalized.contains(it.lowercase()) }
         }?.value
     }
+
+    private fun cargarImagenesMenuDesdeStorage(
+        principal: String?,
+        guarnicion: String?,
+        postre: String?,
+        ivPrincipal: ImageView,
+        ivGuarnicion: ImageView,
+        ivPostre: ImageView
+    ) {
+        val imageUrlsByDish = MenuRepository.obtenerSecciones()
+            .flatMap { it.opciones }
+            .associate { plato -> normalizarNombre(plato.nombre) to plato.imageUrl }
+
+        imageByDishNormalized = imageUrlsByDish
+
+        if (imageByDishNormalized.isEmpty()) {
+            MenuRepository.cargarSecciones { ok, secciones ->
+                if (!ok) return@cargarSecciones
+
+                imageByDishNormalized = secciones
+                    .flatMap { it.opciones }
+                    .associate { plato -> normalizarNombre(plato.nombre) to plato.imageUrl }
+
+                cargarImagenDesdeStorage(principal, ivPrincipal)
+                cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+                cargarImagenDesdeStorage(postre, ivPostre)
+            }
+            return
+        }
+
+        cargarImagenDesdeStorage(principal, ivPrincipal)
+        cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+        cargarImagenDesdeStorage(postre, ivPostre)
+    }
+
+    private fun cargarImagenDesdeStorage(nombrePlato: String?, imageView: ImageView) {
+        val fallbackImage = imageForSelection(nombrePlato)
+        val nombreNormalizado = normalizarNombre(nombrePlato.orEmpty())
+        if (nombreNormalizado.isBlank()) {
+            imageView.setImageResource(fallbackImage)
+            return
+        }
+
+        val imagePath = imageByDishNormalized[nombreNormalizado].orEmpty()
+        if (imagePath.isBlank()) {
+            imageView.setImageResource(fallbackImage)
+            return
+        }
+
+        imageView.tag = nombreNormalizado
+
+        when {
+            imagePath.startsWith("http", ignoreCase = true) -> {
+                Glide.with(this)
+                    .load(imagePath)
+                    .placeholder(fallbackImage)
+                    .error(fallbackImage)
+                    .into(imageView)
+            }
+
+            imagePath.startsWith("gs://", ignoreCase = true) -> {
+                storage.getReferenceFromUrl(imagePath).downloadUrl
+                    .addOnSuccessListener { uri ->
+                        aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                    }
+                    .addOnFailureListener {
+                        imageView.setImageResource(fallbackImage)
+                    }
+            }
+
+            else -> {
+                storage.reference.child(imagePath.trimStart('/')).downloadUrl
+                    .addOnSuccessListener { uri ->
+                        aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                    }
+                    .addOnFailureListener {
+                        imageView.setImageResource(fallbackImage)
+                    }
+            }
+        }
+    }
+
+    private fun aplicarImagenSiCorresponde(
+        imageView: ImageView,
+        expectedTag: String,
+        uri: Uri,
+        fallbackImage: Int
+    ) {
+        if (imageView.tag != expectedTag) return
+
+        Glide.with(this)
+            .load(uri)
+            .placeholder(fallbackImage)
+            .error(fallbackImage)
+            .into(imageView)
+    }
+}
+
+private fun normalizarNombre(nombre: String): String {
+    return nombre
+        .trim()
+        .lowercase(Locale.ROOT)
+        .replace("\\s+".toRegex(), " ")
 }

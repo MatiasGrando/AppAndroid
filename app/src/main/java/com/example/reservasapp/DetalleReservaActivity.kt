@@ -21,6 +21,7 @@ class DetalleReservaActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_DATE_MILLIS = "extra_date_millis"
+        const val EXTRA_RESERVA_ID = "extra_reserva_id"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,15 +33,31 @@ class DetalleReservaActivity : AppCompatActivity() {
         val viewPager = findViewById<ViewPager2>(R.id.viewPagerSections)
         val btnContinuar = findViewById<Button>(R.id.btnConfirmar)
 
-        val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
+        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
+        val reservaEnEdicion = if (reservaId.isNotBlank()) {
+            ReservasRepository.obtenerReservaPorId(reservaId)
+        } else {
+            null
+        }
+
+        if (reservaId.isNotBlank() && reservaEnEdicion == null) {
+            Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val selectedDateMillis = reservaEnEdicion?.fechaMillis
+            ?: intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val fechaFormateada = formatter.format(Date(selectedDateMillis))
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
 
         var secciones = MenuRepository.obtenerSeccionesCache()
-        val selecciones = linkedMapOf<String, String?>()
+        val selecciones = linkedMapOf<String, String?>().apply {
+            putAll(reservaEnEdicion?.selecciones ?: emptyMap())
+        }
         var currentSectionIndex = 0
-        var guarnicionesHabilitadas = false
+        var guarnicionesHabilitadas = estaGuarnicionHabilitada(secciones, selecciones)
 
         val pagerAdapter = MenuSectionsPagerAdapter(
             sections = secciones,
@@ -99,8 +116,12 @@ class DetalleReservaActivity : AppCompatActivity() {
                 pagerAdapter.updateSections(secciones)
                 pagerAdapter.notifyDataSetChanged()
 
-                guarnicionesHabilitadas = false
-                selecciones["Guarniciones"] = null
+                guarnicionesHabilitadas = estaGuarnicionHabilitada(secciones, selecciones)
+                if (!guarnicionesHabilitadas) {
+                    selecciones["Guarniciones"] = null
+                    refrescarSeccionGuarniciones(viewPager, secciones)
+                }
+
                 currentSectionIndex = 0
                 viewPager.setCurrentItem(0, false)
 
@@ -143,11 +164,33 @@ class DetalleReservaActivity : AppCompatActivity() {
                 val siguiente = currentSectionIndex + 1
                 navegarSiExiste(viewPager, siguiente)
             } else {
+                val seleccionesFinales = selecciones
+                    .filterValues { !it.isNullOrBlank() }
+                    .mapValues { it.value.orEmpty() }
+
+                if (reservaEnEdicion != null) {
+                    ReservasRepository.actualizarReserva(
+                        id = reservaEnEdicion.id,
+                        selecciones = seleccionesFinales
+                    ) { actualizada ->
+                        if (actualizada == null) {
+                            Toast.makeText(this, R.string.error_actualizar_reserva, Toast.LENGTH_LONG).show()
+                            return@actualizarReserva
+                        }
+
+                        val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
+                        val intent = Intent(this, ConfirmacionEdicionActivity::class.java).apply {
+                            putExtra(ConfirmacionEdicionActivity.EXTRA_FECHA, fechaFormateada)
+                            putExtra(ConfirmacionEdicionActivity.EXTRA_DETALLE, resumen)
+                        }
+                        startActivity(intent)
+                    }
+                    return@setOnClickListener
+                }
+
                 ReservasRepository.agregarReserva(
                     fechaMillis = selectedDateMillis,
-                    selecciones = selecciones
-                        .filterValues { !it.isNullOrBlank() }
-                        .mapValues { it.value.orEmpty() }
+                    selecciones = seleccionesFinales
                 ) { resultado ->
                     val reservaCreada = resultado.reservaCreada
                     val reservaExistente = resultado.reservaExistente
@@ -221,6 +264,16 @@ class DetalleReservaActivity : AppCompatActivity() {
             viewPager.setCurrentItem(index, true)
         }
     }
+
+    private fun estaGuarnicionHabilitada(
+        secciones: List<MenuSection>,
+        selecciones: Map<String, String?>
+    ): Boolean {
+        val principal = secciones.firstOrNull { it.nombre.equals("Plato principal", ignoreCase = true) }
+            ?: return false
+        val seleccionPrincipal = selecciones[principal.nombre] ?: return false
+        return principal.opciones.firstOrNull { it.nombre == seleccionPrincipal }?.guarnicion == true
+    }
 }
 
 private class MenuSectionsPagerAdapter(
@@ -260,41 +313,4 @@ private class MenuSectionsPagerAdapter(
             recycler.adapter = adapter
         }
     }
-}
-
-private class BindableMenuOptionAdapter(
-    items: List<MenuItemOption>
-) : RecyclerView.Adapter<MenuOptionAdapter.MenuOptionViewHolder>() {
-
-    private var itemsState: List<MenuItemOption> = items
-    private var selectedPosition = RecyclerView.NO_POSITION
-    var onSelection: ((MenuItemOption) -> Unit)? = null
-
-    fun updateItems(newItems: List<MenuItemOption>, selectedName: String?) {
-        itemsState = newItems
-        selectedPosition = selectedName?.let { name ->
-            itemsState.indexOfFirst { it.name == name }
-        }?.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
-        notifyDataSetChanged()
-    }
-
-    override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): MenuOptionAdapter.MenuOptionViewHolder {
-        val view = android.view.LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_menu_option, parent, false)
-        return MenuOptionAdapter.MenuOptionViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: MenuOptionAdapter.MenuOptionViewHolder, position: Int) {
-        val item = itemsState[position]
-        holder.bind(item, position == selectedPosition)
-        holder.itemView.setOnClickListener {
-            val prev = selectedPosition
-            selectedPosition = holder.bindingAdapterPosition
-            if (prev != RecyclerView.NO_POSITION) notifyItemChanged(prev)
-            notifyItemChanged(selectedPosition)
-            onSelection?.invoke(item)
-        }
-    }
-
-    override fun getItemCount(): Int = itemsState.size
 }

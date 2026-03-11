@@ -63,8 +63,9 @@ class ReservarActivity : AppCompatActivity() {
 
         editReservationButton.setOnClickListener {
             val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis) ?: return@setOnClickListener
-            startActivity(Intent(this, EditarDetalleReservaActivity::class.java).apply {
-                putExtra(EditarDetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+            startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
+                putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, reserva.fechaMillis)
             })
         }
     }

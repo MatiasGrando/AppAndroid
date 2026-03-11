@@ -14,6 +14,8 @@ class MisReservasActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyText: TextView
+    private lateinit var editButton: Button
+    private var selectedReserva: Reserva? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,9 +23,19 @@ class MisReservasActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.rvReservas)
         emptyText = findViewById(R.id.tvSinReservas)
+        editButton = findViewById(R.id.btnEditarMisReservas)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuMisReservas)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+        updateEditButtonState()
+
+        editButton.setOnClickListener {
+            val reserva = selectedReserva ?: return@setOnClickListener
+            startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
+                putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, reserva.fechaMillis)
+            })
+        }
 
         btnVolverMenu.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java).apply {
@@ -55,7 +67,13 @@ class MisReservasActivity : AppCompatActivity() {
         recyclerView.adapter = MisReservasAdapter(
             reservas = reservas,
             imageUrlsByDish = imageUrlsByDish
-        )
+        ) { reservaSeleccionada ->
+            selectedReserva = reservaSeleccionada
+            updateEditButtonState()
+        }
+
+        selectedReserva = null
+        updateEditButtonState()
 
         if (reservas.isEmpty()) {
             emptyText.visibility = View.VISIBLE
@@ -65,4 +83,14 @@ class MisReservasActivity : AppCompatActivity() {
             recyclerView.visibility = View.VISIBLE
         }
     }
+
+    private fun updateEditButtonState() {
+        val hasSelection = selectedReserva != null
+        editButton.isEnabled = hasSelection
+        editButton.alpha = if (hasSelection) 1f else 0.85f
+        editButton.setBackgroundResource(
+            if (hasSelection) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+        )
+    }
+
 }

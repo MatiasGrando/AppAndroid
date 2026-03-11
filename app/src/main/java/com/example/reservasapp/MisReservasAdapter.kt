@@ -15,15 +15,19 @@ import java.util.Locale
 
 class MisReservasAdapter(
     private var reservas: List<Reserva>,
-    imageUrlsByDish: Map<String, String>
+    imageUrlsByDish: Map<String, String>,
+    private val onReservaSelected: (Reserva?) -> Unit
 ) : RecyclerView.Adapter<MisReservasAdapter.MisReservasViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("EEEE d/M/yy", Locale("es", "ES"))
     private val imageByDishNormalized = imageUrlsByDish
         .mapKeys { (dishName, _) -> normalizarNombre(dishName) }
+    private var selectedPosition: Int = RecyclerView.NO_POSITION
 
     fun updateData(newReservas: List<Reserva>) {
         reservas = newReservas
+        selectedPosition = RecyclerView.NO_POSITION
+        onReservaSelected(null)
         notifyDataSetChanged()
     }
 
@@ -34,7 +38,21 @@ class MisReservasAdapter(
     }
 
     override fun onBindViewHolder(holder: MisReservasViewHolder, position: Int) {
-        holder.bind(reservas[position], dateFormatter)
+        holder.bind(reservas[position], dateFormatter, position == selectedPosition)
+        holder.itemView.setOnClickListener {
+            val previousSelection = selectedPosition
+            selectedPosition = if (selectedPosition == position) RecyclerView.NO_POSITION else position
+
+            if (previousSelection != RecyclerView.NO_POSITION) {
+                notifyItemChanged(previousSelection)
+            }
+            if (selectedPosition != RecyclerView.NO_POSITION) {
+                notifyItemChanged(selectedPosition)
+                onReservaSelected(reservas[selectedPosition])
+            } else {
+                onReservaSelected(null)
+            }
+        }
     }
 
     override fun getItemCount(): Int = reservas.size
@@ -52,12 +70,13 @@ class MisReservasAdapter(
         private val ivPostre = itemView.findViewById<ImageView>(R.id.ivPostre)
         private val storage by lazy { FirebaseStorage.getInstance() }
 
-        fun bind(reserva: Reserva, formatter: SimpleDateFormat) {
+        fun bind(reserva: Reserva, formatter: SimpleDateFormat, isSelected: Boolean) {
             val principal = extraerSeleccion(reserva.selecciones, "plato", "principal")
             val guarnicion = extraerSeleccion(reserva.selecciones, "guarn")
             val postre = extraerSeleccion(reserva.selecciones, "postre")
 
             tvFecha.text = formatter.format(Date(reserva.fechaMillis)).uppercase(Locale("es", "ES"))
+            itemView.alpha = if (isSelected) 1f else 0.9f
 
             tvPrincipalNombre.text = principal ?: "-"
             tvGuarnicionNombre.text = guarnicion ?: "-"

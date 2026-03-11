@@ -64,8 +64,9 @@ class EditarReservasActivity : AppCompatActivity() {
 
             listView.setOnItemClickListener { _, _, position, _ ->
                 val reserva = reservas[position]
-                val intent = Intent(this, EditarDetalleReservaActivity::class.java).apply {
-                    putExtra(EditarDetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                val intent = Intent(this, DetalleReservaActivity::class.java).apply {
+                    putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                    putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, reserva.fechaMillis)
                 }
                 startActivity(intent)
             }

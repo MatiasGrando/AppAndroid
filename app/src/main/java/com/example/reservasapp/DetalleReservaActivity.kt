@@ -148,19 +148,30 @@ class DetalleReservaActivity : AppCompatActivity() {
                     selecciones = selecciones
                         .filterValues { !it.isNullOrBlank() }
                         .mapValues { it.value.orEmpty() }
-                ) { reserva ->
-                    if (reserva == null) {
-                        Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
-                        return@agregarReserva
-                    }
+                ) { resultado ->
+                    val reservaCreada = resultado.reservaCreada
+                    val reservaExistente = resultado.reservaExistente
 
-                    val resumen = ReservasRepository.formatearSelecciones(reserva.selecciones)
-                    val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
-                        putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
-                        putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
-                        putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reserva.id)
+                    when {
+                        reservaCreada != null -> {
+                            val resumen = ReservasRepository.formatearSelecciones(reservaCreada.selecciones)
+                            val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                                putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                                putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                                putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reservaCreada.id)
+                            }
+                            startActivity(intent)
+                        }
+                        reservaExistente != null -> {
+                            Toast.makeText(this, R.string.reserva_ya_existente, Toast.LENGTH_LONG).show()
+                            startActivity(Intent(this, EditarDetalleReservaActivity::class.java).apply {
+                                putExtra(EditarDetalleReservaActivity.EXTRA_RESERVA_ID, reservaExistente.id)
+                            })
+                        }
+                        else -> {
+                            Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
+                        }
                     }
-                    startActivity(intent)
                 }
             }
         }

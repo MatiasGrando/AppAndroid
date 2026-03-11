@@ -1,20 +1,26 @@
 package com.example.reservasapp
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class MisReservasAdapter(
-    private var reservas: List<Reserva>
+    private var reservas: List<Reserva>,
+    imageUrlsByDish: Map<String, String>
 ) : RecyclerView.Adapter<MisReservasAdapter.MisReservasViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("EEEE d/M/yy", Locale("es", "ES"))
+    private val imageByDishNormalized = imageUrlsByDish
+        .mapKeys { (dishName, _) -> normalizarNombre(dishName) }
 
     fun updateData(newReservas: List<Reserva>) {
         reservas = newReservas
@@ -24,7 +30,7 @@ class MisReservasAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MisReservasViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_mis_reserva, parent, false)
-        return MisReservasViewHolder(view)
+        return MisReservasViewHolder(view, imageByDishNormalized)
     }
 
     override fun onBindViewHolder(holder: MisReservasViewHolder, position: Int) {
@@ -33,7 +39,10 @@ class MisReservasAdapter(
 
     override fun getItemCount(): Int = reservas.size
 
-    class MisReservasViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class MisReservasViewHolder(
+        itemView: View,
+        private val imageByDishNormalized: Map<String, String>
+    ) : RecyclerView.ViewHolder(itemView) {
         private val tvFecha = itemView.findViewById<TextView>(R.id.tvFechaReserva)
         private val tvPrincipalNombre = itemView.findViewById<TextView>(R.id.tvPlatoPrincipalNombre)
         private val ivPrincipal = itemView.findViewById<ImageView>(R.id.ivPlatoPrincipal)
@@ -41,6 +50,7 @@ class MisReservasAdapter(
         private val ivGuarnicion = itemView.findViewById<ImageView>(R.id.ivGuarnicion)
         private val tvPostreNombre = itemView.findViewById<TextView>(R.id.tvPostreNombre)
         private val ivPostre = itemView.findViewById<ImageView>(R.id.ivPostre)
+        private val storage by lazy { FirebaseStorage.getInstance() }
 
         fun bind(reserva: Reserva, formatter: SimpleDateFormat) {
             val principal = extraerSeleccion(reserva.selecciones, "plato", "principal")
@@ -53,9 +63,71 @@ class MisReservasAdapter(
             tvGuarnicionNombre.text = guarnicion ?: "-"
             tvPostreNombre.text = postre ?: "-"
 
-            ivPrincipal.setImageResource(imageForSelection(principal))
-            ivGuarnicion.setImageResource(imageForSelection(guarnicion))
-            ivPostre.setImageResource(imageForSelection(postre))
+            cargarImagenDesdeStorage(principal, ivPrincipal)
+            cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+            cargarImagenDesdeStorage(postre, ivPostre)
+        }
+
+        private fun cargarImagenDesdeStorage(nombrePlato: String?, imageView: ImageView) {
+            val fallbackImage = imageForSelection(nombrePlato)
+            val nombreNormalizado = normalizarNombre(nombrePlato.orEmpty())
+            if (nombreNormalizado.isBlank()) {
+                imageView.setImageResource(fallbackImage)
+                return
+            }
+
+            val imagePath = imageByDishNormalized[nombreNormalizado].orEmpty()
+            if (imagePath.isBlank()) {
+                imageView.setImageResource(fallbackImage)
+                return
+            }
+
+            imageView.tag = nombreNormalizado
+
+            when {
+                imagePath.startsWith("http", ignoreCase = true) -> {
+                    Glide.with(itemView)
+                        .load(imagePath)
+                        .placeholder(fallbackImage)
+                        .error(fallbackImage)
+                        .into(imageView)
+                }
+
+                imagePath.startsWith("gs://", ignoreCase = true) -> {
+                    storage.getReferenceFromUrl(imagePath).downloadUrl
+                        .addOnSuccessListener { uri ->
+                            aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                        }
+                        .addOnFailureListener {
+                            imageView.setImageResource(fallbackImage)
+                        }
+                }
+
+                else -> {
+                    storage.reference.child(imagePath.trimStart('/')).downloadUrl
+                        .addOnSuccessListener { uri ->
+                            aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                        }
+                        .addOnFailureListener {
+                            imageView.setImageResource(fallbackImage)
+                        }
+                }
+            }
+        }
+
+        private fun aplicarImagenSiCorresponde(
+            imageView: ImageView,
+            expectedTag: String,
+            uri: Uri,
+            fallbackImage: Int
+        ) {
+            if (imageView.tag != expectedTag) return
+
+            Glide.with(itemView)
+                .load(uri)
+                .placeholder(fallbackImage)
+                .error(fallbackImage)
+                .into(imageView)
         }
 
         private fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {
@@ -65,4 +137,11 @@ class MisReservasAdapter(
             }?.value
         }
     }
+}
+
+private fun normalizarNombre(nombre: String): String {
+    return nombre
+        .trim()
+        .lowercase(Locale.ROOT)
+        .replace("\\s+".toRegex(), " ")
 }

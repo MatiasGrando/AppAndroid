@@ -17,6 +17,11 @@ object ReservasRepository {
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
+    data class ResultadoAgregarReserva(
+        val reservaCreada: Reserva? = null,
+        val reservaExistente: Reserva? = null
+    )
+
     fun cargarReservasUsuario(onComplete: (Boolean) -> Unit) {
         val uid = auth.currentUser?.uid
         if (uid.isNullOrBlank()) {
@@ -60,40 +65,79 @@ object ReservasRepository {
     fun agregarReserva(
         fechaMillis: Long,
         selecciones: Map<String, String>,
-        onComplete: (Reserva?) -> Unit
+        onComplete: (ResultadoAgregarReserva) -> Unit
     ) {
         val uid = auth.currentUser?.uid
         if (uid.isNullOrBlank()) {
-            onComplete(null)
+            onComplete(ResultadoAgregarReserva())
             return
         }
 
-        PerfilRepository.cargarPerfil { perfil ->
-            val payload = mutableMapOf<String, Any>(
-                FIELD_USER_ID to uid,
-                FIELD_FECHA_MILLIS to fechaMillis,
-                FIELD_SELECCIONES to selecciones.toMap(),
-                FIELD_NOMBRE to perfil?.nombre.orEmpty(),
-                FIELD_APELLIDO to perfil?.apellido.orEmpty(),
-                FIELD_EMPRESA to perfil?.empresa.orEmpty()
-            )
+        firestore.collection(COLLECTION_RESERVAS)
+            .whereEqualTo(FIELD_USER_ID, uid)
+            .whereEqualTo(FIELD_FECHA_MILLIS, fechaMillis)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val existenteDoc = snapshot.documents.firstOrNull()
+                if (existenteDoc != null) {
+                    val reservaExistente = mapearReserva(existenteDoc, uid)
+                    if (reservaExistente != null && reservas.none { it.id == reservaExistente.id }) {
+                        reservas.add(reservaExistente)
+                    }
+                    onComplete(ResultadoAgregarReserva(reservaExistente = reservaExistente))
+                    return@addOnSuccessListener
+                }
 
-            firestore.collection(COLLECTION_RESERVAS)
-                .add(payload)
-                .addOnSuccessListener { docRef ->
-                    val reserva = Reserva(
-                        id = docRef.id,
-                        fechaMillis = fechaMillis,
-                        selecciones = selecciones.toMap(),
-                        userId = uid
+                PerfilRepository.cargarPerfil { perfil ->
+                    val payload = mutableMapOf<String, Any>(
+                        FIELD_USER_ID to uid,
+                        FIELD_FECHA_MILLIS to fechaMillis,
+                        FIELD_SELECCIONES to selecciones.toMap(),
+                        FIELD_NOMBRE to perfil?.nombre.orEmpty(),
+                        FIELD_APELLIDO to perfil?.apellido.orEmpty(),
+                        FIELD_EMPRESA to perfil?.empresa.orEmpty()
                     )
-                    reservas.add(reserva)
-                    onComplete(reserva)
+
+                    firestore.collection(COLLECTION_RESERVAS)
+                        .add(payload)
+                        .addOnSuccessListener { docRef ->
+                            val reserva = Reserva(
+                                id = docRef.id,
+                                fechaMillis = fechaMillis,
+                                selecciones = selecciones.toMap(),
+                                userId = uid
+                            )
+                            reservas.add(reserva)
+                            onComplete(ResultadoAgregarReserva(reservaCreada = reserva))
+                        }
+                        .addOnFailureListener {
+                            onComplete(ResultadoAgregarReserva())
+                        }
                 }
-                .addOnFailureListener {
-                    onComplete(null)
-                }
-        }
+            }
+            .addOnFailureListener {
+                onComplete(ResultadoAgregarReserva())
+            }
+    }
+
+    private fun mapearReserva(doc: com.google.firebase.firestore.DocumentSnapshot, uid: String): Reserva? {
+        val fechaMillis = doc.getLong(FIELD_FECHA_MILLIS) ?: return null
+        val selecciones = (doc.get(FIELD_SELECCIONES) as? Map<*, *>)
+            ?.mapNotNull { (k, v) ->
+                val key = k as? String ?: return@mapNotNull null
+                val value = v as? String ?: return@mapNotNull null
+                key to value
+            }
+            ?.toMap()
+            ?: emptyMap()
+
+        return Reserva(
+            id = doc.id,
+            fechaMillis = fechaMillis,
+            selecciones = selecciones,
+            userId = uid
+        )
     }
 
     fun actualizarReserva(

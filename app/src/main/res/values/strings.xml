@@ -10,6 +10,7 @@
     <string name="modo_administrador">Modo administrador</string>
     <string name="selecciona_dia">Selecciona un día para tu reserva</string>
     <string name="continuar">Continuar</string>
+    <string name="editar_reserva">Editar reserva</string>
     <string name="detalle_reserva">Detalle de la reserva</string>
     <string name="comida_principal">Comida principal</string>
     <string name="postre">Postre</string>

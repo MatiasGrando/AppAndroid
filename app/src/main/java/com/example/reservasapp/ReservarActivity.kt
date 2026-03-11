@@ -102,10 +102,22 @@ class ReservarActivity : AppCompatActivity() {
             add(Calendar.DAY_OF_YEAR, 6)
         }
         reservedDates = ReservasRepository.obtenerFechasReservadas()
-
         if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
             selectedDateMillis = today.timeInMillis
         }
+        updateContinueButtonState()
+    }
+
+    private fun updateContinueButtonState() {
+        val isReservable = selectedDateMillis in today.timeInMillis..maxReservableDate.timeInMillis
+        val hasExistingReservation = selectedDateMillis in reservedDates
+        val canContinue = isReservable && !hasExistingReservation
+
+        continueButton.isEnabled = canContinue
+        continueButton.alpha = if (canContinue) 1f else 0.85f
+        continueButton.setBackgroundResource(
+            if (canContinue) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+        )
     }
 
     private fun renderWeekHeaders() {
@@ -157,9 +169,9 @@ class ReservarActivity : AppCompatActivity() {
 
     private fun createDayCell(dayDate: Calendar): View {
         val isReservable = dayDate.timeInMillis in today.timeInMillis..maxReservableDate.timeInMillis
+        val isReserved = dayDate.timeInMillis in reservedDates
         val isSelected = dayDate.timeInMillis == selectedDateMillis
         val isToday = dayDate.timeInMillis == today.timeInMillis
-        val isReserved = dayDate.timeInMillis in reservedDates
 
         val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -173,6 +185,7 @@ class ReservarActivity : AppCompatActivity() {
             setOnClickListener {
                 if (!isReservable) return@setOnClickListener
                 selectedDateMillis = dayDate.timeInMillis
+                updateContinueButtonState()
                 renderCalendar()
             }
         }

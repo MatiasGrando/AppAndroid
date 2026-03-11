@@ -296,9 +296,8 @@ private class MenuSectionsPagerAdapter(
         val section = sections[position]
         val items = MenuVisualRepository.buildItemsForSection(section.opciones)
 
-        holder.adapter.updateItems(items, selections[section.nombre])
-        holder.adapter.onSelection = { option ->
-            onOptionSelected(section.nombre, option.name)
+        holder.bind(items, selections[section.nombre]) { selectedOption ->
+            onOptionSelected(section.nombre, selectedOption.name)
         }
     }
 
@@ -306,7 +305,19 @@ private class MenuSectionsPagerAdapter(
 
     class SectionPageViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
         private val recycler = itemView.findViewById<RecyclerView>(R.id.recyclerSectionOptions)
-        val adapter = BindableMenuOptionAdapter(emptyList())
+        private var onSelection: ((MenuItemOption) -> Unit)? = null
+        private val adapter = MenuOptionAdapter(emptyList()) { selectedOption ->
+            onSelection?.invoke(selectedOption)
+        }
+
+        fun bind(
+            items: List<MenuItemOption>,
+            selectedName: String?,
+            onSelection: (MenuItemOption) -> Unit
+        ) {
+            this.onSelection = onSelection
+            adapter.updateItems(items, selectedName)
+        }
 
         init {
             recycler.layoutManager = LinearLayoutManager(itemView.context)

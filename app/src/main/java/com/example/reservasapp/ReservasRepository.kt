@@ -166,6 +166,27 @@ object ReservasRepository {
 
     fun obtenerReservaPorId(id: String): Reserva? = reservas.firstOrNull { it.id == id }
 
+    fun obtenerReservaPorFecha(fechaMillis: Long): Reserva? {
+        val fechaNormalizada = Calendar.getInstance().apply {
+            timeInMillis = fechaMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        return reservas.firstOrNull { reserva ->
+            val reservaNormalizada = Calendar.getInstance().apply {
+                timeInMillis = reserva.fechaMillis
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            reservaNormalizada == fechaNormalizada
+        }
+    }
+
     fun obtenerFechasReservadas(): Set<Long> = reservas
         .map { reserva ->
             Calendar.getInstance().apply {

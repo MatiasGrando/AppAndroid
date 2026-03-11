@@ -20,6 +20,7 @@ class ReservarActivity : AppCompatActivity() {
     private lateinit var gridWeekdays: GridLayout
     private lateinit var gridDays: GridLayout
     private lateinit var continueButton: Button
+    private lateinit var editReservationButton: Button
 
     private var today: Calendar = Calendar.getInstance().clearTime()
     private var maxReservableDate: Calendar = Calendar.getInstance().clearTime().apply {
@@ -40,6 +41,7 @@ class ReservarActivity : AppCompatActivity() {
         gridWeekdays = findViewById(R.id.gridWeekdays)
         gridDays = findViewById(R.id.gridDays)
         continueButton = findViewById(R.id.btnContinuar)
+        editReservationButton = findViewById(R.id.btnEditarReserva)
 
         findViewById<TextView>(R.id.btnPrevMonth).setOnClickListener {
             visibleMonth.add(Calendar.MONTH, -1)
@@ -56,6 +58,13 @@ class ReservarActivity : AppCompatActivity() {
         continueButton.setOnClickListener {
             startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
                 putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, selectedDateMillis)
+            })
+        }
+
+        editReservationButton.setOnClickListener {
+            val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis) ?: return@setOnClickListener
+            startActivity(Intent(this, EditarDetalleReservaActivity::class.java).apply {
+                putExtra(EditarDetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
             })
         }
     }
@@ -105,10 +114,10 @@ class ReservarActivity : AppCompatActivity() {
         if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
             selectedDateMillis = today.timeInMillis
         }
-        updateContinueButtonState()
+        updateButtonsState()
     }
 
-    private fun updateContinueButtonState() {
+    private fun updateButtonsState() {
         val isReservable = selectedDateMillis in today.timeInMillis..maxReservableDate.timeInMillis
         val hasExistingReservation = selectedDateMillis in reservedDates
         val canContinue = isReservable && !hasExistingReservation
@@ -117,6 +126,12 @@ class ReservarActivity : AppCompatActivity() {
         continueButton.alpha = if (canContinue) 1f else 0.85f
         continueButton.setBackgroundResource(
             if (canContinue) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+        )
+
+        editReservationButton.isEnabled = hasExistingReservation
+        editReservationButton.alpha = if (hasExistingReservation) 1f else 0.85f
+        editReservationButton.setBackgroundResource(
+            if (hasExistingReservation) R.drawable.bg_button_orange else R.drawable.bg_button_gray
         )
     }
 
@@ -185,7 +200,7 @@ class ReservarActivity : AppCompatActivity() {
             setOnClickListener {
                 if (!isReservable) return@setOnClickListener
                 selectedDateMillis = dayDate.timeInMillis
-                updateContinueButtonState()
+                updateButtonsState()
                 renderCalendar()
             }
         }

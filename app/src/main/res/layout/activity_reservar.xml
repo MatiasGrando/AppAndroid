@@ -96,6 +96,18 @@
                 android:textColor="#F6E9C5"
                 android:textSize="22sp" />
 
+            <Button
+                android:id="@+id/btnEditarReserva"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_button_gray"
+                android:enabled="false"
+                android:text="@string/editar_reserva"
+                android:textAllCaps="false"
+                android:textColor="#F6E9C5"
+                android:textSize="22sp" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

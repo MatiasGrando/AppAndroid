@@ -103,9 +103,11 @@ class EditarDetalleReservaActivity : AppCompatActivity() {
                 }
 
                 val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
-                val intent = Intent(this, ConfirmacionEdicionActivity::class.java).apply {
-                    putExtra(ConfirmacionEdicionActivity.EXTRA_FECHA, fechaFormateada)
-                    putExtra(ConfirmacionEdicionActivity.EXTRA_DETALLE, resumen)
+                val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                    putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, actualizada.id)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_ES_EDICION, true)
                 }
                 startActivity(intent)
             }

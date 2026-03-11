@@ -22,6 +22,7 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
         const val EXTRA_FECHA = "extra_fecha"
         const val EXTRA_DETALLE = "extra_detalle"
         const val EXTRA_RESERVA_ID = "extra_reserva_id"
+        const val EXTRA_ES_EDICION = "extra_es_edicion"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +32,7 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
         val fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty()
         val detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty()
         val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
+        val esEdicion = intent.getBooleanExtra(EXTRA_ES_EDICION, false)
         val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
 
         val titulo = findViewById<TextView>(R.id.tvTituloConfirmacion)
@@ -44,7 +46,9 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
         val ivPostre = findViewById<ImageView>(R.id.ivPostre)
         val volverMenu = findViewById<Button>(R.id.btnVolverMenu)
 
-        titulo.text = getString(R.string.titulo_confirmacion)
+        titulo.text = getString(
+            if (esEdicion) R.string.titulo_confirmacion_edicion else R.string.titulo_confirmacion
+        )
 
         if (reserva != null) {
             val principal = extraerSeleccion(reserva.selecciones, "plato", "principal")
@@ -70,7 +74,10 @@ class ConfirmacionReservaActivity : AppCompatActivity() {
                 ivPostre = ivPostre
             )
 
-            detalle.text = getString(R.string.resumen_confirmacion_fecha, fecha)
+            detalle.text = getString(
+                if (esEdicion) R.string.resumen_confirmacion_edicion_fecha else R.string.resumen_confirmacion_fecha,
+                fecha
+            )
         } else {
             detalle.text = getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
         }

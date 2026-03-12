@@ -110,7 +110,7 @@ class DetalleReservaActivity : AppCompatActivity() {
             }
         })
 
-        MenuRepository.cargarSecciones { ok, loadedSections ->
+        MenuRepository.cargarSecciones(selectedDateMillis) { ok, loadedSections ->
             runOnUiThread {
                 secciones = loadedSections
                 pagerAdapter.updateSections(secciones)

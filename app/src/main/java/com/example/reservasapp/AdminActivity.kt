@@ -17,5 +17,9 @@ class AdminActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnAddMenuAdmin).setOnClickListener {
             startActivity(Intent(this, AdminMenuActivity::class.java))
         }
+
+        findViewById<Button>(R.id.btnResumenPedidosDiaAdmin).setOnClickListener {
+            startActivity(Intent(this, PedidosPorDiaActivity::class.java))
+        }
     }
 }

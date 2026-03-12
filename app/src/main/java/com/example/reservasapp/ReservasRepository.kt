@@ -220,6 +220,56 @@ object ReservasRepository {
             .sortedBy { it.fechaMillis }
     }
 
+
+
+    fun obtenerResumenPedidosPorFecha(
+        fechaMillis: Long,
+        onComplete: (Boolean, Map<String, Map<String, Int>>) -> Unit
+    ) {
+        val inicioDia = Calendar.getInstance().apply {
+            timeInMillis = fechaMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        val finDia = Calendar.getInstance().apply {
+            timeInMillis = inicioDia
+            add(Calendar.DAY_OF_MONTH, 1)
+            add(Calendar.MILLISECOND, -1)
+        }.timeInMillis
+
+        firestore.collection(COLLECTION_RESERVAS)
+            .whereGreaterThanOrEqualTo(FIELD_FECHA_MILLIS, inicioDia)
+            .whereLessThanOrEqualTo(FIELD_FECHA_MILLIS, finDia)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val groupedCounts = linkedMapOf<String, MutableMap<String, Int>>()
+
+                snapshot.documents.forEach { doc ->
+                    val selecciones = (doc.get(FIELD_SELECCIONES) as? Map<*, *>)
+                        ?.mapNotNull { (k, v) ->
+                            val key = k as? String ?: return@mapNotNull null
+                            val value = v as? String ?: return@mapNotNull null
+                            key to value
+                        }
+                        ?.toMap()
+                        ?: emptyMap()
+
+                    selecciones.forEach { (tipoComida, plato) ->
+                        val dishCounters = groupedCounts.getOrPut(tipoComida) { linkedMapOf() }
+                        dishCounters[plato] = (dishCounters[plato] ?: 0) + 1
+                    }
+                }
+
+                onComplete(true, groupedCounts)
+            }
+            .addOnFailureListener {
+                onComplete(false, emptyMap())
+            }
+    }
+
     fun formatearSelecciones(selecciones: Map<String, String>): String {
         return selecciones.entries.joinToString(" | ") { "${it.key}: ${it.value}" }
     }

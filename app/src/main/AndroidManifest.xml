@@ -8,6 +8,9 @@
         android:theme="@style/Theme.ReservasApp" >
 
         <activity
+            android:name=".PedidosPorDiaActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminMenuFechaActivity"
             android:exported="false" />
         <activity

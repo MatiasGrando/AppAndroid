@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/admin_menu_config_por_fecha"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+
+        <TextView
+            android:id="@+id/tvFechaConfigSeleccionada"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/admin_menu_fecha_config_default" />
+
+        <Button
+            android:id="@+id/btnSeleccionarFechaConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_menu_seleccionar_fecha" />
+
+        <ListView
+            android:id="@+id/listPlatosPorFecha"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnGuardarPlatosPorFecha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_menu_guardar_fecha" />
+
+
+    </LinearLayout>
+</ScrollView>

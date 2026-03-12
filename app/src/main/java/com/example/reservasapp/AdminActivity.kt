@@ -10,6 +10,10 @@ class AdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
+        findViewById<Button>(R.id.btnConfigMenuFechaAdmin).setOnClickListener {
+            startActivity(Intent(this, AdminMenuFechaActivity::class.java))
+        }
+
         findViewById<Button>(R.id.btnAddMenuAdmin).setOnClickListener {
             startActivity(Intent(this, AdminMenuActivity::class.java))
         }

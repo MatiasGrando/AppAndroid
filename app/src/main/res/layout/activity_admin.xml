@@ -13,10 +13,17 @@
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
     <Button
-        android:id="@+id/btnAddMenuAdmin"
+        android:id="@+id/btnConfigMenuFechaAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:text="@string/admin_menu_config_por_fecha" />
+
+    <Button
+        android:id="@+id/btnAddMenuAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="@string/admin_panel_add_menu" />
 
     <TextView

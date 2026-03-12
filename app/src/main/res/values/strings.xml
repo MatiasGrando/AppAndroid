@@ -50,6 +50,16 @@
     <string name="label_guarnicion">Guarnición</string>
     <string name="hint_guarnicion">Seleccionar si tiene guarnición</string>
     <string name="error_guarnicion_requerida">Debes indicar si el plato principal tiene guarnición.</string>
+    <string name="admin_menu_config_por_fecha">Configurar menú visible por fecha</string>
+    <string name="admin_menu_fecha_config">Fecha seleccionada: %1$s</string>
+    <string name="admin_menu_fecha_config_default">Fecha seleccionada: -</string>
+    <string name="admin_menu_seleccionar_fecha">Seleccionar fecha</string>
+    <string name="admin_menu_guardar_fecha">Guardar menú para esta fecha</string>
+    <string name="admin_menu_crear_plato">Crear platos del menú base</string>
+    <string name="mensaje_menu_fecha_guardado">Menú por fecha guardado correctamente.</string>
+    <string name="error_guardar_menu_fecha">No se pudo guardar el menú para esa fecha.</string>
+    <string name="error_cargar_menu_fecha">No se pudo cargar la configuración de esa fecha.</string>
+    <string name="error_sin_platos_para_configurar">No hay platos disponibles para configurar.</string>
     <string name="si">Sí</string>
     <string name="no">No</string>
     <string name="mensaje_menus_actualizados">Menús principales y postres actualizados.</string>

@@ -21,5 +21,9 @@ class AdminActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnResumenPedidosDiaAdmin).setOnClickListener {
             startActivity(Intent(this, PedidosPorDiaActivity::class.java))
         }
+
+        findViewById<Button>(R.id.btnDetallePedidosUsuariosAdmin).setOnClickListener {
+            startActivity(Intent(this, DetallePedidosUsuariosActivity::class.java))
+        }
     }
 }

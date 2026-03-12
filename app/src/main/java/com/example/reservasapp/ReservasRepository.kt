@@ -17,6 +17,15 @@ object ReservasRepository {
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val auth by lazy { FirebaseAuth.getInstance() }
 
+    data class DetallePedidoUsuario(
+        val empresa: String,
+        val nombre: String,
+        val apellido: String,
+        val platoPrincipal: String,
+        val guarnicion: String,
+        val postre: String
+    )
+
     data class ResultadoAgregarReserva(
         val reservaCreada: Reserva? = null,
         val reservaExistente: Reserva? = null
@@ -270,7 +279,63 @@ object ReservasRepository {
             }
     }
 
+    fun obtenerDetallePedidosPorFecha(
+        fechaMillis: Long,
+        onComplete: (Boolean, List<DetallePedidoUsuario>) -> Unit
+    ) {
+        val inicioDia = Calendar.getInstance().apply {
+            timeInMillis = fechaMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        val finDia = Calendar.getInstance().apply {
+            timeInMillis = inicioDia
+            add(Calendar.DAY_OF_MONTH, 1)
+            add(Calendar.MILLISECOND, -1)
+        }.timeInMillis
+
+        firestore.collection(COLLECTION_RESERVAS)
+            .whereGreaterThanOrEqualTo(FIELD_FECHA_MILLIS, inicioDia)
+            .whereLessThanOrEqualTo(FIELD_FECHA_MILLIS, finDia)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val rows = snapshot.documents.map { doc ->
+                    val selecciones = (doc.get(FIELD_SELECCIONES) as? Map<*, *>)
+                        ?.mapNotNull { (k, v) ->
+                            val key = k as? String ?: return@mapNotNull null
+                            val value = v as? String ?: return@mapNotNull null
+                            key to value
+                        }
+                        ?.toMap()
+                        ?: emptyMap()
+
+                    DetallePedidoUsuario(
+                        empresa = doc.getString(FIELD_EMPRESA).orEmpty().ifBlank { "Sin empresa" },
+                        nombre = doc.getString(FIELD_NOMBRE).orEmpty(),
+                        apellido = doc.getString(FIELD_APELLIDO).orEmpty(),
+                        platoPrincipal = selecciones["Plato principal"].orDash(),
+                        guarnicion = selecciones["Guarniciones"].orDash(),
+                        postre = selecciones["Postres"].orDash()
+                    )
+                }.sortedWith(
+                    compareBy<DetallePedidoUsuario> { it.empresa.lowercase() }
+                        .thenBy { it.apellido.lowercase() }
+                        .thenBy { it.nombre.lowercase() }
+                )
+
+                onComplete(true, rows)
+            }
+            .addOnFailureListener {
+                onComplete(false, emptyList())
+            }
+    }
+
     fun formatearSelecciones(selecciones: Map<String, String>): String {
         return selecciones.entries.joinToString(" | ") { "${it.key}: ${it.value}" }
     }
+
+    private fun String?.orDash(): String = if (this.isNullOrBlank()) "-" else this
 }

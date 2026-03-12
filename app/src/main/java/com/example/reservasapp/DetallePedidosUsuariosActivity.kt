@@ -1,0 +1,116 @@
+package com.example.reservasapp
+
+import android.app.DatePickerDialog
+import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+
+class DetallePedidosUsuariosActivity : AppCompatActivity() {
+
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private var selectedDateMillis: Long = Calendar.getInstance().clearTime().timeInMillis
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_detalle_pedidos_usuarios)
+
+        val tvFechaSeleccionada = findViewById<TextView>(R.id.tvFechaDetallePedidosSeleccionada)
+        val btnSeleccionarFecha = findViewById<Button>(R.id.btnSeleccionarFechaDetallePedidos)
+        val btnGenerarDetalle = findViewById<Button>(R.id.btnGenerarDetallePedidos)
+        val tvDetalle = findViewById<TextView>(R.id.tvDetallePedidosUsuarios)
+
+        fun actualizarTextoFecha() {
+            tvFechaSeleccionada.text = getString(
+                R.string.pedidos_por_dia_fecha,
+                dateFormatter.format(Date(selectedDateMillis))
+            )
+        }
+
+        fun renderDetalle(rows: List<ReservasRepository.DetallePedidoUsuario>) {
+            if (rows.isEmpty()) {
+                tvDetalle.text = getString(R.string.detalle_pedidos_usuarios_sin_datos)
+                return
+            }
+
+            val fechaTitulo = SimpleDateFormat("EEEE dd/MM", Locale("es", "ES"))
+                .format(Date(selectedDateMillis))
+                .uppercase(Locale("es", "ES"))
+
+            val lines = mutableListOf(fechaTitulo)
+            var empresaActual = ""
+
+            rows.forEach { row ->
+                if (row.empresa != empresaActual) {
+                    empresaActual = row.empresa
+                    lines += ""
+                    lines += getString(R.string.detalle_pedidos_empresa, empresaActual)
+                }
+
+                val nombreCompleto = listOf(row.nombre, row.apellido)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" ")
+                    .ifBlank { getString(R.string.detalle_pedidos_usuario_sin_nombre) }
+
+                lines += String.format(
+                    Locale.getDefault(),
+                    "%-18s %-24s %-16s %s",
+                    nombreCompleto,
+                    row.platoPrincipal,
+                    row.guarnicion,
+                    row.postre
+                )
+            }
+
+            tvDetalle.text = lines.joinToString("\n")
+        }
+
+        actualizarTextoFecha()
+
+        btnSeleccionarFecha.setOnClickListener {
+            val calendar = Calendar.getInstance().clearTime().apply { timeInMillis = selectedDateMillis }
+            DatePickerDialog(
+                this,
+                { _, year, month, dayOfMonth ->
+                    selectedDateMillis = Calendar.getInstance().clearTime().apply {
+                        set(year, month, dayOfMonth)
+                    }.timeInMillis
+                    actualizarTextoFecha()
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        btnGenerarDetalle.setOnClickListener {
+            tvDetalle.text = getString(R.string.pedidos_por_dia_cargando)
+            ReservasRepository.obtenerDetallePedidosPorFecha(selectedDateMillis) { ok, detalle ->
+                runOnUiThread {
+                    if (!ok) {
+                        tvDetalle.text = getString(R.string.detalle_pedidos_usuarios_sin_datos)
+                        Toast.makeText(
+                            this,
+                            R.string.error_cargar_detalle_pedidos_usuarios,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@runOnUiThread
+                    }
+                    renderDetalle(detalle)
+                }
+            }
+        }
+    }
+
+    private fun Calendar.clearTime(): Calendar = apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+}

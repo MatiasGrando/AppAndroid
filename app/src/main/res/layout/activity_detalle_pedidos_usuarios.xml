@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/detalle_pedidos_usuarios_titulo"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+
+    <TextView
+        android:id="@+id/tvFechaDetallePedidosSeleccionada"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/pedidos_por_dia_fecha_default"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+
+    <Button
+        android:id="@+id/btnSeleccionarFechaDetallePedidos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/admin_menu_seleccionar_fecha" />
+
+    <Button
+        android:id="@+id/btnGenerarDetallePedidos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/detalle_pedidos_usuarios_generar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tvDetallePedidosUsuarios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="@string/detalle_pedidos_usuarios_sin_datos"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+    </ScrollView>
+
+</LinearLayout>

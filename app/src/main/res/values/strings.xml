@@ -94,6 +94,13 @@
     <string name="pedidos_por_dia_sin_datos">No hay pedidos para la fecha seleccionada.</string>
     <string name="pedidos_por_dia_cargando">Cargando pedidos...</string>
     <string name="error_cargar_pedidos_por_dia">No se pudieron cargar los pedidos del día.</string>
+    <string name="admin_panel_detalle_pedidos_usuarios">Detalle de pedidos de Usuarios</string>
+    <string name="detalle_pedidos_usuarios_titulo">Detalle de pedidos de usuarios</string>
+    <string name="detalle_pedidos_usuarios_generar">Generar detalle</string>
+    <string name="detalle_pedidos_usuarios_sin_datos">No hay pedidos para la fecha seleccionada.</string>
+    <string name="error_cargar_detalle_pedidos_usuarios">No se pudo cargar el detalle de pedidos.</string>
+    <string name="detalle_pedidos_empresa">Empresa %1$s</string>
+    <string name="detalle_pedidos_usuario_sin_nombre">Usuario sin nombre</string>
     <string name="profile_data_title">Perfil / datos personales</string>
     <string name="profile_data_message">Email: %1$s
 Nombre y apellido: %2$s

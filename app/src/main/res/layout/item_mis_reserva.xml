@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="14dp"
     app:cardBackgroundColor="@color/mis_reserva_card_background"
-    app:cardCornerRadius="18dp"
+    app:cardCornerRadius="22dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/mis_reserva_card_stroke"
     app:strokeWidth="2dp">
@@ -21,51 +21,56 @@
             android:layout_height="wrap_content"
             android:background="@color/mis_reserva_header_background"
             android:gravity="center"
-            android:paddingVertical="8dp"
+            android:paddingVertical="10dp"
             android:textColor="@color/mis_reserva_header_text"
-            android:textSize="24sp"
+            android:textSize="25sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="14dp">
 
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@color/mis_reserva_section_background"
-                    android:gravity="center"
-                    android:paddingVertical="6dp"
-                    android:text="PLATO PRINCIPAL"
-                    android:textColor="@color/mis_reserva_section_text"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="12dp">
 
-                <TextView
-                    android:id="@+id/tvPlatoPrincipalNombre"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="16dp"
-                    android:textColor="@color/mis_reserva_item_text"
-                    android:textSize="22sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Plato principal"
+                        android:textColor="@color/mis_reserva_section_text"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPlatoPrincipalNombre"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:textColor="@color/mis_reserva_item_text"
+                        android:textSize="17sp" />
+                </LinearLayout>
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivPlatoPrincipal"
-                    android:layout_width="86dp"
-                    android:layout_height="86dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="8dp"
+                    android:layout_width="94dp"
+                    android:layout_height="94dp"
                     android:background="@color/mis_reserva_image_background"
-                    android:padding="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_food_main"
                     app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
@@ -74,80 +79,98 @@
             </LinearLayout>
 
             <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="4dp"
                 android:background="@color/mis_reserva_card_stroke" />
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@color/mis_reserva_section_background"
-                    android:gravity="center"
-                    android:paddingVertical="6dp"
-                    android:text="GUARNICIÓN"
-                    android:textColor="@color/mis_reserva_section_text"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="12dp">
 
-                <TextView
-                    android:id="@+id/tvGuarnicionNombre"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="16dp"
-                    android:textColor="@color/mis_reserva_item_text"
-                    android:textSize="18sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Guarnición"
+                        android:textColor="@color/mis_reserva_section_text"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvGuarnicionNombre"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:textColor="@color/mis_reserva_item_text"
+                        android:textSize="17sp" />
+                </LinearLayout>
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivGuarnicion"
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="8dp"
+                    android:layout_width="94dp"
+                    android:layout_height="94dp"
                     android:background="@color/mis_reserva_image_background"
-                    android:padding="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_side_dish"
                     app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
                     app:strokeColor="@color/mis_reserva_image_stroke"
                     app:strokeWidth="2dp" />
+            </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/mis_reserva_section_background"
-                    android:gravity="center"
-                    android:paddingVertical="6dp"
-                    android:text="POSTRE"
-                    android:textColor="@color/mis_reserva_section_text"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="4dp"
+                android:background="@color/mis_reserva_card_stroke" />
 
-                <TextView
-                    android:id="@+id/tvPostreNombre"
-                    android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="16dp"
-                    android:textColor="@color/mis_reserva_item_text"
-                    android:textSize="18sp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Postre"
+                        android:textColor="@color/mis_reserva_section_text"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPostreNombre"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:textColor="@color/mis_reserva_item_text"
+                        android:textSize="17sp" />
+                </LinearLayout>
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivPostre"
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginVertical="8dp"
+                    android:layout_width="94dp"
+                    android:layout_height="94dp"
                     android:background="@color/mis_reserva_image_background"
-                    android:padding="8dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_dessert"
                     app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"

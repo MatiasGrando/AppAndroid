@@ -9,4 +9,14 @@
     <color name="app_dark_on_background">#F4E7D2</color>
     <color name="app_dark_surface">#1B2A33</color>
     <color name="app_dark_on_surface">#F6E9C5</color>
+
+    <color name="confirm_title_text">#1D1A16</color>
+    <color name="confirm_date_text">#4D0D0D</color>
+    <color name="confirm_subtitle_text">#1D1A16</color>
+    <color name="confirm_card_bg">#FAFAFA</color>
+    <color name="confirm_section_title">#4D0D0D</color>
+    <color name="confirm_item_text">#2A1D1D</color>
+    <color name="confirm_image_bg">#FFFFFF</color>
+    <color name="confirm_image_stroke">#C99A61</color>
+
 </resources>

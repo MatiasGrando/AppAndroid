@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/titulo_confirmacion"
-            android:textColor="@color/confirm_title_text"
+            android:textColor="#1D1A16"
             android:textSize="44sp"
             android:textStyle="bold" />
 
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:gravity="center"
-            android:textColor="@color/confirm_date_text"
+            android:textColor="#4D0D0D"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:textColor="@color/confirm_subtitle_text"
+            android:textColor="#1D1A16"
             android:textSize="20sp" />
 
         <com.google.android.material.card.MaterialCardView
@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            app:cardBackgroundColor="@color/confirm_card_bg"
+            app:cardBackgroundColor="#FAFAFA"
             app:cardCornerRadius="20dp"
             app:cardElevation="6dp">
 
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/label_plato_principal"
-                    android:textColor="@color/confirm_section_title"
+                    android:textColor="#4D0D0D"
                     android:textSize="44sp"
                     android:textStyle="bold" />
 
@@ -75,22 +75,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:textColor="@color/confirm_item_text"
+                    android:textColor="#2A1D1D"
                     android:textSize="30sp" />
 
-                <com.google.android.material.imageview.ShapeableImageView
+                <ImageView
                     android:id="@+id/ivPlatoPrincipal"
                     android:layout_width="220dp"
                     android:layout_height="220dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="12dp"
-                    android:background="@color/confirm_image_bg"
-                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_food_main"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
-                    app:strokeColor="@color/confirm_image_stroke"
-                    app:strokeWidth="2dp" />
+                    android:src="@drawable/ic_food_main" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -99,7 +94,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/confirm_card_bg"
+            app:cardBackgroundColor="#FAFAFA"
             app:cardCornerRadius="20dp"
             app:cardElevation="6dp">
 
@@ -121,7 +116,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_guarnicion"
-                        android:textColor="@color/confirm_section_title"
+                        android:textColor="#4D0D0D"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -130,22 +125,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textColor="@color/confirm_item_text"
+                        android:textColor="#2A1D1D"
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <com.google.android.material.imageview.ShapeableImageView
+                <ImageView
                     android:id="@+id/ivGuarnicion"
                     android:layout_width="96dp"
-                    android:layout_height="96dp"
+                    android:layout_height="72dp"
                     android:layout_marginStart="12dp"
-                    android:background="@color/confirm_image_bg"
-                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_side_dish"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
-                    app:strokeColor="@color/confirm_image_stroke"
-                    app:strokeWidth="2dp" />
+                    android:src="@drawable/ic_side_dish" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -154,7 +144,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/confirm_card_bg"
+            app:cardBackgroundColor="#FAFAFA"
             app:cardCornerRadius="20dp"
             app:cardElevation="6dp">
 
@@ -176,7 +166,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_postre"
-                        android:textColor="@color/confirm_section_title"
+                        android:textColor="#4D0D0D"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -185,22 +175,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textColor="@color/confirm_item_text"
+                        android:textColor="#2A1D1D"
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <com.google.android.material.imageview.ShapeableImageView
+                <ImageView
                     android:id="@+id/ivPostre"
                     android:layout_width="96dp"
-                    android:layout_height="96dp"
+                    android:layout_height="72dp"
                     android:layout_marginStart="12dp"
-                    android:background="@color/confirm_image_bg"
-                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_dessert"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
-                    app:strokeColor="@color/confirm_image_stroke"
-                    app:strokeWidth="2dp" />
+                    android:src="@drawable/ic_dessert" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

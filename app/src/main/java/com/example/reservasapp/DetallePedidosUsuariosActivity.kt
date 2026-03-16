@@ -56,14 +56,27 @@ class DetallePedidosUsuariosActivity : BaseActivity() {
                     .joinToString(" ")
                     .ifBlank { getString(R.string.detalle_pedidos_usuario_sin_nombre) }
 
-                lines += String.format(
-                    Locale.getDefault(),
-                    "%-18s %-24s %-16s %s",
-                    nombreCompleto,
-                    row.platoPrincipal,
-                    row.guarnicion,
-                    row.postre
-                )
+                val guarnicion = row.guarnicion.trim()
+                val tieneGuarnicion = guarnicion.isNotEmpty() && guarnicion != "-"
+
+                lines += if (tieneGuarnicion) {
+                    String.format(
+                        Locale.getDefault(),
+                        "%-18s %-24s %-16s %s",
+                        nombreCompleto,
+                        row.platoPrincipal,
+                        guarnicion,
+                        row.postre
+                    )
+                } else {
+                    String.format(
+                        Locale.getDefault(),
+                        "%-18s %-24s %s",
+                        nombreCompleto,
+                        row.platoPrincipal,
+                        row.postre
+                    )
+                }
             }
 
             tvDetalle.text = lines.joinToString("\n")

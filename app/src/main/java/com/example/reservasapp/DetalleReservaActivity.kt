@@ -1,8 +1,11 @@
 package com.example.reservasapp
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 
@@ -11,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import java.text.SimpleDateFormat
@@ -31,9 +36,17 @@ class DetalleReservaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_detalle_reserva)
 
         val dateText = findViewById<TextView>(R.id.tvFechaSeleccionada)
+        val titleText = findViewById<TextView>(R.id.tvTituloDetalle)
         val tabLayout = findViewById<TabLayout>(R.id.tabSections)
         val viewPager = findViewById<ViewPager2>(R.id.viewPagerSections)
         val btnContinuar = findViewById<Button>(R.id.btnConfirmar)
+        val root = findViewById<View>(R.id.rootDetalleReserva)
+        val header = findViewById<LinearLayout>(R.id.header)
+        val bottomBar = findViewById<LinearLayout>(R.id.bottomBar)
+        val selectionHint = findViewById<TextView>(R.id.tvSeleccionHint)
+        val themeToggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.themeToggleGroup)
+        val btnThemeDark = findViewById<MaterialButton>(R.id.btnThemeDark)
+        val btnThemeLight = findViewById<MaterialButton>(R.id.btnThemeLight)
 
         val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
         val reservaEnEdicion = if (reservaId.isNotBlank()) {
@@ -90,6 +103,57 @@ class DetalleReservaActivity : AppCompatActivity() {
 
         viewPager.adapter = pagerAdapter
         viewPager.isUserInputEnabled = false
+
+        var currentTheme = MenuThemePreference.get(this)
+        val initialPalette = MenuThemeRegistry.palette(currentTheme)
+        pagerAdapter.updateTheme(initialPalette)
+
+        val initialCheckedId = if (currentTheme == MenuVisualTheme.DARK) {
+            R.id.btnThemeDark
+        } else {
+            R.id.btnThemeLight
+        }
+        themeToggleGroup.check(initialCheckedId)
+        applyMenuTheme(
+            palette = initialPalette,
+            root = root,
+            header = header,
+            bottomBar = bottomBar,
+            titleText = titleText,
+            dateText = dateText,
+            tabLayout = tabLayout,
+            selectionHint = selectionHint,
+            btnContinuar = btnContinuar,
+            btnThemeDark = btnThemeDark,
+            btnThemeLight = btnThemeLight
+        )
+
+        themeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val selectedTheme = when (checkedId) {
+                R.id.btnThemeLight -> MenuVisualTheme.LIGHT
+                else -> MenuVisualTheme.DARK
+            }
+            if (selectedTheme == currentTheme) return@addOnButtonCheckedListener
+
+            currentTheme = selectedTheme
+            MenuThemePreference.save(this, selectedTheme)
+            val palette = MenuThemeRegistry.palette(selectedTheme)
+            pagerAdapter.updateTheme(palette)
+            applyMenuTheme(
+                palette = palette,
+                root = root,
+                header = header,
+                bottomBar = bottomBar,
+                titleText = titleText,
+                dateText = dateText,
+                tabLayout = tabLayout,
+                selectionHint = selectionHint,
+                btnContinuar = btnContinuar,
+                btnThemeDark = btnThemeDark,
+                btnThemeLight = btnThemeLight
+            )
+        }
 
         val tabMediator = TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = secciones.getOrNull(position)?.nombre.orEmpty()
@@ -261,6 +325,45 @@ class DetalleReservaActivity : AppCompatActivity() {
         val seleccionPrincipal = selecciones[principal.nombre] ?: return false
         return principal.opciones.firstOrNull { it.nombre == seleccionPrincipal }?.guarnicion == true
     }
+
+    private fun applyMenuTheme(
+        palette: MenuThemePalette,
+        root: View,
+        header: LinearLayout,
+        bottomBar: LinearLayout,
+        titleText: TextView,
+        dateText: TextView,
+        tabLayout: TabLayout,
+        selectionHint: TextView,
+        btnContinuar: Button,
+        btnThemeDark: MaterialButton,
+        btnThemeLight: MaterialButton
+    ) {
+        root.setBackgroundResource(palette.backgroundDrawableRes)
+        header.setBackgroundColor(palette.panelBackgroundColor)
+        bottomBar.setBackgroundColor(palette.panelBackgroundColor)
+
+        titleText.setTextColor(palette.titleColor)
+        dateText.setTextColor(palette.bodyTextColor)
+        selectionHint.setTextColor(palette.hintTextColor)
+
+        tabLayout.setSelectedTabIndicatorColor(palette.tabIndicatorColor)
+        tabLayout.setTabTextColors(palette.tabUnselectedColor, palette.tabSelectedColor)
+
+        btnContinuar.backgroundTintList = ColorStateList.valueOf(palette.buttonBackgroundColor)
+        btnContinuar.setTextColor(palette.buttonTextColor)
+
+        val activeText = ColorStateList.valueOf(palette.buttonTextColor)
+        val activeStroke = ColorStateList.valueOf(palette.optionCardSelectedStrokeColor)
+
+        btnThemeDark.setTextColor(activeText)
+        btnThemeDark.strokeColor = activeStroke
+        btnThemeDark.backgroundTintList = ColorStateList.valueOf(palette.optionCardDefaultColor)
+
+        btnThemeLight.setTextColor(activeText)
+        btnThemeLight.strokeColor = activeStroke
+        btnThemeLight.backgroundTintList = ColorStateList.valueOf(palette.optionCardDefaultColor)
+    }
 }
 
 private class MenuSectionsPagerAdapter(
@@ -269,8 +372,15 @@ private class MenuSectionsPagerAdapter(
     private val onOptionSelected: (sectionName: String, selectedOption: String, isDoubleTap: Boolean) -> Unit
 ) : RecyclerView.Adapter<MenuSectionsPagerAdapter.SectionPageViewHolder>() {
 
+    private var currentPalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
+
     fun updateSections(newSections: List<MenuSection>) {
         sections = newSections
+    }
+
+    fun updateTheme(palette: MenuThemePalette) {
+        currentPalette = palette
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): SectionPageViewHolder {
@@ -283,7 +393,7 @@ private class MenuSectionsPagerAdapter(
         val section = sections[position]
         val items = MenuVisualRepository.buildItemsForSection(section.opciones)
 
-        holder.bind(items, selections[section.nombre]) { selectionEvent ->
+        holder.bind(items, selections[section.nombre], currentPalette) { selectionEvent ->
             onOptionSelected(section.nombre, selectionEvent.option.name, selectionEvent.isDoubleTap)
         }
     }
@@ -300,9 +410,11 @@ private class MenuSectionsPagerAdapter(
         fun bind(
             items: List<MenuItemOption>,
             selectedName: String?,
+            palette: MenuThemePalette,
             onSelection: (OptionSelectionEvent) -> Unit
         ) {
             this.onSelection = onSelection
+            adapter.updateTheme(palette)
             adapter.updateItems(items, selectedName)
         }
 

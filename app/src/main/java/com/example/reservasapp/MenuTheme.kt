@@ -1,0 +1,99 @@
+package com.example.reservasapp
+
+import android.content.Context
+import android.graphics.Color
+
+private const val MENU_THEME_PREFS = "menu_theme_prefs"
+private const val KEY_SELECTED_THEME = "selected_theme"
+
+enum class MenuVisualTheme(val storageValue: String) {
+    DARK("dark"),
+    LIGHT("light");
+
+    companion object {
+        fun fromStorage(value: String?): MenuVisualTheme {
+            return entries.firstOrNull { it.storageValue == value } ?: DARK
+        }
+    }
+}
+
+data class MenuThemePalette(
+    val backgroundDrawableRes: Int,
+    val panelBackgroundColor: Int,
+    val titleColor: Int,
+    val bodyTextColor: Int,
+    val tabSelectedColor: Int,
+    val tabUnselectedColor: Int,
+    val tabIndicatorColor: Int,
+    val hintTextColor: Int,
+    val buttonBackgroundColor: Int,
+    val buttonTextColor: Int,
+    val optionCardSelectedColor: Int,
+    val optionCardDefaultColor: Int,
+    val optionCardSelectedStrokeColor: Int,
+    val optionCardDefaultStrokeColor: Int,
+    val optionTitleColor: Int,
+    val optionDescriptionColor: Int,
+    val imageStrokeColor: Int,
+    val imageBackgroundColor: Int
+)
+
+object MenuThemeRegistry {
+    fun palette(theme: MenuVisualTheme): MenuThemePalette {
+        return when (theme) {
+            MenuVisualTheme.DARK -> MenuThemePalette(
+                backgroundDrawableRes = R.drawable.bg_asian_food_dark,
+                panelBackgroundColor = Color.parseColor("#D9101A24"),
+                titleColor = Color.parseColor("#F6E9C5"),
+                bodyTextColor = Color.parseColor("#D9D2C1"),
+                tabSelectedColor = Color.parseColor("#F1DDAD"),
+                tabUnselectedColor = Color.parseColor("#B7BFD1"),
+                tabIndicatorColor = Color.parseColor("#F1DDAD"),
+                hintTextColor = Color.parseColor("#F1DDAD"),
+                buttonBackgroundColor = Color.parseColor("#A86C3D"),
+                buttonTextColor = Color.parseColor("#F6E9C5"),
+                optionCardSelectedColor = Color.parseColor("#1E3142"),
+                optionCardDefaultColor = Color.parseColor("#D9101A24"),
+                optionCardSelectedStrokeColor = Color.parseColor("#F1DDAD"),
+                optionCardDefaultStrokeColor = Color.parseColor("#37506A"),
+                optionTitleColor = Color.parseColor("#F6E9C5"),
+                optionDescriptionColor = Color.parseColor("#D2D9E4"),
+                imageStrokeColor = Color.parseColor("#C99A61"),
+                imageBackgroundColor = Color.parseColor("#1E2D3B")
+            )
+
+            MenuVisualTheme.LIGHT -> MenuThemePalette(
+                backgroundDrawableRes = R.drawable.bg_asian_food_light,
+                panelBackgroundColor = Color.parseColor("#EBF5EFE7"),
+                titleColor = Color.parseColor("#3A2A1D"),
+                bodyTextColor = Color.parseColor("#5A4A3A"),
+                tabSelectedColor = Color.parseColor("#7A613F"),
+                tabUnselectedColor = Color.parseColor("#7E7465"),
+                tabIndicatorColor = Color.parseColor("#B08D57"),
+                hintTextColor = Color.parseColor("#4A3928"),
+                buttonBackgroundColor = Color.parseColor("#B08D57"),
+                buttonTextColor = Color.parseColor("#FFFFFF"),
+                optionCardSelectedColor = Color.parseColor("#FFF7E8"),
+                optionCardDefaultColor = Color.parseColor("#F4EDE2"),
+                optionCardSelectedStrokeColor = Color.parseColor("#B08D57"),
+                optionCardDefaultStrokeColor = Color.parseColor("#D6C5AA"),
+                optionTitleColor = Color.parseColor("#6A5536"),
+                optionDescriptionColor = Color.parseColor("#4B4031"),
+                imageStrokeColor = Color.parseColor("#B08D57"),
+                imageBackgroundColor = Color.parseColor("#F5E6D2")
+            )
+        }
+    }
+}
+
+object MenuThemePreference {
+    fun get(context: Context): MenuVisualTheme {
+        val prefs = context.getSharedPreferences(MENU_THEME_PREFS, Context.MODE_PRIVATE)
+        return MenuVisualTheme.fromStorage(prefs.getString(KEY_SELECTED_THEME, null))
+    }
+
+    fun save(context: Context, theme: MenuVisualTheme) {
+        val prefs = context.getSharedPreferences(MENU_THEME_PREFS, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_SELECTED_THEME, theme.storageValue).apply()
+    }
+}

@@ -7,14 +7,13 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ConfirmacionReservaActivity : AppCompatActivity() {
+class ConfirmacionReservaActivity : BaseActivity() {
 
     private val storage by lazy { FirebaseStorage.getInstance() }
     private var imageByDishNormalized: Map<String, String> = emptyMap()

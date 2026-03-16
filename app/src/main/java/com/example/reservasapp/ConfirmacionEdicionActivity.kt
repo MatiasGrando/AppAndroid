@@ -4,9 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 
-class ConfirmacionEdicionActivity : AppCompatActivity() {
+class ConfirmacionEdicionActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_FECHA = "extra_fecha"

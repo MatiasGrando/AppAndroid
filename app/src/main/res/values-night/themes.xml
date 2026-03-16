@@ -1,3 +1,4 @@
 <resources>
-    <style name="Theme.ReservasApp" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.App" parent="Theme.App.Dark" />
+    <style name="Theme.ReservasApp" parent="Theme.App" />
 </resources>

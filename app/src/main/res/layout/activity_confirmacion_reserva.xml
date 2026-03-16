@@ -20,8 +20,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/titulo_confirmacion"
-            android:textColor="#1D1A16"
-            android:textSize="44sp"
+            android:textColor="#F6E9C5"
+            android:textSize="38sp"
             android:textStyle="bold" />
 
         <TextView
@@ -30,8 +30,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:gravity="center"
-            android:textColor="#4D0D0D"
-            android:textSize="22sp"
+            android:textColor="#D9D2C1"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
@@ -40,17 +40,19 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:textColor="#1D1A16"
-            android:textSize="20sp" />
+            android:textColor="#D9D2C1"
+            android:textSize="18sp" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPlatoPrincipal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            app:cardBackgroundColor="#FAFAFA"
+            app:cardBackgroundColor="#D9101A24"
             app:cardCornerRadius="20dp"
-            app:cardElevation="6dp">
+            app:cardElevation="0dp"
+            app:strokeColor="#37506A"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -65,8 +67,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/label_plato_principal"
-                    android:textColor="#4D0D0D"
-                    android:textSize="44sp"
+                    android:textColor="#F6E9C5"
+                    android:textSize="30sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -75,17 +77,22 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:textColor="#2A1D1D"
-                    android:textSize="30sp" />
+                    android:textColor="#F6E9C5"
+                    android:textSize="26sp" />
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivPlatoPrincipal"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="12dp"
+                    android:background="#1E2D3B"
+                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_food_main" />
+                    android:src="@drawable/ic_food_main"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
+                    app:strokeColor="#C99A61"
+                    app:strokeWidth="2dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -94,9 +101,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#FAFAFA"
+            app:cardBackgroundColor="#D9101A24"
             app:cardCornerRadius="20dp"
-            app:cardElevation="6dp">
+            app:cardElevation="0dp"
+            app:strokeColor="#37506A"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -116,7 +125,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_guarnicion"
-                        android:textColor="#4D0D0D"
+                        android:textColor="#F6E9C5"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -125,17 +134,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textColor="#2A1D1D"
+                        android:textColor="#D2D9E4"
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivGuarnicion"
-                    android:layout_width="96dp"
-                    android:layout_height="72dp"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"
                     android:layout_marginStart="12dp"
+                    android:background="#1E2D3B"
+                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_side_dish" />
+                    android:src="@drawable/ic_side_dish"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
+                    app:strokeColor="#C99A61"
+                    app:strokeWidth="2dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -144,9 +158,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#FAFAFA"
+            app:cardBackgroundColor="#D9101A24"
             app:cardCornerRadius="20dp"
-            app:cardElevation="6dp">
+            app:cardElevation="0dp"
+            app:strokeColor="#37506A"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -166,7 +182,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/label_postre"
-                        android:textColor="#4D0D0D"
+                        android:textColor="#F6E9C5"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -175,17 +191,22 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textColor="#2A1D1D"
+                        android:textColor="#D2D9E4"
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivPostre"
-                    android:layout_width="96dp"
-                    android:layout_height="72dp"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"
                     android:layout_marginStart="12dp"
+                    android:background="#1E2D3B"
+                    android:padding="2dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_dessert" />
+                    android:src="@drawable/ic_dessert"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ReservasApp.CircleImage"
+                    app:strokeColor="#C99A61"
+                    app:strokeWidth="2dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -80,11 +80,9 @@ class LoginActivity : AppCompatActivity() {
     private fun cargarDatosInicialesYEntrar() {
         PerfilRepository.sincronizarPerfilConGoogle {
             ReservasRepository.cargarReservasUsuario {
-                UsuariosRepository.sincronizarUsuarioYObtenerRol {
-                    PerfilRepository.obtenerEsAdmin { esAdmin ->
-                        UserSession.esAdmin = esAdmin
-                        openMainScreen()
-                    }
+                PerfilRepository.obtenerEsAdmin { esAdmin ->
+                    UserSession.esAdmin = esAdmin
+                    openMainScreen()
                 }
             }
         }

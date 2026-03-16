@@ -1,10 +1,6 @@
 package com.example.reservasapp
 
-import android.content.Context
 import android.graphics.Color
-
-private const val MENU_THEME_PREFS = "menu_theme_prefs"
-private const val KEY_SELECTED_THEME = "selected_theme"
 
 enum class MenuVisualTheme(val storageValue: String) {
     DARK("dark"),
@@ -83,17 +79,5 @@ object MenuThemeRegistry {
                 imageBackgroundColor = Color.parseColor("#F5E6D2")
             )
         }
-    }
-}
-
-object MenuThemePreference {
-    fun get(context: Context): MenuVisualTheme {
-        val prefs = context.getSharedPreferences(MENU_THEME_PREFS, Context.MODE_PRIVATE)
-        return MenuVisualTheme.fromStorage(prefs.getString(KEY_SELECTED_THEME, null))
-    }
-
-    fun save(context: Context, theme: MenuVisualTheme) {
-        val prefs = context.getSharedPreferences(MENU_THEME_PREFS, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_SELECTED_THEME, theme.storageValue).apply()
     }
 }

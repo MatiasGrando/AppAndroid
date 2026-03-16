@@ -46,10 +46,26 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val titleRes = if (AppThemePreference.isDarkModeEnabled(this)) {
+            R.string.menu_theme_to_light
+        } else {
+            R.string.menu_theme_to_dark
+        }
+        menu.findItem(R.id.action_toggle_theme)?.setTitle(titleRes)
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_profile -> {
                 startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java))
+                true
+            }
+
+            R.id.action_toggle_theme -> {
+                AppThemePreference.toggle(this)
+                invalidateOptionsMenu()
                 true
             }
 

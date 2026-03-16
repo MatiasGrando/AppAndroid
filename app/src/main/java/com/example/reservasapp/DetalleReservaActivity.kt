@@ -182,53 +182,24 @@ class DetalleReservaActivity : AppCompatActivity() {
                     .filterValues { !it.isNullOrBlank() }
                     .mapValues { it.value.orEmpty() }
 
-                if (reservaEnEdicion != null) {
-                    ReservasRepository.actualizarReserva(
-                        id = reservaEnEdicion.id,
-                        selecciones = seleccionesFinales
-                    ) { actualizada ->
-                        if (actualizada == null) {
-                            Toast.makeText(this, R.string.error_actualizar_reserva, Toast.LENGTH_LONG).show()
-                            return@actualizarReserva
-                        }
+                val intentConfirmacion = Intent(this, ConfirmacionReservaActivity::class.java).apply {
+                    putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_FECHA_MILLIS, selectedDateMillis)
+                    putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, ReservasRepository.formatearSelecciones(seleccionesFinales))
+                    putExtra(
+                        ConfirmacionReservaActivity.EXTRA_SELECCIONES_PENDIENTES,
+                        HashMap(seleccionesFinales)
+                    )
+                }
 
-                        val resumen = ReservasRepository.formatearSelecciones(actualizada.selecciones)
-                        val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
-                            putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
-                            putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
-                            putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, actualizada.id)
-                            putExtra(ConfirmacionReservaActivity.EXTRA_ES_EDICION, true)
-                        }
-                        startActivity(intent)
-                    }
+                if (reservaEnEdicion != null) {
+                    intentConfirmacion.putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reservaEnEdicion.id)
+                    intentConfirmacion.putExtra(ConfirmacionReservaActivity.EXTRA_ES_EDICION, true)
+                    startActivity(intentConfirmacion)
                     return@setOnClickListener
                 }
 
-                ReservasRepository.agregarReserva(
-                    fechaMillis = selectedDateMillis,
-                    selecciones = seleccionesFinales
-                ) { resultado ->
-                    val reservaCreada = resultado.reservaCreada
-                    val reservaExistente = resultado.reservaExistente
-
-                    when {
-                        reservaCreada != null -> {
-                            val resumen = ReservasRepository.formatearSelecciones(reservaCreada.selecciones)
-                            val intent = Intent(this, ConfirmacionReservaActivity::class.java).apply {
-                                putExtra(ConfirmacionReservaActivity.EXTRA_FECHA, fechaFormateada)
-                                putExtra(ConfirmacionReservaActivity.EXTRA_DETALLE, resumen)
-                                putExtra(ConfirmacionReservaActivity.EXTRA_RESERVA_ID, reservaCreada.id)
-                            }
-                            startActivity(intent)
-                        }
-                        reservaExistente != null -> {
-                            Toast.makeText(this, R.string.reserva_ya_existente_en_fecha, Toast.LENGTH_LONG).show()
-                        }
-                        else -> {
-                            Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
-                        }
-                    }
-                }
+                startActivity(intentConfirmacion)
             }
         }
     }

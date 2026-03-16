@@ -15,6 +15,7 @@
     <string name="comida_principal">Comida principal</string>
     <string name="postre">Postre</string>
     <string name="confirmar_reserva">Confirmar reserva</string>
+    <string name="confirmar_pedido">Confirmar pedido</string>
     <string name="confirmar_edicion">Confirmar edición</string>
     <string name="fecha_seleccionada">Fecha seleccionada: %1$s</string>
     <string name="resumen_reserva_generico">Reserva confirmada\nFecha: %1$s\nSelección: %2$s</string>
@@ -110,6 +111,7 @@ DNI: %4$s</string>
     <string name="not_available">No disponible</string>
     <string name="error_guardar_reserva">No se pudo guardar la reserva. Inténtalo nuevamente.</string>
     <string name="reserva_ya_existente_en_fecha">Ya tienes una reserva para este día.</string>
+    <string name="pedido_confirmado_exito">Pedido confirmado correctamente.</string>
     <string name="error_cargar_reservas">No se pudieron cargar tus reservas.</string>
     <string name="error_actualizar_reserva">No se pudo actualizar la reserva.</string>
     <string name="profile_nombre">Nombre</string>

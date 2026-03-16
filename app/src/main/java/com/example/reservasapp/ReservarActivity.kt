@@ -32,6 +32,8 @@ class ReservarActivity : AppCompatActivity() {
     }
     private var selectedDateMillis: Long = today.timeInMillis
     private var reservedDates: Set<Long> = emptySet()
+    private var lastTappedDateMillis: Long = -1L
+    private var lastDateTapTimestamp: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,9 +202,20 @@ class ReservarActivity : AppCompatActivity() {
             }
             setOnClickListener {
                 if (!isReservable) return@setOnClickListener
-                selectedDateMillis = dayDate.timeInMillis
+
+                val tappedDateMillis = dayDate.timeInMillis
+                val now = System.currentTimeMillis()
+                val isDoubleTap = lastTappedDateMillis == tappedDateMillis && now - lastDateTapTimestamp <= DOUBLE_TAP_WINDOW_MS
+
+                lastTappedDateMillis = tappedDateMillis
+                lastDateTapTimestamp = now
+                selectedDateMillis = tappedDateMillis
                 updateButtonsState()
                 renderCalendar()
+
+                if (isDoubleTap && continueButton.isEnabled) {
+                    continueButton.post { continueButton.performClick() }
+                }
             }
         }
 
@@ -264,6 +277,7 @@ class ReservarActivity : AppCompatActivity() {
     private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
 
     companion object {
+        private const val DOUBLE_TAP_WINDOW_MS = 400L
         const val EXTRA_OPENED_FROM_BOOKING = "opened_from_booking"
     }
 }

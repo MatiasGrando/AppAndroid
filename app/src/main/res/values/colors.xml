@@ -24,8 +24,8 @@
     <color name="mis_reserva_header_background">#B85E22</color>
     <color name="mis_reserva_header_text">#F8E7C8</color>
     <color name="mis_reserva_section_background">#E8DBC7</color>
-    <color name="mis_reserva_section_text">#5A1212</color>
-    <color name="mis_reserva_item_text">#FFFFFF</color>
+    <color name="mis_reserva_section_text">#F8E7C8</color>
+    <color name="mis_reserva_item_text">#F2F2F2</color>
     <color name="mis_reserva_image_background">#FFFFFF</color>
     <color name="mis_reserva_image_stroke">#C99A61</color>
 

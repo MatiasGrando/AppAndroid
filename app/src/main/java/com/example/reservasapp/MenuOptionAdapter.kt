@@ -12,8 +12,11 @@ import com.google.android.material.card.MaterialCardView
 
 class MenuOptionAdapter(
     private var items: List<MenuItemOption>,
-    private val onSelected: (MenuItemOption) -> Unit
+    private val onSelected: (MenuItemOption, Boolean) -> Unit
 ) : RecyclerView.Adapter<MenuOptionAdapter.MenuOptionViewHolder>() {
+
+    private var lastTappedPosition = RecyclerView.NO_POSITION
+    private var lastTapTimestamp = 0L
 
     private var selectedPosition = RecyclerView.NO_POSITION
 
@@ -35,11 +38,19 @@ class MenuOptionAdapter(
         val item = items[position]
         holder.bind(item, position == selectedPosition)
         holder.itemView.setOnClickListener {
+            val currentPosition = holder.bindingAdapterPosition
+            if (currentPosition == RecyclerView.NO_POSITION) return@setOnClickListener
+
+            val now = System.currentTimeMillis()
+            val isDoubleTap = lastTappedPosition == currentPosition && now - lastTapTimestamp <= DOUBLE_TAP_WINDOW_MS
+            lastTappedPosition = currentPosition
+            lastTapTimestamp = now
+
             val prev = selectedPosition
-            selectedPosition = holder.bindingAdapterPosition
+            selectedPosition = currentPosition
             if (prev != RecyclerView.NO_POSITION) notifyItemChanged(prev)
             notifyItemChanged(selectedPosition)
-            onSelected(item)
+            onSelected(item, isDoubleTap)
         }
     }
 
@@ -69,5 +80,9 @@ class MenuOptionAdapter(
             card.strokeColor = if (isSelected) Color.parseColor("#F1DDAD") else Color.parseColor("#37506A")
             card.strokeWidth = if (isSelected) 3 else 1
         }
+    }
+
+    companion object {
+        private const val DOUBLE_TAP_WINDOW_MS = 400L
     }
 }

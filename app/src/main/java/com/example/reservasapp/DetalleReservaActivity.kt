@@ -19,6 +19,8 @@ import java.util.Locale
 
 class DetalleReservaActivity : AppCompatActivity() {
 
+    private var shouldAutoContinueOnNextSelection = false
+
     companion object {
         const val EXTRA_DATE_MILLIS = "extra_date_millis"
         const val EXTRA_RESERVA_ID = "extra_reserva_id"
@@ -62,8 +64,10 @@ class DetalleReservaActivity : AppCompatActivity() {
         val pagerAdapter = MenuSectionsPagerAdapter(
             sections = secciones,
             selections = selecciones
-        ) { sectionName, selectedOption ->
+        ) { sectionName, selectedOption, isDoubleTap ->
             selecciones[sectionName] = selectedOption
+
+            shouldAutoContinueOnNextSelection = isDoubleTap
 
             if (sectionName.equals("Plato principal", ignoreCase = true)) {
                 guarnicionesHabilitadas = false
@@ -73,6 +77,15 @@ class DetalleReservaActivity : AppCompatActivity() {
             }
 
             actualizarEstadoBotonContinuar(btnContinuar, secciones, selecciones, currentSectionIndex)
+
+            if (shouldAutoContinueOnNextSelection) {
+                btnContinuar.post {
+                    if (shouldAutoContinueOnNextSelection && btnContinuar.isEnabled) {
+                        shouldAutoContinueOnNextSelection = false
+                        btnContinuar.performClick()
+                    }
+                }
+            }
         }
 
         viewPager.adapter = pagerAdapter
@@ -136,6 +149,7 @@ class DetalleReservaActivity : AppCompatActivity() {
         }
 
         btnContinuar.setOnClickListener {
+            shouldAutoContinueOnNextSelection = false
             val section = secciones.getOrNull(currentSectionIndex) ?: return@setOnClickListener
             val seleccionActual = selecciones[section.nombre]
             if (seleccionActual.isNullOrBlank()) return@setOnClickListener
@@ -281,7 +295,7 @@ class DetalleReservaActivity : AppCompatActivity() {
 private class MenuSectionsPagerAdapter(
     private var sections: List<MenuSection>,
     private val selections: Map<String, String?>,
-    private val onOptionSelected: (sectionName: String, selectedOption: String) -> Unit
+    private val onOptionSelected: (sectionName: String, selectedOption: String, isDoubleTap: Boolean) -> Unit
 ) : RecyclerView.Adapter<MenuSectionsPagerAdapter.SectionPageViewHolder>() {
 
     fun updateSections(newSections: List<MenuSection>) {
@@ -298,8 +312,8 @@ private class MenuSectionsPagerAdapter(
         val section = sections[position]
         val items = MenuVisualRepository.buildItemsForSection(section.opciones)
 
-        holder.bind(items, selections[section.nombre]) { selectedOption ->
-            onOptionSelected(section.nombre, selectedOption.name)
+        holder.bind(items, selections[section.nombre]) { selectionEvent ->
+            onOptionSelected(section.nombre, selectionEvent.option.name, selectionEvent.isDoubleTap)
         }
     }
 
@@ -307,15 +321,15 @@ private class MenuSectionsPagerAdapter(
 
     class SectionPageViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
         private val recycler = itemView.findViewById<RecyclerView>(R.id.recyclerSectionOptions)
-        private var onSelection: ((MenuItemOption) -> Unit)? = null
-        private val adapter = MenuOptionAdapter(emptyList()) { selectedOption ->
-            onSelection?.invoke(selectedOption)
+        private var onSelection: ((OptionSelectionEvent) -> Unit)? = null
+        private val adapter = MenuOptionAdapter(emptyList()) { selectedOption, isDoubleTap ->
+            onSelection?.invoke(OptionSelectionEvent(selectedOption, isDoubleTap))
         }
 
         fun bind(
             items: List<MenuItemOption>,
             selectedName: String?,
-            onSelection: (MenuItemOption) -> Unit
+            onSelection: (OptionSelectionEvent) -> Unit
         ) {
             this.onSelection = onSelection
             adapter.updateItems(items, selectedName)
@@ -326,4 +340,9 @@ private class MenuSectionsPagerAdapter(
             recycler.adapter = adapter
         }
     }
+
+    data class OptionSelectionEvent(
+        val option: MenuItemOption,
+        val isDoubleTap: Boolean
+    )
 }

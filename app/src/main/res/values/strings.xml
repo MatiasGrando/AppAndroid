@@ -48,6 +48,8 @@
     <string name="error_plato_invalido">Completa sección y nombre del plato.</string>
     <string name="error_guardar_menu">No se pudo guardar el plato.</string>
     <string name="error_cargar_menu">No se pudo cargar el menú desde Firebase.</string>
+    <string name="label_plato_principal">Plato principal</string>
+    <string name="label_postre">Postre</string>
     <string name="label_guarnicion">Guarnición</string>
     <string name="hint_guarnicion">Seleccionar si tiene guarnición</string>
     <string name="error_guarnicion_requerida">Debes indicar si el plato principal tiene guarnición.</string>

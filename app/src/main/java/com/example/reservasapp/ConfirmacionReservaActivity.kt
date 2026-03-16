@@ -3,6 +3,7 @@ package com.example.reservasapp
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -49,6 +50,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
         val ivPrincipal = findViewById<ImageView>(R.id.ivPlatoPrincipal)
         val ivGuarnicion = findViewById<ImageView>(R.id.ivGuarnicion)
         val ivPostre = findViewById<ImageView>(R.id.ivPostre)
+        val cardGuarnicion = findViewById<View>(R.id.cardGuarnicion)
         val accionPrincipal = findViewById<Button>(R.id.btnVolverMenu)
 
         titulo.text = getString(
@@ -71,9 +73,12 @@ class ConfirmacionReservaActivity : BaseActivity() {
             formatter.format(it).uppercase(Locale("es", "ES"))
         } ?: fecha.uppercase(Locale("es", "ES"))
 
+        val tieneGuarnicion = !guarnicion.isNullOrBlank()
+
         tvPrincipal.text = principal ?: "-"
-        tvGuarnicion.text = guarnicion ?: "-"
+        tvGuarnicion.text = guarnicion.orEmpty()
         tvPostre.text = postre ?: "-"
+        cardGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
 
         ivPrincipal.setImageResource(imageForSelection(principal))
         ivGuarnicion.setImageResource(imageForSelection(guarnicion))

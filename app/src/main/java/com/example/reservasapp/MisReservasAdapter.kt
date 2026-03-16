@@ -64,6 +64,8 @@ class MisReservasAdapter(
         private val tvFecha = itemView.findViewById<TextView>(R.id.tvFechaReserva)
         private val tvPrincipalNombre = itemView.findViewById<TextView>(R.id.tvPlatoPrincipalNombre)
         private val ivPrincipal = itemView.findViewById<ImageView>(R.id.ivPlatoPrincipal)
+        private val rowGuarnicion = itemView.findViewById<View>(R.id.rowGuarnicion)
+        private val dividerPostGuarnicion = itemView.findViewById<View>(R.id.dividerPostGuarnicion)
         private val tvGuarnicionNombre = itemView.findViewById<TextView>(R.id.tvGuarnicionNombre)
         private val ivGuarnicion = itemView.findViewById<ImageView>(R.id.ivGuarnicion)
         private val tvPostreNombre = itemView.findViewById<TextView>(R.id.tvPostreNombre)
@@ -78,12 +80,18 @@ class MisReservasAdapter(
             tvFecha.text = formatter.format(Date(reserva.fechaMillis)).uppercase(Locale("es", "ES"))
             itemView.alpha = if (isSelected) 1f else 0.9f
 
+            val tieneGuarnicion = !guarnicion.isNullOrBlank() && guarnicion != "-"
+
             tvPrincipalNombre.text = principal ?: "-"
-            tvGuarnicionNombre.text = guarnicion ?: "-"
+            tvGuarnicionNombre.text = guarnicion.orEmpty()
             tvPostreNombre.text = postre ?: "-"
+            rowGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
+            dividerPostGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
 
             cargarImagenDesdeStorage(principal, ivPrincipal)
-            cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+            if (tieneGuarnicion) {
+                cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+            }
             cargarImagenDesdeStorage(postre, ivPostre)
         }
 

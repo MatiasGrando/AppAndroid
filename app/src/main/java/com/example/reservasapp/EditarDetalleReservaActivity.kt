@@ -9,12 +9,11 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class EditarDetalleReservaActivity : AppCompatActivity() {
+class EditarDetalleReservaActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_RESERVA_ID = "extra_reserva_id"

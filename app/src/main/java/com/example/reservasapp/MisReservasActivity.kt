@@ -6,11 +6,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class MisReservasActivity : AppCompatActivity() {
+class MisReservasActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyText: TextView

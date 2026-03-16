@@ -8,14 +8,13 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class ReservarActivity : AppCompatActivity() {
+class ReservarActivity : BaseActivity() {
     private lateinit var monthLabel: TextView
     private lateinit var gridWeekdays: GridLayout
     private lateinit var gridDays: GridLayout

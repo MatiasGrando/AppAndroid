@@ -9,9 +9,9 @@
         android:id="@+id/topAppBarPerfil"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@android:color/black"
+        android:backgroundTint="?attr/colorSurface"
         app:title="@string/profile_data_title"
-        app:titleTextColor="@android:color/white" />
+        app:titleTextColor="?attr/colorOnSurface" />
 
     <ScrollView
         android:layout_width="match_parent"

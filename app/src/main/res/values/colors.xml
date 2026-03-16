@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="app_light_background">#F7F2E7</color>
+    <color name="app_light_on_background">#1F1B16</color>
+    <color name="app_light_surface">#FFF8F2</color>
+    <color name="app_light_on_surface">#2A2118</color>
+
+    <color name="app_dark_background">#101820</color>
+    <color name="app_dark_on_background">#F4E7D2</color>
+    <color name="app_dark_surface">#1B2A33</color>
+    <color name="app_dark_on_surface">#F6E9C5</color>
+</resources>

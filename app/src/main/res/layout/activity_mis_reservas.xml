@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_asian_food_dark"
+    android:background="@drawable/bg_asian_food"
     android:orientation="vertical"
     android:paddingHorizontal="20dp"
     android:paddingTop="26dp"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="Mis Pedidos Pasados"
-        android:textColor="#F4E7D2"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="30sp" />
 
     <TextView
@@ -24,7 +24,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="@string/sin_reservas_proximas"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="18sp"
         android:visibility="gone" />
 

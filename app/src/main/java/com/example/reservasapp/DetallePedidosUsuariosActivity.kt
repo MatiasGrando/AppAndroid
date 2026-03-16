@@ -5,13 +5,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class DetallePedidosUsuariosActivity : AppCompatActivity() {
+class DetallePedidosUsuariosActivity : BaseActivity() {
 
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     private var selectedDateMillis: Long = Calendar.getInstance().clearTime().timeInMillis

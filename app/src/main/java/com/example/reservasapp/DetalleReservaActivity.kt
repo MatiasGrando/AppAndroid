@@ -10,7 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -20,7 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class DetalleReservaActivity : AppCompatActivity() {
+class DetalleReservaActivity : BaseActivity() {
 
     private var shouldAutoContinueOnNextSelection = false
 

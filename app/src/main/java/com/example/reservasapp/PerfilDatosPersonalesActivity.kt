@@ -6,10 +6,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.appbar.MaterialToolbar
 
-class PerfilDatosPersonalesActivity : AppCompatActivity() {
+class PerfilDatosPersonalesActivity : BaseActivity() {
 
     private companion object {
         const val EMPRESA_PLACEHOLDER_INDEX = 0

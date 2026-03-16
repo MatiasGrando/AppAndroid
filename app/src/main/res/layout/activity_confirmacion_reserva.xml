@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_asian_food_dark"
+    android:background="@drawable/bg_asian_food"
     android:orientation="vertical"
     android:paddingHorizontal="20dp"
     android:paddingTop="26dp"
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/titulo_confirmacion"
-        android:textColor="#F4E7D2"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="30sp"
         android:textStyle="bold" />
 
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="16sp" />
 
     <com.google.android.material.card.MaterialCardView

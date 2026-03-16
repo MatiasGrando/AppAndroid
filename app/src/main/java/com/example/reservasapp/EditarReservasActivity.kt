@@ -8,12 +8,11 @@ import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class EditarReservasActivity : AppCompatActivity() {
+class EditarReservasActivity : BaseActivity() {
 
     private lateinit var listView: ListView
     private lateinit var emptyText: TextView

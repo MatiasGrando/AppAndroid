@@ -1,14 +1,14 @@
 package com.example.reservasapp
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
+import android.content.res.ColorStateList
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.imageview.ShapeableImageView
 
 class MenuOptionAdapter(
     private var items: List<MenuItemOption>,
@@ -19,12 +19,18 @@ class MenuOptionAdapter(
     private var lastTapTimestamp = 0L
 
     private var selectedPosition = RecyclerView.NO_POSITION
+    private var themePalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
 
     fun updateItems(newItems: List<MenuItemOption>, selectedName: String?) {
         items = newItems
         selectedPosition = selectedName?.let { name ->
             items.indexOfFirst { it.name == name }
         }?.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
+        notifyDataSetChanged()
+    }
+
+    fun updateTheme(palette: MenuThemePalette) {
+        themePalette = palette
         notifyDataSetChanged()
     }
 
@@ -36,7 +42,7 @@ class MenuOptionAdapter(
 
     override fun onBindViewHolder(holder: MenuOptionViewHolder, position: Int) {
         val item = items[position]
-        holder.bind(item, position == selectedPosition)
+        holder.bind(item, position == selectedPosition, themePalette)
         holder.itemView.setOnClickListener {
             val currentPosition = holder.bindingAdapterPosition
             if (currentPosition == RecyclerView.NO_POSITION) return@setOnClickListener
@@ -58,11 +64,11 @@ class MenuOptionAdapter(
 
     class MenuOptionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val card = itemView.findViewById<MaterialCardView>(R.id.cardMenu)
-        private val image = itemView.findViewById<ImageView>(R.id.ivMenu)
+        private val image = itemView.findViewById<ShapeableImageView>(R.id.ivMenu)
         private val title = itemView.findViewById<TextView>(R.id.tvMenuTitle)
         private val description = itemView.findViewById<TextView>(R.id.tvMenuDescription)
 
-        fun bind(item: MenuItemOption, isSelected: Boolean) {
+        fun bind(item: MenuItemOption, isSelected: Boolean, palette: MenuThemePalette) {
             val fallbackImage = ComidaImageRepository.obtenerImagenComida(item.name)
             if (item.imageUrl.isNotBlank()) {
                 Glide.with(itemView)
@@ -75,9 +81,13 @@ class MenuOptionAdapter(
             }
             title.text = item.name
             description.text = item.description
+            title.setTextColor(palette.optionTitleColor)
+            description.setTextColor(palette.optionDescriptionColor)
+            image.setBackgroundColor(palette.imageBackgroundColor)
+            image.strokeColor = ColorStateList.valueOf(palette.imageStrokeColor)
 
-            card.setCardBackgroundColor(if (isSelected) Color.parseColor("#1E3142") else Color.parseColor("#D9101A24"))
-            card.strokeColor = if (isSelected) Color.parseColor("#F1DDAD") else Color.parseColor("#37506A")
+            card.setCardBackgroundColor(if (isSelected) palette.optionCardSelectedColor else palette.optionCardDefaultColor)
+            card.strokeColor = if (isSelected) palette.optionCardSelectedStrokeColor else palette.optionCardDefaultStrokeColor
             card.strokeWidth = if (isSelected) 3 else 1
         }
     }

@@ -8,4 +8,14 @@
     <color name="confirm_item_text">#F4E7D2</color>
     <color name="confirm_image_bg">#233244</color>
     <color name="confirm_image_stroke">#C99A61</color>
+    <color name="mis_reserva_card_background">#D91B2A33</color>
+    <color name="mis_reserva_card_stroke">#486178</color>
+    <color name="mis_reserva_header_background">#A86C3D</color>
+    <color name="mis_reserva_header_text">#F6E9C5</color>
+    <color name="mis_reserva_section_background">#22384B</color>
+    <color name="mis_reserva_section_text">#F6D4A6</color>
+    <color name="mis_reserva_item_text">#F4E7D2</color>
+    <color name="mis_reserva_image_background">#233244</color>
+    <color name="mis_reserva_image_stroke">#C99A61</color>
+
 </resources>

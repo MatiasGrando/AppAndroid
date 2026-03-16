@@ -84,6 +84,8 @@
     <string name="error_google_login">Error al autenticar con Firebase</string>
     <string name="error_google_login_cancelled">Inicio de sesión cancelado o fallido</string>
     <string name="menu_profile">Perfil</string>
+    <string name="menu_theme_to_dark">Cambiar a tema oscuro</string>
+    <string name="menu_theme_to_light">Cambiar a tema claro</string>
     <string name="admin_panel_menu">Panel Administrador</string>
     <string name="admin_panel_title">Panel Administrador</string>
     <string name="admin_panel_add_menu">Add menu</string>

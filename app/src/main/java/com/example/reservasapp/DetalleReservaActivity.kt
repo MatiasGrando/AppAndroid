@@ -14,8 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import java.text.SimpleDateFormat
@@ -44,9 +42,6 @@ class DetalleReservaActivity : AppCompatActivity() {
         val header = findViewById<LinearLayout>(R.id.header)
         val bottomBar = findViewById<LinearLayout>(R.id.bottomBar)
         val selectionHint = findViewById<TextView>(R.id.tvSeleccionHint)
-        val themeToggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.themeToggleGroup)
-        val btnThemeDark = findViewById<MaterialButton>(R.id.btnThemeDark)
-        val btnThemeLight = findViewById<MaterialButton>(R.id.btnThemeLight)
 
         val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
         val reservaEnEdicion = if (reservaId.isNotBlank()) {
@@ -104,16 +99,14 @@ class DetalleReservaActivity : AppCompatActivity() {
         viewPager.adapter = pagerAdapter
         viewPager.isUserInputEnabled = false
 
-        var currentTheme = MenuThemePreference.get(this)
+        val currentTheme = if (AppThemePreference.isDarkModeEnabled(this)) {
+            MenuVisualTheme.DARK
+        } else {
+            MenuVisualTheme.LIGHT
+        }
         val initialPalette = MenuThemeRegistry.palette(currentTheme)
         pagerAdapter.updateTheme(initialPalette)
 
-        val initialCheckedId = if (currentTheme == MenuVisualTheme.DARK) {
-            R.id.btnThemeDark
-        } else {
-            R.id.btnThemeLight
-        }
-        themeToggleGroup.check(initialCheckedId)
         applyMenuTheme(
             palette = initialPalette,
             root = root,
@@ -123,37 +116,8 @@ class DetalleReservaActivity : AppCompatActivity() {
             dateText = dateText,
             tabLayout = tabLayout,
             selectionHint = selectionHint,
-            btnContinuar = btnContinuar,
-            btnThemeDark = btnThemeDark,
-            btnThemeLight = btnThemeLight
+            btnContinuar = btnContinuar
         )
-
-        themeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            val selectedTheme = when (checkedId) {
-                R.id.btnThemeLight -> MenuVisualTheme.LIGHT
-                else -> MenuVisualTheme.DARK
-            }
-            if (selectedTheme == currentTheme) return@addOnButtonCheckedListener
-
-            currentTheme = selectedTheme
-            MenuThemePreference.save(this, selectedTheme)
-            val palette = MenuThemeRegistry.palette(selectedTheme)
-            pagerAdapter.updateTheme(palette)
-            applyMenuTheme(
-                palette = palette,
-                root = root,
-                header = header,
-                bottomBar = bottomBar,
-                titleText = titleText,
-                dateText = dateText,
-                tabLayout = tabLayout,
-                selectionHint = selectionHint,
-                btnContinuar = btnContinuar,
-                btnThemeDark = btnThemeDark,
-                btnThemeLight = btnThemeLight
-            )
-        }
 
         val tabMediator = TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = secciones.getOrNull(position)?.nombre.orEmpty()
@@ -335,9 +299,7 @@ class DetalleReservaActivity : AppCompatActivity() {
         dateText: TextView,
         tabLayout: TabLayout,
         selectionHint: TextView,
-        btnContinuar: Button,
-        btnThemeDark: MaterialButton,
-        btnThemeLight: MaterialButton
+        btnContinuar: Button
     ) {
         root.setBackgroundResource(palette.backgroundDrawableRes)
         header.setBackgroundColor(palette.panelBackgroundColor)
@@ -352,17 +314,6 @@ class DetalleReservaActivity : AppCompatActivity() {
 
         btnContinuar.backgroundTintList = ColorStateList.valueOf(palette.buttonBackgroundColor)
         btnContinuar.setTextColor(palette.buttonTextColor)
-
-        val activeText = ColorStateList.valueOf(palette.buttonTextColor)
-        val activeStroke = ColorStateList.valueOf(palette.optionCardSelectedStrokeColor)
-
-        btnThemeDark.setTextColor(activeText)
-        btnThemeDark.strokeColor = activeStroke
-        btnThemeDark.backgroundTintList = ColorStateList.valueOf(palette.optionCardDefaultColor)
-
-        btnThemeLight.setTextColor(activeText)
-        btnThemeLight.strokeColor = activeStroke
-        btnThemeLight.backgroundTintList = ColorStateList.valueOf(palette.optionCardDefaultColor)
     }
 }
 

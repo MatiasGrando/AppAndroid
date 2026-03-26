@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -40,21 +36,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="@string/hint_nombre_plato" />
+            android:hint="@string/hint_nombre_plato"
+            android:inputType="textCapWords" />
 
         <EditText
             android:id="@+id/etDetallePlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/hint_detalle_plato" />
+            android:hint="@string/hint_detalle_plato"
+            android:inputType="textCapSentences|textMultiLine" />
 
         <EditText
             android:id="@+id/etImagenUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/hint_url_imagen" />
+            android:hint="@string/hint_url_imagen"
+            android:inputType="textUri" />
 
         <TextView
             android:id="@+id/tvGuarnicion"
@@ -102,8 +101,9 @@
         <ListView
             android:id="@+id/listSeccionesMenu"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="8dp" />
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1" />
 
         <Button
             android:id="@+id/btnVolverMenuAdmin"
@@ -113,4 +113,3 @@
             android:text="@string/volver_menu" />
 
     </LinearLayout>
-</ScrollView>

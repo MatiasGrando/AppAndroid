@@ -247,8 +247,7 @@ class DetalleReservaActivity : BaseActivity() {
 
     private fun bloquearInteraccionManualTabs(tabLayout: TabLayout) {
         tabLayout.touchables.forEach { view ->
-            view.setOnTouchListener { _, _ -> true }
-            view.isClickable = false
+            view.setOnClickListener { }
         }
     }
 

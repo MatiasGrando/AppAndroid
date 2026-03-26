@@ -39,6 +39,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -59,4 +63,7 @@ dependencies {
     implementation("androidx.annotation:annotation:1.6.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation(kotlin("test"))
 }

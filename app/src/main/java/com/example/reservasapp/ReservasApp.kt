@@ -6,5 +6,6 @@ class ReservasApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppThemePreference.applySavedMode(this)
+        SessionBootstrap.bootstrap()
     }
 }

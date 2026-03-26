@@ -7,6 +7,11 @@ import android.widget.Button
 class AdminActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAdminAccess()) {
+            return
+        }
+
         setContentView(R.layout.activity_admin)
 
         findViewById<Button>(R.id.btnConfigMenuFechaAdmin).setOnClickListener {

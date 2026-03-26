@@ -117,7 +117,7 @@ object PerfilRepository {
             }
     }
 
-    fun obtenerEsAdmin(onComplete: (Boolean) -> Unit) {
+    fun obtenerRolAdminActual(onComplete: (Boolean) -> Unit) {
         val uid = auth.currentUser?.uid
         if (uid.isNullOrBlank()) {
             onComplete(false)
@@ -133,5 +133,23 @@ object PerfilRepository {
             .addOnFailureListener {
                 onComplete(false)
             }
+    }
+
+    fun resolverEstadoSesionActual(onComplete: (UserSession.State) -> Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            onComplete(UserSession.State.LoggedOut)
+            return
+        }
+
+        obtenerRolAdminActual { isAdmin ->
+            onComplete(
+                if (isAdmin) {
+                    UserSession.State.AuthenticatedAdmin
+                } else {
+                    UserSession.State.AuthenticatedUser
+                }
+            )
+        }
     }
 }

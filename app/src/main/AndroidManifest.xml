@@ -24,16 +24,7 @@
             android:name=".AdminActivity"
             android:exported="false" />
         <activity
-            android:name=".ConfirmacionEdicionActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditarDetalleReservaActivity"
-            android:exported="false" />
-        <activity
             android:name=".ConfirmacionReservaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditarReservasActivity"
             android:exported="false" />
         <activity
             android:name=".MisReservasActivity"

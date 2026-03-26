@@ -165,10 +165,3 @@ class MisReservasAdapter(
         }
     }
 }
-
-private fun normalizarNombre(nombre: String): String {
-    return nombre
-        .trim()
-        .lowercase(Locale.ROOT)
-        .replace("\\s+".toRegex(), " ")
-}

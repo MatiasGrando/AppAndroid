@@ -19,6 +19,11 @@ class AdminMenuFechaActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAdminAccess()) {
+            return
+        }
+
         setContentView(R.layout.activity_admin_menu_fecha)
 
         val tvFechaSeleccionada = findViewById<TextView>(R.id.tvFechaConfigSeleccionada)

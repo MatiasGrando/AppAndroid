@@ -1,5 +1,6 @@
 package com.example.reservasapp
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -26,10 +27,35 @@ class DetalleReservaActivity : BaseActivity() {
     companion object {
         const val EXTRA_DATE_MILLIS = "extra_date_millis"
         const val EXTRA_RESERVA_ID = "extra_reserva_id"
+
+        fun createIntent(context: Context, dateMillis: Long): Intent {
+            val contract = detalleReservaNavigationForCreate(dateMillis)
+            return Intent(context, DetalleReservaActivity::class.java).apply {
+                putExtra(EXTRA_DATE_MILLIS, contract.selectedDateMillis)
+            }
+        }
+
+        fun editIntent(context: Context, reserva: Reserva): Intent {
+            val contract = detalleReservaNavigationForEdit(reserva)
+            return Intent(context, DetalleReservaActivity::class.java).apply {
+                putExtra(EXTRA_RESERVA_ID, contract.reservaId)
+                putExtra(EXTRA_DATE_MILLIS, contract.selectedDateMillis)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAuthenticatedSession()) {
+            return
+        }
+
+        val entry = resolveEntryPoint() ?: run {
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_detalle_reserva)
 
         val dateText = findViewById<TextView>(R.id.tvFechaSeleccionada)
@@ -42,21 +68,9 @@ class DetalleReservaActivity : BaseActivity() {
         val bottomBar = findViewById<LinearLayout>(R.id.bottomBar)
         val selectionHint = findViewById<TextView>(R.id.tvSeleccionHint)
 
-        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
-        val reservaEnEdicion = if (reservaId.isNotBlank()) {
-            ReservasRepository.obtenerReservaPorId(reservaId)
-        } else {
-            null
-        }
-
-        if (reservaId.isNotBlank() && reservaEnEdicion == null) {
-            Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        val selectedDateMillis = reservaEnEdicion?.fechaMillis
-            ?: intent.getLongExtra(EXTRA_DATE_MILLIS, System.currentTimeMillis())
+        val reservaId = entry.reservaEnEdicion?.id.orEmpty()
+        val reservaEnEdicion = entry.reservaEnEdicion
+        val selectedDateMillis = entry.selectedDateMillis
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val fechaFormateada = formatter.format(Date(selectedDateMillis))
         dateText.text = getString(R.string.fecha_seleccionada, fechaFormateada)
@@ -238,6 +252,34 @@ class DetalleReservaActivity : BaseActivity() {
         }
     }
 
+    private fun resolveEntryPoint(): DetalleReservaEntry? {
+        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
+        if (reservaId.isNotBlank()) {
+            val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
+            if (reserva == null || !ReservasRepository.esFechaReservable(reserva.fechaMillis)) {
+                Toast.makeText(this, R.string.error_detalle_reserva_no_disponible, Toast.LENGTH_SHORT).show()
+                return null
+            }
+            return DetalleReservaEntry(reservaEnEdicion = reserva, selectedDateMillis = reserva.fechaMillis)
+        }
+
+        if (!intent.hasExtra(EXTRA_DATE_MILLIS)) {
+            Toast.makeText(this, R.string.error_detalle_reserva_no_disponible, Toast.LENGTH_SHORT).show()
+            return null
+        }
+
+        val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, -1L)
+        if (selectedDateMillis <= 0L || !ReservasRepository.esFechaReservable(selectedDateMillis)) {
+            Toast.makeText(this, R.string.error_detalle_reserva_no_disponible, Toast.LENGTH_SHORT).show()
+            return null
+        }
+
+        return DetalleReservaEntry(
+            reservaEnEdicion = null,
+            selectedDateMillis = selectedDateMillis
+        )
+    }
+
     private fun actualizarEstadoTabGuarnicion(
         tabLayout: TabLayout,
         secciones: List<MenuSection>,
@@ -314,6 +356,27 @@ class DetalleReservaActivity : BaseActivity() {
         btnContinuar.backgroundTintList = ColorStateList.valueOf(palette.buttonBackgroundColor)
         btnContinuar.setTextColor(palette.buttonTextColor)
     }
+}
+
+private data class DetalleReservaEntry(
+    val reservaEnEdicion: Reserva?,
+    val selectedDateMillis: Long
+)
+
+internal data class DetalleReservaNavigationContract(
+    val selectedDateMillis: Long,
+    val reservaId: String = ""
+)
+
+internal fun detalleReservaNavigationForCreate(dateMillis: Long): DetalleReservaNavigationContract {
+    return DetalleReservaNavigationContract(selectedDateMillis = dateMillis)
+}
+
+internal fun detalleReservaNavigationForEdit(reserva: Reserva): DetalleReservaNavigationContract {
+    return DetalleReservaNavigationContract(
+        selectedDateMillis = reserva.fechaMillis,
+        reservaId = reserva.id
+    )
 }
 
 private class MenuSectionsPagerAdapter(

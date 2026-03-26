@@ -45,7 +45,30 @@ class LoginActivity : BaseActivity() {
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            cargarDatosInicialesYEntrar()
+            SessionBootstrap.bootstrap { state ->
+                if (!isActiveForUiUpdates()) {
+                    return@bootstrap
+                }
+
+                if (state == UserSession.State.LoggedOut) {
+                    showLoginUi()
+                    setLoading(false)
+                    return@bootstrap
+                }
+
+                cargarDatosInicialesYEntrar()
+            }
+            return
+        }
+
+        ReservasRepository.clearCache()
+        UserSession.setLoggedOut()
+        showLoginUi()
+        setLoading(false)
+    }
+
+    private fun showLoginUi() {
+        if (::loading.isInitialized) {
             return
         }
 
@@ -77,17 +100,35 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun cargarDatosInicialesYEntrar() {
+        setLoading(true)
         PerfilRepository.sincronizarPerfilConGoogle {
             ReservasRepository.cargarReservasUsuario {
-                PerfilRepository.obtenerEsAdmin { esAdmin ->
-                    UserSession.esAdmin = esAdmin
+                SessionBootstrap.bootstrap(forceRefresh = true) { state ->
+                    if (!isActiveForUiUpdates()) {
+                        return@bootstrap
+                    }
+
+                    setLoading(false)
+
+                    if (state == UserSession.State.LoggedOut) {
+                        showError(getString(R.string.error_google_login))
+                        return@bootstrap
+                    }
+
                     openMainScreen()
                 }
             }
         }
     }
 
+    private fun isActiveForUiUpdates(): Boolean {
+        return !isFinishing && !isDestroyed
+    }
+
     private fun setLoading(show: Boolean) {
+        if (!::loading.isInitialized) {
+            return
+        }
         loading.visibility = if (show) View.VISIBLE else View.GONE
     }
 

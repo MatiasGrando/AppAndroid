@@ -16,6 +16,11 @@ class AdminMenuActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAdminAccess()) {
+            return
+        }
+
         setContentView(R.layout.activity_admin_menu)
 
         val etNombrePlato = findViewById<android.widget.EditText>(R.id.etNombrePlato)

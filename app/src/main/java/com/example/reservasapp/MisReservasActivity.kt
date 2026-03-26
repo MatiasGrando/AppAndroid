@@ -30,10 +30,7 @@ class MisReservasActivity : BaseActivity() {
 
         editButton.setOnClickListener {
             val reserva = selectedReserva ?: return@setOnClickListener
-            startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
-                putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
-                putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, reserva.fechaMillis)
-            })
+            startActivity(DetalleReservaActivity.editIntent(this, reserva))
         }
 
         btnVolverMenu.setOnClickListener {

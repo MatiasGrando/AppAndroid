@@ -36,6 +36,11 @@ class ReservarActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAuthenticatedSession()) {
+            return
+        }
+
         setContentView(R.layout.activity_reservar)
 
         monthLabel = findViewById(R.id.tvMonth)
@@ -57,22 +62,22 @@ class ReservarActivity : BaseActivity() {
         renderCalendar()
 
         continueButton.setOnClickListener {
-            startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
-                putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, selectedDateMillis)
-            })
+            startActivity(DetalleReservaActivity.createIntent(this, selectedDateMillis))
         }
 
         editReservationButton.setOnClickListener {
             val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis) ?: return@setOnClickListener
-            startActivity(Intent(this, DetalleReservaActivity::class.java).apply {
-                putExtra(DetalleReservaActivity.EXTRA_RESERVA_ID, reserva.id)
-                putExtra(DetalleReservaActivity.EXTRA_DATE_MILLIS, reserva.fechaMillis)
-            })
+            startActivity(DetalleReservaActivity.editIntent(this, reserva))
         }
     }
 
     override fun onResume() {
         super.onResume()
+
+        if (!ensureAuthenticatedSession()) {
+            return
+        }
+
         validarPerfilAntesDeReservar { puedeReservar ->
             if (!puedeReservar) {
                 finish()

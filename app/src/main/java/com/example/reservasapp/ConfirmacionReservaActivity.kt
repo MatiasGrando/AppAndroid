@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.StringRes
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
@@ -30,16 +31,25 @@ class ConfirmacionReservaActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAuthenticatedSession()) {
+            return
+        }
+
+        val request = resolveRequest() ?: run {
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_confirmacion_reserva)
 
-        val fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty()
-        val detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty()
-        val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
-        val esEdicion = intent.getBooleanExtra(EXTRA_ES_EDICION, false)
-        val fechaMillis = intent.getLongExtra(EXTRA_FECHA_MILLIS, -1L)
-        @Suppress("DEPRECATION")
-        val seleccionesPendientes = intent.getSerializableExtra(EXTRA_SELECCIONES_PENDIENTES) as? HashMap<String, String>
-        val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
+        val fecha = request.fecha
+        val detalleSeleccion = request.detalleSeleccion
+        val reservaId = request.reservaId
+        val esEdicion = request.esEdicion
+        val fechaMillis = request.fechaMillis
+        val seleccionesPendientes = request.seleccionesPendientes
+        val reserva = request.reserva
 
         val titulo = findViewById<TextView>(R.id.tvTituloConfirmacion)
         val detalle = findViewById<TextView>(R.id.tvDetalleConfirmacion)
@@ -57,7 +67,11 @@ class ConfirmacionReservaActivity : BaseActivity() {
             if (esEdicion) R.string.titulo_confirmacion_edicion else R.string.titulo_confirmacion
         )
 
-        val seleccionesVisualizadas = reserva?.selecciones ?: seleccionesPendientes.orEmpty()
+        val seleccionesVisualizadas = if (seleccionesPendientes.isNotEmpty()) {
+            seleccionesPendientes
+        } else {
+            reserva?.selecciones.orEmpty()
+        }
         val principal = extraerSeleccion(seleccionesVisualizadas, "plato", "principal")
         val guarnicion = extraerSeleccion(seleccionesVisualizadas, "guarn")
         val postre = extraerSeleccion(seleccionesVisualizadas, "postre")
@@ -93,7 +107,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
             ivPostre = ivPostre
         )
 
-        detalle.text = if (reserva != null || !seleccionesPendientes.isNullOrEmpty()) {
+        detalle.text = if (reserva != null || seleccionesPendientes.isNotEmpty()) {
             getString(
                 if (esEdicion) R.string.resumen_confirmacion_edicion_fecha else R.string.resumen_confirmacion_fecha,
                 fecha
@@ -102,7 +116,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
             getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
         }
 
-        val hayConfirmacionPendiente = !seleccionesPendientes.isNullOrEmpty()
+        val hayConfirmacionPendiente = seleccionesPendientes.isNotEmpty()
         accionPrincipal.text = getString(
             if (hayConfirmacionPendiente) R.string.confirmar_pedido else R.string.volver_menu
         )
@@ -114,7 +128,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
             }
 
             accionPrincipal.isEnabled = false
-            val selecciones = seleccionesPendientes.orEmpty()
+            val selecciones = seleccionesPendientes
 
             if (esEdicion) {
                 if (reservaId.isBlank()) {
@@ -169,6 +183,31 @@ class ConfirmacionReservaActivity : BaseActivity() {
         }
     }
 
+    private fun resolveRequest(): ConfirmacionReservaRequest? {
+        val rawRequest = ConfirmacionReservaRawRequest(
+            esEdicion = intent.getBooleanExtra(EXTRA_ES_EDICION, false),
+            fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty(),
+            detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty(),
+            reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty(),
+            fechaMillis = intent.getLongExtra(EXTRA_FECHA_MILLIS, -1L),
+            hasSeleccionesPendientesExtra = intent.hasExtra(EXTRA_SELECCIONES_PENDIENTES),
+            seleccionesPendientesRaw = run {
+                @Suppress("DEPRECATION")
+                intent.getSerializableExtra(EXTRA_SELECCIONES_PENDIENTES) as? HashMap<String, String>
+            }.orEmpty()
+        )
+
+        return when (val resolution = resolveConfirmacionReservaRequest(rawRequest)) {
+            is ConfirmacionReservaRequestResolution.Invalid -> invalidRequest(resolution.messageRes)
+            is ConfirmacionReservaRequestResolution.Valid -> resolution.request
+        }
+    }
+
+    private fun invalidRequest(@StringRes messageRes: Int): ConfirmacionReservaRequest? {
+        Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
+        return null
+    }
+
 
     private fun volverAMenuPrincipal() {
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -176,13 +215,6 @@ class ConfirmacionReservaActivity : BaseActivity() {
         }
         startActivity(intent)
         finish()
-    }
-
-    private fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {
-        return selecciones.entries.firstOrNull { (key, _) ->
-            val keyNormalized = key.lowercase()
-            aliases.all { keyNormalized.contains(it.lowercase()) }
-        }?.value
     }
 
     private fun cargarImagenesMenuDesdeStorage(
@@ -282,9 +314,91 @@ class ConfirmacionReservaActivity : BaseActivity() {
     }
 }
 
-private fun normalizarNombre(nombre: String): String {
+internal fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {
+    return selecciones.entries.firstOrNull { (key, _) ->
+        val keyNormalized = key.lowercase()
+        aliases.all { keyNormalized.contains(it.lowercase()) }
+    }?.value
+}
+
+internal fun normalizarNombre(nombre: String): String {
     return nombre
         .trim()
         .lowercase(Locale.ROOT)
         .replace("\\s+".toRegex(), " ")
+}
+
+internal data class ConfirmacionReservaRequest(
+    val fecha: String,
+    val detalleSeleccion: String,
+    val reserva: Reserva?,
+    val esEdicion: Boolean,
+    val fechaMillis: Long,
+    val seleccionesPendientes: Map<String, String>
+) {
+    val reservaId: String
+        get() = reserva?.id.orEmpty()
+}
+
+internal data class ConfirmacionReservaRawRequest(
+    val esEdicion: Boolean,
+    val fecha: String,
+    val detalleSeleccion: String,
+    val reservaId: String,
+    val fechaMillis: Long,
+    val hasSeleccionesPendientesExtra: Boolean,
+    val seleccionesPendientesRaw: Map<String, String>
+)
+
+internal sealed interface ConfirmacionReservaRequestResolution {
+    data class Valid(val request: ConfirmacionReservaRequest) : ConfirmacionReservaRequestResolution
+    data class Invalid(@StringRes val messageRes: Int) : ConfirmacionReservaRequestResolution
+}
+
+internal fun resolveConfirmacionReservaRequest(
+    rawRequest: ConfirmacionReservaRawRequest,
+    sanitizeSelecciones: (Map<String, String>) -> Map<String, String> = ReservasRepository::sanitizeSelecciones,
+    reservaById: (String) -> Reserva? = ReservasRepository::obtenerReservaPorId,
+    isFechaReservable: (Long) -> Boolean = ReservasRepository::esFechaReservable
+): ConfirmacionReservaRequestResolution {
+    val seleccionesPendientes = sanitizeSelecciones(rawRequest.seleccionesPendientesRaw)
+
+    if (rawRequest.hasSeleccionesPendientesExtra && seleccionesPendientes.isEmpty()) {
+        return ConfirmacionReservaRequestResolution.Invalid(
+            if (rawRequest.esEdicion) R.string.error_actualizar_reserva else R.string.error_guardar_reserva
+        )
+    }
+
+    if (rawRequest.esEdicion) {
+        val reserva = reservaById(rawRequest.reservaId)
+        return if (rawRequest.reservaId.isBlank() || reserva == null || !isFechaReservable(reserva.fechaMillis)) {
+            ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
+        } else {
+            ConfirmacionReservaRequestResolution.Valid(
+                ConfirmacionReservaRequest(
+                    fecha = rawRequest.fecha,
+                    detalleSeleccion = rawRequest.detalleSeleccion,
+                    reserva = reserva,
+                    esEdicion = true,
+                    fechaMillis = reserva.fechaMillis,
+                    seleccionesPendientes = seleccionesPendientes
+                )
+            )
+        }
+    }
+
+    return if (rawRequest.fechaMillis <= 0L || !isFechaReservable(rawRequest.fechaMillis)) {
+        ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
+    } else {
+        ConfirmacionReservaRequestResolution.Valid(
+            ConfirmacionReservaRequest(
+                fecha = rawRequest.fecha,
+                detalleSeleccion = rawRequest.detalleSeleccion,
+                reserva = null,
+                esEdicion = false,
+                fechaMillis = rawRequest.fechaMillis,
+                seleccionesPendientes = seleccionesPendientes
+            )
+        )
+    }
 }

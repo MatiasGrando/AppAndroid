@@ -16,6 +16,11 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAuthenticatedSession()) {
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
@@ -34,14 +39,25 @@ class MainActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (FirebaseAuth.getInstance().currentUser != null) {
+
+        SessionBootstrap.bootstrap { state ->
+            if (isFinishing || isDestroyed) {
+                return@bootstrap
+            }
+
+            if (!isSessionValidForUi(state)) {
+                ensureAuthenticatedSession()
+                return@bootstrap
+            }
+
+            invalidateOptionsMenu()
             ReservasRepository.cargarReservasUsuario { }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
-        menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.esAdmin
+        menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.isAdmin
         return true
     }
 
@@ -74,7 +90,9 @@ class MainActivity : BaseActivity() {
             }
 
             R.id.action_admin_panel -> {
-                startActivity(Intent(this, AdminActivity::class.java))
+                if (UserSession.isAdmin) {
+                    startActivity(Intent(this, AdminActivity::class.java))
+                }
                 true
             }
 
@@ -83,7 +101,8 @@ class MainActivity : BaseActivity() {
     }
 
     private fun logout() {
-        UserSession.esAdmin = false
+        ReservasRepository.clearCache()
+        UserSession.setUnauthenticated()
         FirebaseAuth.getInstance().signOut()
         googleSignInClient.signOut().addOnCompleteListener {
             val intent = Intent(this, LoginActivity::class.java)
@@ -100,4 +119,10 @@ class MainActivity : BaseActivity() {
             .build()
         return GoogleSignIn.getClient(this, gso)
     }
+
+    private fun isSessionValidForUi(state: UserSession.State): Boolean {
+        return state == UserSession.State.AuthenticatedUser ||
+            state == UserSession.State.AuthenticatedAdmin
+    }
+
 }

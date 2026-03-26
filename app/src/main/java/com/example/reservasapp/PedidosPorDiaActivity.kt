@@ -17,6 +17,11 @@ class PedidosPorDiaActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAdminAccess()) {
+            return
+        }
+
         setContentView(R.layout.activity_pedidos_por_dia)
 
         val tvFechaSeleccionada = findViewById<TextView>(R.id.tvFechaPedidosSeleccionada)

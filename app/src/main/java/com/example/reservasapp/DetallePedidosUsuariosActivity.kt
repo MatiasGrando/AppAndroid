@@ -17,6 +17,11 @@ class DetallePedidosUsuariosActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!ensureAdminAccess()) {
+            return
+        }
+
         setContentView(R.layout.activity_detalle_pedidos_usuarios)
 
         val tvFechaSeleccionada = findViewById<TextView>(R.id.tvFechaDetallePedidosSeleccionada)

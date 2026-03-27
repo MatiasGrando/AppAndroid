@@ -3,7 +3,11 @@ package com.example.reservasapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -15,9 +19,26 @@ import com.google.firebase.auth.GoogleAuthProvider
 
 class LoginActivity : BaseActivity() {
 
+    private companion object {
+        const val LOGIN_FADE_DURATION = 280L
+        const val LOGIN_CONTENT_TRANSLATION_Y = 24f
+        const val LOGIN_CONTENT_START_SCALE = 0.97f
+        const val STARTUP_LOGO_END_SCALE = 1.04f
+        const val LOGIN_CONTENT_STAGGER_DELAY = 36L
+    }
+
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var startupLogo: ImageView
+    private lateinit var loginDecor: View
+    private lateinit var loginOverlay: View
     private lateinit var loading: ProgressBar
+    private lateinit var loginLogo: ImageView
+    private lateinit var loginTitle: TextView
+    private lateinit var googleButton: SignInButton
+    private var hasAnimatedLoginEntrance = false
+    private val startupFadeInterpolator = AccelerateInterpolator(1.1f)
+    private val loginEntranceInterpolator = DecelerateInterpolator(1.2f)
 
     private val googleSignInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -27,44 +48,32 @@ class LoginActivity : BaseActivity() {
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener(this) { signInTask ->
-                        setLoading(false)
                         if (signInTask.isSuccessful) {
                             cargarDatosInicialesYEntrar()
                         } else {
+                            showLoggedOutState()
                             showError(getString(R.string.error_google_login))
                         }
                     }
             } catch (_: Exception) {
-                setLoading(false)
+                showLoggedOutState()
                 showError(getString(R.string.error_google_login_cancelled))
             }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        showLoginUi()
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            SessionBootstrap.bootstrap { state ->
-                if (!isActiveForUiUpdates()) {
-                    return@bootstrap
-                }
-
-                if (state == UserSession.State.LoggedOut) {
-                    showLoginUi()
-                    setLoading(false)
-                    return@bootstrap
-                }
-
-                cargarDatosInicialesYEntrar()
-            }
+            cargarDatosInicialesYEntrar()
             return
         }
 
         ReservasRepository.clearCache()
         UserSession.setLoggedOut()
-        showLoginUi()
-        setLoading(false)
+        showLoggedOutState()
     }
 
     private fun showLoginUi() {
@@ -74,16 +83,67 @@ class LoginActivity : BaseActivity() {
 
         setContentView(R.layout.activity_login)
 
+        startupLogo = findViewById(R.id.startupLogo)
+        loginDecor = findViewById(R.id.loginDecor)
+        loginOverlay = findViewById(R.id.loginOverlay)
         loading = findViewById(R.id.loading)
-        val googleButton = findViewById<SignInButton>(R.id.googleButton)
+        loginLogo = findViewById(R.id.ivLogo)
+        loginTitle = findViewById(R.id.tvLoginTitle)
+        googleButton = findViewById(R.id.googleButton)
 
         googleSignInClient = buildGoogleClient()
 
         googleButton.setSize(SignInButton.SIZE_WIDE)
         googleButton.setOnClickListener {
-            setLoading(true)
+            showStartupState()
             googleSignInLauncher.launch(googleSignInClient.signInIntent)
         }
+    }
+
+    private fun showStartupState() {
+        if (!::loading.isInitialized) {
+            return
+        }
+        hasAnimatedLoginEntrance = false
+        startupLogo.animate().cancel()
+        loginDecor.animate().cancel()
+        loginOverlay.animate().cancel()
+        loginLogo.animate().cancel()
+        loginTitle.animate().cancel()
+        googleButton.animate().cancel()
+        resetAnimatedView(startupLogo)
+        resetAnimatedView(loginDecor)
+        resetAnimatedView(loginOverlay)
+        resetAnimatedView(loginLogo)
+        resetAnimatedView(loginTitle)
+        resetAnimatedView(googleButton)
+        startupLogo.visibility = View.VISIBLE
+        loginDecor.visibility = View.GONE
+        loginOverlay.visibility = View.GONE
+        loginLogo.visibility = View.GONE
+        loginTitle.visibility = View.GONE
+        googleButton.visibility = View.GONE
+        loading.visibility = View.GONE
+    }
+
+    private fun showLoggedOutState() {
+        if (!::loading.isInitialized) {
+            return
+        }
+        loading.visibility = View.GONE
+
+        if (startupLogo.visibility == View.VISIBLE && !hasAnimatedLoginEntrance) {
+            animateLoginEntrance()
+            return
+        }
+
+        startupLogo.visibility = View.GONE
+        loginDecor.visibility = View.VISIBLE
+        loginOverlay.visibility = View.VISIBLE
+        loginLogo.visibility = View.VISIBLE
+        loginTitle.text = getString(R.string.login_google_title)
+        loginTitle.visibility = View.VISIBLE
+        googleButton.visibility = View.VISIBLE
     }
 
     private fun buildGoogleClient(): GoogleSignInClient {
@@ -96,11 +156,79 @@ class LoginActivity : BaseActivity() {
 
     private fun openMainScreen() {
         startActivity(Intent(this, MainActivity::class.java))
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         finish()
     }
 
+    private fun animateLoginEntrance() {
+        hasAnimatedLoginEntrance = true
+
+        loginDecor.visibility = View.VISIBLE
+        loginOverlay.visibility = View.VISIBLE
+        loginLogo.visibility = View.VISIBLE
+        loginTitle.text = getString(R.string.login_google_title)
+        loginTitle.visibility = View.VISIBLE
+        googleButton.visibility = View.VISIBLE
+
+        prepareLoginEntranceView(loginDecor)
+        prepareLoginEntranceView(loginOverlay)
+        prepareLoginEntranceView(loginLogo)
+        prepareLoginEntranceView(loginTitle)
+        prepareLoginEntranceView(googleButton)
+
+        startupLogo.alpha = 1f
+        startupLogo.scaleX = 1f
+        startupLogo.scaleY = 1f
+        startupLogo.translationY = 0f
+
+        startupLogo.animate()
+            .alpha(0f)
+            .scaleX(STARTUP_LOGO_END_SCALE)
+            .scaleY(STARTUP_LOGO_END_SCALE)
+            .setDuration(LOGIN_FADE_DURATION)
+            .setInterpolator(startupFadeInterpolator)
+            .withEndAction {
+                startupLogo.visibility = View.GONE
+                resetAnimatedView(startupLogo)
+            }
+            .start()
+
+        animateLoginEntranceView(loginDecor, 0f, 1f, 0L)
+        animateLoginEntranceView(loginOverlay, 0f, 1f, 0L)
+        animateLoginEntranceView(loginLogo, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY)
+        animateLoginEntranceView(loginTitle, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY * 2)
+        animateLoginEntranceView(googleButton, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY * 3)
+    }
+
+    private fun prepareLoginEntranceView(view: View) {
+        view.alpha = 0f
+        view.scaleX = LOGIN_CONTENT_START_SCALE
+        view.scaleY = LOGIN_CONTENT_START_SCALE
+        view.translationY = LOGIN_CONTENT_TRANSLATION_Y
+    }
+
+    private fun animateLoginEntranceView(view: View, translationY: Float, targetAlpha: Float, startDelay: Long) {
+        view.translationY = translationY
+        view.animate()
+            .alpha(targetAlpha)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setStartDelay(startDelay)
+            .setDuration(LOGIN_FADE_DURATION)
+            .setInterpolator(loginEntranceInterpolator)
+            .start()
+    }
+
+    private fun resetAnimatedView(view: View) {
+        view.alpha = 1f
+        view.scaleX = 1f
+        view.scaleY = 1f
+        view.translationY = 0f
+    }
+
     private fun cargarDatosInicialesYEntrar() {
-        setLoading(true)
+        showStartupState()
         PerfilRepository.sincronizarPerfilConGoogle {
             ReservasRepository.cargarReservasUsuario {
                 SessionBootstrap.bootstrap(forceRefresh = true) { state ->
@@ -108,9 +236,8 @@ class LoginActivity : BaseActivity() {
                         return@bootstrap
                     }
 
-                    setLoading(false)
-
                     if (state == UserSession.State.LoggedOut) {
+                        showLoggedOutState()
                         showError(getString(R.string.error_google_login))
                         return@bootstrap
                     }
@@ -123,13 +250,6 @@ class LoginActivity : BaseActivity() {
 
     private fun isActiveForUiUpdates(): Boolean {
         return !isFinishing && !isDestroyed
-    }
-
-    private fun setLoading(show: Boolean) {
-        if (!::loading.isInitialized) {
-            return
-        }
-        loading.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun showError(message: String) {

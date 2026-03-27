@@ -19,7 +19,7 @@ class ReservarActivity : BaseActivity() {
     private lateinit var gridWeekdays: GridLayout
     private lateinit var gridDays: GridLayout
     private lateinit var continueButton: Button
-    private lateinit var editReservationButton: Button
+    private lateinit var flowStatusText: TextView
 
     private var today: Calendar = Calendar.getInstance().clearTime()
     private var maxReservableDate: Calendar = Calendar.getInstance().clearTime().apply {
@@ -30,6 +30,7 @@ class ReservarActivity : BaseActivity() {
         set(Calendar.DAY_OF_MONTH, 1)
     }
     private var selectedDateMillis: Long = today.timeInMillis
+    private var hasUserSelectedDate: Boolean = false
     private var reservedDates: Set<Long> = emptySet()
     private var lastTappedDateMillis: Long = -1L
     private var lastDateTapTimestamp: Long = 0L
@@ -46,8 +47,8 @@ class ReservarActivity : BaseActivity() {
         monthLabel = findViewById(R.id.tvMonth)
         gridWeekdays = findViewById(R.id.gridWeekdays)
         gridDays = findViewById(R.id.gridDays)
-        continueButton = findViewById(R.id.btnContinuar)
-        editReservationButton = findViewById(R.id.btnEditarReserva)
+        continueButton = findViewById(R.id.btnContinuarConFecha)
+        flowStatusText = findViewById(R.id.tvFlowStatus)
 
         findViewById<TextView>(R.id.btnPrevMonth).setOnClickListener {
             visibleMonth.add(Calendar.MONTH, -1)
@@ -58,16 +59,18 @@ class ReservarActivity : BaseActivity() {
             renderCalendar()
         }
 
+        updateButtonsState()
         renderWeekHeaders()
         renderCalendar()
 
         continueButton.setOnClickListener {
-            startActivity(DetalleReservaActivity.createIntent(this, selectedDateMillis))
-        }
-
-        editReservationButton.setOnClickListener {
-            val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis) ?: return@setOnClickListener
-            startActivity(DetalleReservaActivity.editIntent(this, reserva))
+            val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis)
+            val intent = if (reserva != null) {
+                DetalleReservaActivity.editIntent(this, reserva)
+            } else {
+                DetalleReservaActivity.createIntent(this, selectedDateMillis)
+            }
+            startActivity(intent)
         }
     }
 
@@ -120,6 +123,7 @@ class ReservarActivity : BaseActivity() {
         reservedDates = ReservasRepository.obtenerFechasReservadas()
         if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
             selectedDateMillis = today.timeInMillis
+            hasUserSelectedDate = false
         }
         updateButtonsState()
     }
@@ -127,18 +131,23 @@ class ReservarActivity : BaseActivity() {
     private fun updateButtonsState() {
         val isReservable = selectedDateMillis in today.timeInMillis..maxReservableDate.timeInMillis
         val hasExistingReservation = selectedDateMillis in reservedDates
-        val canContinue = isReservable && !hasExistingReservation
+        val canContinue = hasUserSelectedDate && isReservable
 
         continueButton.isEnabled = canContinue
         continueButton.alpha = if (canContinue) 1f else 0.85f
+        continueButton.text = getString(
+            if (hasExistingReservation) R.string.editar_reserva else R.string.reservar
+        )
         continueButton.setBackgroundResource(
             if (canContinue) R.drawable.bg_button_orange else R.drawable.bg_button_gray
         )
 
-        editReservationButton.isEnabled = hasExistingReservation
-        editReservationButton.alpha = if (hasExistingReservation) 1f else 0.85f
-        editReservationButton.setBackgroundResource(
-            if (hasExistingReservation) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+        flowStatusText.text = getString(
+            when {
+                !isReservable -> R.string.reserva_estado_fecha_no_disponible
+                hasExistingReservation -> R.string.reserva_estado_editar
+                else -> R.string.reserva_estado_crear
+            }
         )
     }
 
@@ -192,7 +201,8 @@ class ReservarActivity : BaseActivity() {
     private fun createDayCell(dayDate: Calendar): View {
         val isReservable = dayDate.timeInMillis in today.timeInMillis..maxReservableDate.timeInMillis
         val isReserved = dayDate.timeInMillis in reservedDates
-        val isSelected = dayDate.timeInMillis == selectedDateMillis
+        val isReservedAndReservable = isReservable && isReserved
+        val isSelected = hasUserSelectedDate && dayDate.timeInMillis == selectedDateMillis
         val isToday = dayDate.timeInMillis == today.timeInMillis
 
         val cell = LinearLayout(this).apply {
@@ -214,6 +224,7 @@ class ReservarActivity : BaseActivity() {
                 lastTappedDateMillis = tappedDateMillis
                 lastDateTapTimestamp = now
                 selectedDateMillis = tappedDateMillis
+                hasUserSelectedDate = true
                 updateButtonsState()
                 renderCalendar()
 
@@ -229,7 +240,7 @@ class ReservarActivity : BaseActivity() {
             }
             setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
             visibility = if (isReservable) View.VISIBLE else View.INVISIBLE
-            setBackgroundColor(if (isReserved) 0xFFE67E22.toInt() else 0xFF3FC77AL.toInt())
+            setBackgroundColor(if (isReservedAndReservable) 0xFFE67E22.toInt() else 0xFF3FC77AL.toInt())
         }
 
         val dayText = TextView(this).apply {
@@ -238,8 +249,8 @@ class ReservarActivity : BaseActivity() {
             textSize = 24f
             setTextColor(
                 when {
-                    isSelected -> 0xFFF9E5B4.toInt()
-                    isReserved -> 0xFFFFE0BF.toInt()
+                    isSelected -> 0xFFF6F1E4.toInt()
+                    isReservedAndReservable -> 0xFFFFE0BF.toInt()
                     isReservable -> 0xFFDAECCE.toInt()
                     else -> 0xFFE8CF9F.toInt()
                 }
@@ -249,7 +260,7 @@ class ReservarActivity : BaseActivity() {
                 context,
                 when {
                     isSelected -> R.drawable.bg_day_selected
-                    isReserved -> R.drawable.bg_day_reserved
+                    isReservedAndReservable -> R.drawable.bg_day_reserved
                     isToday -> R.drawable.bg_day_today
                     isReservable -> R.drawable.bg_day_available
                     else -> R.drawable.bg_day_default

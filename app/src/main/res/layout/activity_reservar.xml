@@ -86,27 +86,27 @@
                 android:rowCount="6" />
 
             <Button
-                android:id="@+id/btnContinuar"
+                style="@style/Widget.ReservasApp.Button.Primary"
+                android:id="@+id/btnContinuarConFecha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_button_orange"
-                android:text="@string/continuar"
+                android:backgroundTint="@null"
+                android:text="@string/reservar"
                 android:textAllCaps="false"
-                android:textColor="#F6E9C5"
+                android:textColor="@color/button_primary_text"
                 android:textSize="22sp" />
 
-            <Button
-                android:id="@+id/btnEditarReserva"
+            <TextView
+                android:id="@+id/tvFlowStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:background="@drawable/bg_button_gray"
-                android:enabled="false"
-                android:text="@string/editar_reserva"
-                android:textAllCaps="false"
-                android:textColor="#F6E9C5"
-                android:textSize="22sp" />
+                android:gravity="center"
+                android:text="@string/reserva_estado_crear"
+                android:textColor="#D9D2C1"
+                android:textSize="15sp" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

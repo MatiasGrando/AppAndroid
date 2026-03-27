@@ -25,6 +25,7 @@ class MainActivity : BaseActivity() {
 
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         googleSignInClient = buildGoogleClient()
 

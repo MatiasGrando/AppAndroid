@@ -3,6 +3,6 @@
     <corners android:radius="28dp" />
     <gradient
         android:angle="0"
-        android:endColor="#5F6870"
-        android:startColor="#78818A" />
+        android:endColor="@color/button_disabled_end"
+        android:startColor="@color/button_disabled_start" />
 </shape>

@@ -20,6 +20,7 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnSeleccionarFechaDetallePedidos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,6 +28,7 @@
         android:text="@string/admin_menu_seleccionar_fecha" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnGenerarDetallePedidos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

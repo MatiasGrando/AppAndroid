@@ -4,6 +4,8 @@
         <item name="colorOnBackground">@color/app_light_on_background</item>
         <item name="colorSurface">@color/app_light_surface</item>
         <item name="colorOnSurface">@color/app_light_on_surface</item>
+        <item name="buttonStyle">@style/Widget.ReservasApp.Button.Primary</item>
+        <item name="materialButtonStyle">@style/Widget.ReservasApp.Button.MaterialPrimary</item>
         <item name="android:statusBarColor">@color/app_light_surface</item>
         <item name="android:navigationBarColor">@color/app_light_surface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
@@ -14,11 +16,18 @@
         <item name="colorOnBackground">@color/app_dark_on_background</item>
         <item name="colorSurface">@color/app_dark_surface</item>
         <item name="colorOnSurface">@color/app_dark_on_surface</item>
+        <item name="buttonStyle">@style/Widget.ReservasApp.Button.Primary</item>
+        <item name="materialButtonStyle">@style/Widget.ReservasApp.Button.MaterialPrimary</item>
         <item name="android:statusBarColor">@color/app_dark_surface</item>
         <item name="android:navigationBarColor">@color/app_dark_surface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
     </style>
 
     <style name="Theme.App" parent="Theme.App.Light" />
-    <style name="Theme.ReservasApp" parent="Theme.App" />
+    <style name="Theme.ReservasApp" parent="Theme.App">
+        <item name="android:windowBackground">@drawable/landing_background</item>
+    </style>
+    <style name="Theme.ReservasApp.Launcher" parent="Theme.ReservasApp">
+        <item name="android:windowBackground">@color/app_dark_background</item>
+    </style>
 </resources>

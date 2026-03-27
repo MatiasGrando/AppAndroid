@@ -85,6 +85,7 @@
         </LinearLayout>
 
         <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
             android:id="@+id/btnCrearPlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,6 +107,7 @@
             android:layout_weight="1" />
 
         <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
             android:id="@+id/btnVolverMenuAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

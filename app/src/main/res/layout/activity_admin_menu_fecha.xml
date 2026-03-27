@@ -19,6 +19,7 @@
             android:text="@string/admin_menu_fecha_config_default" />
 
         <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
             android:id="@+id/btnSeleccionarFechaConfig"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,6 +34,7 @@
             android:layout_weight="1" />
 
         <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
             android:id="@+id/btnGuardarPlatosPorFecha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

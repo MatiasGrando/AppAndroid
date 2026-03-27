@@ -24,21 +24,51 @@
             android:textSize="38sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvFechaReserva"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:gravity="center"
-            android:textColor="#D9D2C1"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#E6162430"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#C99A61"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="18dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/confirmacion_fecha_entrega"
+                    android:textColor="#E6C98E"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvFechaReserva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center"
+                    android:textColor="#FFF5E2"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvDetalleConfirmacion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:textColor="#D9D2C1"
             android:textSize="18sp" />
@@ -211,6 +241,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
             android:id="@+id/btnVolverMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -219,7 +250,7 @@
             android:paddingVertical="10dp"
             android:text="@string/volver_menu"
             android:textAllCaps="false"
-            android:textColor="#F6E9C5"
+            android:textColor="@color/button_primary_text"
             android:textSize="20sp" />
 
     </LinearLayout>

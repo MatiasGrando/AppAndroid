@@ -10,6 +10,10 @@
     <color name="app_dark_surface">#1B2A33</color>
     <color name="app_dark_on_surface">#F6E9C5</color>
 
+    <color name="button_primary_fill">#A84300</color>
+    <color name="button_primary_text">#F6E9C5</color>
+    <color name="button_disabled_start">#78818A</color>
+    <color name="button_disabled_end">#5F6870</color>
     <color name="confirm_title_text">#1D1A16</color>
     <color name="confirm_date_text">#4D0D0D</color>
     <color name="confirm_subtitle_text">#1D1A16</color>
@@ -28,5 +32,7 @@
     <color name="mis_reserva_item_text">#F2F2F2</color>
     <color name="mis_reserva_image_background">#FFFFFF</color>
     <color name="mis_reserva_image_stroke">#C99A61</color>
+
+    <color name="launcher_icon_background">#D6281E</color>
 
 </resources>

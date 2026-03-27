@@ -53,6 +53,7 @@
                 android:inputType="number" />
 
             <Button
+                style="@style/Widget.ReservasApp.Button.Primary"
                 android:id="@+id/btnGuardarPerfil"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

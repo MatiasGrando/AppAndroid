@@ -13,6 +13,7 @@
         android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnConfigMenuFechaAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,6 +21,7 @@
         android:text="@string/admin_menu_config_por_fecha" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnAddMenuAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,6 +29,7 @@
         android:text="@string/admin_panel_add_menu" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnResumenPedidosDiaAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,6 +37,7 @@
         android:text="@string/admin_panel_resumen_pedidos_dia" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnDetallePedidosUsuariosAdmin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

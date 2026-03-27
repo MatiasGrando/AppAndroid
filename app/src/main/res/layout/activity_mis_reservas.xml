@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Mis Pedidos Pasados"
+        android:text="@string/titulo_mis_pedidos"
         android:textColor="?attr/colorOnBackground"
         android:textSize="30sp" />
 
@@ -39,6 +39,7 @@
 
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnEditarMisReservas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,10 +48,11 @@
         android:enabled="false"
         android:text="@string/editar_reserva"
         android:textAllCaps="false"
-        android:textColor="#F6E9C5"
+        android:textColor="@color/button_primary_text"
         android:textSize="22sp" />
 
     <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
         android:id="@+id/btnVolverMenuMisReservas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

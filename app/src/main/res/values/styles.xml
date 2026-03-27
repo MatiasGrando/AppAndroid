@@ -3,4 +3,20 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+    <style name="Widget.ReservasApp.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/bg_button_orange</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:textColor">@color/button_primary_text</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Widget.ReservasApp.Button.MaterialPrimary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/button_primary_fill</item>
+        <item name="android:textColor">@color/button_primary_text</item>
+        <item name="iconTint">@color/button_primary_text</item>
+        <item name="cornerRadius">18dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
 </resources>

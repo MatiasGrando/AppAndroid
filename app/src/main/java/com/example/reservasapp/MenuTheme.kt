@@ -1,6 +1,7 @@
 package com.example.reservasapp
 
 import android.graphics.Color
+import androidx.core.content.ContextCompat
 
 enum class MenuVisualTheme(val storageValue: String) {
     DARK("dark"),
@@ -35,6 +36,12 @@ data class MenuThemePalette(
 )
 
 object MenuThemeRegistry {
+    private val buttonBackgroundColor: Int
+        get() = ContextCompat.getColor(ReservasApp.instance, R.color.button_primary_fill)
+
+    private val buttonTextColor: Int
+        get() = ContextCompat.getColor(ReservasApp.instance, R.color.button_primary_text)
+
     fun palette(theme: MenuVisualTheme): MenuThemePalette {
         return when (theme) {
             MenuVisualTheme.DARK -> MenuThemePalette(
@@ -46,8 +53,8 @@ object MenuThemeRegistry {
                 tabUnselectedColor = Color.parseColor("#B7BFD1"),
                 tabIndicatorColor = Color.parseColor("#F1DDAD"),
                 hintTextColor = Color.parseColor("#F1DDAD"),
-                buttonBackgroundColor = Color.parseColor("#A86C3D"),
-                buttonTextColor = Color.parseColor("#F6E9C5"),
+                buttonBackgroundColor = buttonBackgroundColor,
+                buttonTextColor = buttonTextColor,
                 optionCardSelectedColor = Color.parseColor("#1E3142"),
                 optionCardDefaultColor = Color.parseColor("#D9101A24"),
                 optionCardSelectedStrokeColor = Color.parseColor("#F1DDAD"),
@@ -67,8 +74,8 @@ object MenuThemeRegistry {
                 tabUnselectedColor = Color.parseColor("#7E7465"),
                 tabIndicatorColor = Color.parseColor("#B08D57"),
                 hintTextColor = Color.parseColor("#4A3928"),
-                buttonBackgroundColor = Color.parseColor("#B08D57"),
-                buttonTextColor = Color.parseColor("#FFFFFF"),
+                buttonBackgroundColor = buttonBackgroundColor,
+                buttonTextColor = buttonTextColor,
                 optionCardSelectedColor = Color.parseColor("#FFF7E8"),
                 optionCardDefaultColor = Color.parseColor("#F4EDE2"),
                 optionCardSelectedStrokeColor = Color.parseColor("#B08D57"),

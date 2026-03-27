@@ -107,13 +107,11 @@ class ConfirmacionReservaActivity : BaseActivity() {
             ivPostre = ivPostre
         )
 
-        detalle.text = if (reserva != null || seleccionesPendientes.isNotEmpty()) {
-            getString(
-                if (esEdicion) R.string.resumen_confirmacion_edicion_fecha else R.string.resumen_confirmacion_fecha,
-                fecha
-            )
+        if (reserva != null || seleccionesPendientes.isNotEmpty()) {
+            detalle.visibility = View.GONE
         } else {
-            getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
+            detalle.visibility = View.VISIBLE
+            detalle.text = getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
         }
 
         val hayConfirmacionPendiente = seleccionesPendientes.isNotEmpty()

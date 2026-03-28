@@ -357,7 +357,8 @@ internal fun resolveConfirmacionReservaRequest(
     rawRequest: ConfirmacionReservaRawRequest,
     sanitizeSelecciones: (Map<String, String>) -> Map<String, String> = ReservasRepository::sanitizeSelecciones,
     reservaById: (String) -> Reserva? = ReservasRepository::obtenerReservaPorId,
-    isFechaReservable: (Long) -> Boolean = ReservasRepository::esFechaReservable
+    canEditReservationDate: (Long) -> Boolean = ReservasRepository::puedeEditarReservaExistenteEnFecha,
+    canCreateReservationDate: (Long) -> Boolean = ReservasRepository::puedeCrearReservaEnFecha
 ): ConfirmacionReservaRequestResolution {
     val seleccionesPendientes = sanitizeSelecciones(rawRequest.seleccionesPendientesRaw)
 
@@ -369,7 +370,7 @@ internal fun resolveConfirmacionReservaRequest(
 
     if (rawRequest.esEdicion) {
         val reserva = reservaById(rawRequest.reservaId)
-        return if (rawRequest.reservaId.isBlank() || reserva == null || !isFechaReservable(reserva.fechaMillis)) {
+        return if (rawRequest.reservaId.isBlank() || reserva == null || !canEditReservationDate(reserva.fechaMillis)) {
             ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
         } else {
             ConfirmacionReservaRequestResolution.Valid(
@@ -385,7 +386,7 @@ internal fun resolveConfirmacionReservaRequest(
         }
     }
 
-    return if (rawRequest.fechaMillis <= 0L || !isFechaReservable(rawRequest.fechaMillis)) {
+    return if (rawRequest.fechaMillis <= 0L || !canCreateReservationDate(rawRequest.fechaMillis)) {
         ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
     } else {
         ConfirmacionReservaRequestResolution.Valid(

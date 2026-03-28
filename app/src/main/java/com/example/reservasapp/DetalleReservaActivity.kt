@@ -255,7 +255,7 @@ class DetalleReservaActivity : BaseActivity() {
         val reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty()
         if (reservaId.isNotBlank()) {
             val reserva = ReservasRepository.obtenerReservaPorId(reservaId)
-            if (reserva == null || !ReservasRepository.esFechaReservable(reserva.fechaMillis)) {
+            if (reserva == null || !ReservasRepository.puedeEditarReservaExistenteEnFecha(reserva.fechaMillis)) {
                 Toast.makeText(this, R.string.error_detalle_reserva_no_disponible, Toast.LENGTH_SHORT).show()
                 return null
             }
@@ -268,7 +268,7 @@ class DetalleReservaActivity : BaseActivity() {
         }
 
         val selectedDateMillis = intent.getLongExtra(EXTRA_DATE_MILLIS, -1L)
-        if (selectedDateMillis <= 0L || !ReservasRepository.esFechaReservable(selectedDateMillis)) {
+        if (selectedDateMillis <= 0L || !ReservasRepository.puedeCrearReservaEnFecha(selectedDateMillis)) {
             Toast.makeText(this, R.string.error_detalle_reserva_no_disponible, Toast.LENGTH_SHORT).show()
             return null
         }

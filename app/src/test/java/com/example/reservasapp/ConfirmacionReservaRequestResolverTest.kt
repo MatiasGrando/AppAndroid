@@ -14,7 +14,7 @@ class ConfirmacionReservaRequestResolverTest {
                 seleccionesPendientesRaw = linkedMapOf("Plato principal" to "   ")
             ),
             sanitizeSelecciones = { emptyMap() },
-            isFechaReservable = { true }
+            canCreateReservationDate = { true }
         )
 
         assertEquals(
@@ -27,7 +27,7 @@ class ConfirmacionReservaRequestResolverTest {
     fun createRequestRejectsNonReservableDateBeforeRendering() {
         val resolution = resolveConfirmacionReservaRequest(
             rawRequest = baseRawRequest(fechaMillis = 0L),
-            isFechaReservable = { false }
+            canCreateReservationDate = { false }
         )
 
         assertEquals(
@@ -47,7 +47,7 @@ class ConfirmacionReservaRequestResolverTest {
                 )
             ),
             sanitizeSelecciones = { raw -> raw.mapKeys { it.key.trim() }.mapValues { it.value.trim() } },
-            isFechaReservable = { true }
+            canCreateReservationDate = { true }
         )
 
         val request = (resolution as ConfirmacionReservaRequestResolution.Valid).request
@@ -67,7 +67,7 @@ class ConfirmacionReservaRequestResolverTest {
         val resolution = resolveConfirmacionReservaRequest(
             rawRequest = baseRawRequest(esEdicion = true, reservaId = "reserva-inexistente"),
             reservaById = { null },
-            isFechaReservable = { true }
+            canEditReservationDate = { true }
         )
 
         assertEquals(
@@ -94,7 +94,7 @@ class ConfirmacionReservaRequestResolverTest {
                 seleccionesPendientesRaw = emptyMap()
             ),
             reservaById = { reserva },
-            isFechaReservable = { millis -> millis == reserva.fechaMillis }
+            canEditReservationDate = { millis -> millis == reserva.fechaMillis }
         )
 
         val request = (resolution as ConfirmacionReservaRequestResolution.Valid).request
@@ -103,6 +103,33 @@ class ConfirmacionReservaRequestResolverTest {
         assertEquals(reserva, request.reserva)
         assertEquals(reserva.fechaMillis, request.fechaMillis)
         assertTrue(request.seleccionesPendientes.isEmpty())
+    }
+
+    @Test
+    fun editRequestRejectsReservationWhenEditWindowBlocksItsDate() {
+        val reserva = Reserva(
+            id = "reserva-100",
+            fechaMillis = 1_719_191_919_000L,
+            selecciones = mapOf("Postres" to "Flan"),
+            userId = "user-1"
+        )
+
+        val resolution = resolveConfirmacionReservaRequest(
+            rawRequest = baseRawRequest(
+                esEdicion = true,
+                reservaId = reserva.id,
+                hasSeleccionesPendientesExtra = false,
+                seleccionesPendientesRaw = emptyMap()
+            ),
+            reservaById = { reserva },
+            canEditReservationDate = { false },
+            canCreateReservationDate = { false }
+        )
+
+        assertEquals(
+            ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible),
+            resolution
+        )
     }
 
     private fun baseRawRequest(

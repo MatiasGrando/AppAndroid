@@ -81,11 +81,13 @@ class MisReservasActivity : BaseActivity() {
     }
 
     private fun updateEditButtonState() {
-        val hasSelection = selectedReserva != null
-        editButton.isEnabled = hasSelection
-        editButton.alpha = if (hasSelection) 1f else 0.85f
+        val canEditSelection = selectedReserva?.let { reserva ->
+            ReservasRepository.puedeEditarReservaExistenteEnFecha(reserva.fechaMillis)
+        } == true
+        editButton.isEnabled = canEditSelection
+        editButton.alpha = if (canEditSelection) 1f else 0.85f
         editButton.setBackgroundResource(
-            if (hasSelection) R.drawable.bg_button_orange else R.drawable.bg_button_gray
+            if (canEditSelection) R.drawable.bg_button_orange else R.drawable.bg_button_gray
         )
     }
 

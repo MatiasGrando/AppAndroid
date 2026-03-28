@@ -13,7 +13,6 @@ object ReservasRepository {
     private const val FIELD_NOMBRE = "nombre"
     private const val FIELD_APELLIDO = "apellido"
     private const val FIELD_EMPRESA = "empresa"
-    private const val RESERVA_WINDOW_DAYS = 6
     private const val SECTION_PLATO_PRINCIPAL = "Plato principal"
     private const val SECTION_GUARNICIONES = "Guarniciones"
 
@@ -41,7 +40,18 @@ object ReservasRepository {
 
     fun esFechaReservable(fechaMillis: Long): Boolean {
         val fechaNormalizada = normalizarFecha(fechaMillis)
-        return fechaNormalizada in ventanaReservaActual()
+        return fechaNormalizada in ventanaEdicionActual()
+    }
+
+    fun puedeCrearReservaEnFecha(fechaMillis: Long): Boolean {
+        val fechaNormalizada = normalizarFecha(fechaMillis)
+        return fechaNormalizada in ventanaCreacionActual() &&
+            BookingAvailabilityRepository.estaFechaHabilitada(fechaNormalizada)
+    }
+
+    fun puedeEditarReservaExistenteEnFecha(fechaMillis: Long): Boolean {
+        val fechaNormalizada = normalizarFecha(fechaMillis)
+        return fechaNormalizada in ventanaEdicionPermitidaActual()
     }
 
     fun cargarReservasUsuario(onComplete: (Boolean) -> Unit) {
@@ -92,65 +102,72 @@ object ReservasRepository {
         val fechaNormalizada = normalizarFecha(fechaMillis)
         val seleccionesNormalizadas = sanitizeSelecciones(selecciones)
         val uid = auth.currentUser?.uid
-        if (uid.isNullOrBlank() || seleccionesNormalizadas.isEmpty() || !esFechaReservable(fechaNormalizada)) {
+        if (uid.isNullOrBlank() || seleccionesNormalizadas.isEmpty()) {
             onComplete(ResultadoAgregarReserva())
             return
         }
 
-        validarSeleccionesParaFecha(fechaNormalizada, seleccionesNormalizadas) { seleccionesValidas ->
-            if (!seleccionesValidas) {
+        BookingAvailabilityRepository.cargarConfiguracion { _, _ ->
+            if (!puedeCrearReservaEnFecha(fechaNormalizada)) {
                 onComplete(ResultadoAgregarReserva())
-                return@validarSeleccionesParaFecha
+                return@cargarConfiguracion
             }
 
-            firestore.collection(COLLECTION_RESERVAS)
-                .whereEqualTo(FIELD_USER_ID, uid)
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    val existenteDoc = snapshot.documents.firstOrNull { doc ->
-                        val fechaExistente = doc.getLong(FIELD_FECHA_MILLIS) ?: return@firstOrNull false
-                        normalizarFecha(fechaExistente) == fechaNormalizada
-                    }
-                    if (existenteDoc != null) {
-                        val reservaExistente = mapearReserva(existenteDoc, uid)
-                        if (reservaExistente != null && reservas.none { it.id == reservaExistente.id }) {
-                            reservas.add(reservaExistente)
-                        }
-                        onComplete(ResultadoAgregarReserva(reservaExistente = reservaExistente))
-                        return@addOnSuccessListener
-                    }
-
-                    PerfilRepository.cargarPerfil { perfil ->
-                        val payload = mutableMapOf<String, Any>(
-                            FIELD_USER_ID to uid,
-                            FIELD_FECHA_MILLIS to fechaNormalizada,
-                            FIELD_SELECCIONES to seleccionesNormalizadas,
-                            FIELD_NOMBRE to perfil?.nombre.orEmpty(),
-                            FIELD_APELLIDO to perfil?.apellido.orEmpty(),
-                            FIELD_EMPRESA to perfil?.empresa.orEmpty()
-                        )
-
-                        firestore.collection(COLLECTION_RESERVAS)
-                            .add(payload)
-                            .addOnSuccessListener { docRef ->
-                                val reserva = Reserva(
-                                    id = docRef.id,
-                                    fechaMillis = fechaNormalizada,
-                                    selecciones = seleccionesNormalizadas,
-                                    userId = uid
-                                )
-                                reservas.add(reserva)
-                                reservas.sortBy { it.fechaMillis }
-                                onComplete(ResultadoAgregarReserva(reservaCreada = reserva))
-                            }
-                            .addOnFailureListener {
-                                onComplete(ResultadoAgregarReserva())
-                            }
-                    }
-                }
-                .addOnFailureListener {
+            validarSeleccionesParaFecha(fechaNormalizada, seleccionesNormalizadas) { seleccionesValidas ->
+                if (!seleccionesValidas) {
                     onComplete(ResultadoAgregarReserva())
+                    return@validarSeleccionesParaFecha
                 }
+
+                firestore.collection(COLLECTION_RESERVAS)
+                    .whereEqualTo(FIELD_USER_ID, uid)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val existenteDoc = snapshot.documents.firstOrNull { doc ->
+                            val fechaExistente = doc.getLong(FIELD_FECHA_MILLIS) ?: return@firstOrNull false
+                            normalizarFecha(fechaExistente) == fechaNormalizada
+                        }
+                        if (existenteDoc != null) {
+                            val reservaExistente = mapearReserva(existenteDoc, uid)
+                            if (reservaExistente != null && reservas.none { it.id == reservaExistente.id }) {
+                                reservas.add(reservaExistente)
+                            }
+                            onComplete(ResultadoAgregarReserva(reservaExistente = reservaExistente))
+                            return@addOnSuccessListener
+                        }
+
+                        PerfilRepository.cargarPerfil { perfil ->
+                            val payload = mutableMapOf<String, Any>(
+                                FIELD_USER_ID to uid,
+                                FIELD_FECHA_MILLIS to fechaNormalizada,
+                                FIELD_SELECCIONES to seleccionesNormalizadas,
+                                FIELD_NOMBRE to perfil?.nombre.orEmpty(),
+                                FIELD_APELLIDO to perfil?.apellido.orEmpty(),
+                                FIELD_EMPRESA to perfil?.empresa.orEmpty()
+                            )
+
+                            firestore.collection(COLLECTION_RESERVAS)
+                                .add(payload)
+                                .addOnSuccessListener { docRef ->
+                                    val reserva = Reserva(
+                                        id = docRef.id,
+                                        fechaMillis = fechaNormalizada,
+                                        selecciones = seleccionesNormalizadas,
+                                        userId = uid
+                                    )
+                                    reservas.add(reserva)
+                                    reservas.sortBy { it.fechaMillis }
+                                    onComplete(ResultadoAgregarReserva(reservaCreada = reserva))
+                                }
+                                .addOnFailureListener {
+                                    onComplete(ResultadoAgregarReserva())
+                                }
+                            }
+                    }
+                    .addOnFailureListener {
+                        onComplete(ResultadoAgregarReserva())
+                    }
+            }
         }
     }
 
@@ -181,7 +198,7 @@ object ReservasRepository {
         val seleccionesNormalizadas = sanitizeSelecciones(selecciones)
         val index = reservas.indexOfFirst { it.id == id }
         val reservaActual = reservas.getOrNull(index)
-        if (reservaActual == null || seleccionesNormalizadas.isEmpty() || !esFechaReservable(reservaActual.fechaMillis)) {
+        if (reservaActual == null || seleccionesNormalizadas.isEmpty() || !puedeEditarReservaExistenteEnFecha(reservaActual.fechaMillis)) {
             onComplete(null)
             return
         }
@@ -218,7 +235,7 @@ object ReservasRepository {
         .toSet()
 
     fun obtenerReservasProximosSieteDias(): List<Reserva> {
-        val ventanaReservaActual = ventanaReservaActual()
+        val ventanaReservaActual = ventanaEdicionActual()
 
         return reservas
             .filter { it.fechaMillis in ventanaReservaActual }
@@ -404,23 +421,25 @@ object ReservasRepository {
         }.timeInMillis
     }
 
-    private fun ventanaReservaActual(): LongRange {
-        val inicioHoy = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
+    private fun ventanaCreacionActual(): LongRange {
+        return ventanaCreacionDesde(
+            hoy = Calendar.getInstance(),
+            config = BookingAvailabilityRepository.obtenerConfiguracionActual()
+        )
+    }
 
-        val finRango = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-            add(Calendar.DAY_OF_YEAR, RESERVA_WINDOW_DAYS)
-        }.timeInMillis
+    private fun ventanaEdicionActual(): LongRange {
+        return ventanaEdicionDesde(
+            hoy = Calendar.getInstance(),
+            config = BookingAvailabilityRepository.obtenerConfiguracionActual()
+        )
+    }
 
-        return inicioHoy..finRango
+    private fun ventanaEdicionPermitidaActual(): LongRange {
+        return ventanaEdicionPermitidaDesde(
+            hoy = Calendar.getInstance(),
+            config = BookingAvailabilityRepository.obtenerConfiguracionActual()
+        )
     }
 
     private fun String.normalizarClaveDominio(): String {
@@ -428,4 +447,43 @@ object ReservasRepository {
     }
 
     private fun String?.orDash(): String = if (this.isNullOrBlank()) "-" else this
+}
+
+internal fun ventanaCreacionDesde(hoy: Calendar, config: BookingAvailabilityConfig): LongRange {
+    val inicioReserva = inicioVentanaReserva(hoy, config)
+    val finReserva = finVentanaReserva(inicioReserva, config.windowLengthDays)
+    return inicioReserva.timeInMillis..finReserva.timeInMillis
+}
+
+internal fun ventanaEdicionDesde(hoy: Calendar, config: BookingAvailabilityConfig): LongRange {
+    val inicioEdicion = (hoy.clone() as Calendar).clearTime()
+    val finReserva = finVentanaReserva(inicioVentanaReserva(hoy, config), config.windowLengthDays)
+    return inicioEdicion.timeInMillis..finReserva.timeInMillis
+}
+
+internal fun ventanaEdicionPermitidaDesde(hoy: Calendar, config: BookingAvailabilityConfig): LongRange {
+    return ventanaCreacionDesde(hoy, config)
+}
+
+private fun inicioVentanaReserva(hoy: Calendar, config: BookingAvailabilityConfig): Calendar {
+    return (hoy.clone() as Calendar).clearTime().apply {
+        add(Calendar.DAY_OF_YEAR, sanitizeInitialDelayDays(config.initialDelayDays))
+    }
+}
+
+private fun finVentanaReserva(inicioVentana: Calendar, windowLengthDays: Int): Calendar {
+    return (inicioVentana.clone() as Calendar).apply {
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 59)
+        set(Calendar.MILLISECOND, 999)
+        add(Calendar.DAY_OF_YEAR, sanitizeWindowLengthDays(windowLengthDays) - 1)
+    }
+}
+
+private fun Calendar.clearTime(): Calendar = apply {
+    set(Calendar.HOUR_OF_DAY, 0)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
 }

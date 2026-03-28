@@ -1,53 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/admin_panel_title"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
-
-    <Button
-        style="@style/Widget.ReservasApp.Button.Primary"
-        android:id="@+id/btnConfigMenuFechaAdmin"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/admin_menu_config_por_fecha" />
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <Button
-        style="@style/Widget.ReservasApp.Button.Primary"
-        android:id="@+id/btnAddMenuAdmin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/admin_panel_add_menu" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/admin_panel_title"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
-    <Button
-        style="@style/Widget.ReservasApp.Button.Primary"
-        android:id="@+id/btnResumenPedidosDiaAdmin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/admin_panel_resumen_pedidos_dia" />
+        <TextView
+            android:id="@+id/tvBookingDaysSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/admin_booking_days_title"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
-    <Button
-        style="@style/Widget.ReservasApp.Button.Primary"
-        android:id="@+id/btnDetallePedidosUsuariosAdmin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/admin_panel_detalle_pedidos_usuarios" />
+        <TextView
+            android:id="@+id/tvBookingDaysSummary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_booking_days_summary_weekdays"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/admin_panel_placeholder"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/tvBookingDaysHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/admin_booking_days_hint"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+        <TextView
+            android:id="@+id/tvBookingWindowSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/admin_booking_window_title"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+        <TextView
+            android:id="@+id/tvBookingWindowSummary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_booking_window_summary_default"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_booking_window_initial_delay_label"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+        <EditText
+            android:id="@+id/etBookingInitialDelay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/admin_booking_window_initial_delay_hint"
+            android:inputType="number"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_booking_window_length_label"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+        <EditText
+            android:id="@+id/etBookingWindowLength"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/admin_booking_window_length_hint"
+            android:inputType="number"
+            android:maxLines="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnPresetWeekdays"
+                style="@style/Widget.ReservasApp.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/admin_booking_days_preset_weekdays" />
+
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="1dp" />
+
+            <Button
+                android:id="@+id/btnPresetFullWeek"
+                style="@style/Widget.ReservasApp.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/admin_booking_days_preset_full_week" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/checkMonday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/day_monday" />
+
+        <CheckBox
+            android:id="@+id/checkTuesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_tuesday" />
+
+        <CheckBox
+            android:id="@+id/checkWednesday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_wednesday" />
+
+        <CheckBox
+            android:id="@+id/checkThursday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_thursday" />
+
+        <CheckBox
+            android:id="@+id/checkFriday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_friday" />
+
+        <CheckBox
+            android:id="@+id/checkSaturday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_saturday" />
+
+        <CheckBox
+            android:id="@+id/checkSunday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/day_sunday" />
+
+        <Button
+            android:id="@+id/btnGuardarBookingDaysAdmin"
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_booking_days_save" />
+
+        <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:id="@+id/btnConfigMenuFechaAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/admin_menu_config_por_fecha" />
+
+        <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:id="@+id/btnAddMenuAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_panel_add_menu" />
+
+        <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:id="@+id/btnResumenPedidosDiaAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_panel_resumen_pedidos_dia" />
+
+        <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:id="@+id/btnDetallePedidosUsuariosAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_panel_detalle_pedidos_usuarios" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/admin_panel_placeholder"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+    </LinearLayout>
+</ScrollView>

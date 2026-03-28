@@ -2,8 +2,9 @@ package com.example.reservasapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.appcompat.widget.PopupMenu
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -26,6 +27,9 @@ class MainActivity : BaseActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+        findViewById<View>(R.id.btnProfileMenu).setOnClickListener { view ->
+            showMainMenu(view)
+        }
 
         googleSignInClient = buildGoogleClient()
 
@@ -56,23 +60,30 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.isAdmin
-        return true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (handleMenuItemSelection(item)) {
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+    private fun showMainMenu(anchor: View) {
+        val popupMenu = PopupMenu(this, anchor)
+        popupMenu.menuInflater.inflate(R.menu.menu_main, popupMenu.menu)
+        popupMenu.menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.isAdmin
+
         val titleRes = if (AppThemePreference.isDarkModeEnabled(this)) {
             R.string.menu_theme_to_light
         } else {
             R.string.menu_theme_to_dark
         }
-        menu.findItem(R.id.action_toggle_theme)?.setTitle(titleRes)
-        return super.onPrepareOptionsMenu(menu)
+        popupMenu.menu.findItem(R.id.action_toggle_theme)?.setTitle(titleRes)
+        popupMenu.setOnMenuItemClickListener { item -> handleMenuItemSelection(item) }
+        popupMenu.show()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun handleMenuItemSelection(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_profile -> {
                 startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java))
@@ -97,7 +108,7 @@ class MainActivity : BaseActivity() {
                 true
             }
 
-            else -> super.onOptionsItemSelected(item)
+            else -> false
         }
     }
 

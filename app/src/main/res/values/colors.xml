@@ -12,6 +12,9 @@
 
     <color name="button_primary_fill">#A84300</color>
     <color name="button_primary_text">#F6E9C5</color>
+    <color name="home_cta_primary_fill">#C45F1A</color>
+    <color name="home_cta_secondary_fill">#455A64</color>
+    <color name="home_cta_text">#FFFFFF</color>
     <color name="button_disabled_start">#78818A</color>
     <color name="button_disabled_end">#5F6870</color>
     <color name="confirm_title_text">#1D1A16</color>

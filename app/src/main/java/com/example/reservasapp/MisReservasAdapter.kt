@@ -20,8 +20,7 @@ class MisReservasAdapter(
 ) : RecyclerView.Adapter<MisReservasAdapter.MisReservasViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("EEEE d/M/yy", Locale("es", "ES"))
-    private val imageByDishNormalized = imageUrlsByDish
-        .mapKeys { (dishName, _) -> normalizarNombre(dishName) }
+    private val imageByDishId = imageUrlsByDish
     private var selectedPosition: Int = RecyclerView.NO_POSITION
 
     fun updateData(newReservas: List<Reserva>) {
@@ -34,7 +33,7 @@ class MisReservasAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MisReservasViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_mis_reserva, parent, false)
-        return MisReservasViewHolder(view, imageByDishNormalized)
+        return MisReservasViewHolder(view, imageByDishId)
     }
 
     override fun onBindViewHolder(holder: MisReservasViewHolder, position: Int) {
@@ -59,7 +58,7 @@ class MisReservasAdapter(
 
     class MisReservasViewHolder(
         itemView: View,
-        private val imageByDishNormalized: Map<String, String>
+        private val imageByDishId: Map<String, String>
     ) : RecyclerView.ViewHolder(itemView) {
         private val tvFecha = itemView.findViewById<TextView>(R.id.tvFechaReserva)
         private val tvPrincipalNombre = itemView.findViewById<TextView>(R.id.tvPlatoPrincipalNombre)
@@ -73,9 +72,12 @@ class MisReservasAdapter(
         private val storage by lazy { FirebaseStorage.getInstance() }
 
         fun bind(reserva: Reserva, formatter: SimpleDateFormat, isSelected: Boolean) {
-            val principal = extraerSeleccion(reserva.selecciones, "plato", "principal")
-            val guarnicion = extraerSeleccion(reserva.selecciones, "guarn")
-            val postre = extraerSeleccion(reserva.selecciones, "postre")
+            val principalId = reserva.selecciones[MenuIdentity.SECTION_MAIN]
+            val guarnicionId = reserva.selecciones[MenuIdentity.SECTION_SIDE]
+            val postreId = reserva.selecciones[MenuIdentity.SECTION_DESSERT]
+            val principal = MenuRepository.nombrePlato(MenuIdentity.SECTION_MAIN, principalId)
+            val guarnicion = MenuRepository.nombrePlato(MenuIdentity.SECTION_SIDE, guarnicionId)
+            val postre = MenuRepository.nombrePlato(MenuIdentity.SECTION_DESSERT, postreId)
 
             tvFecha.text = formatter.format(Date(reserva.fechaMillis)).uppercase(Locale("es", "ES"))
             itemView.alpha = if (isSelected) 1f else 0.9f
@@ -88,28 +90,29 @@ class MisReservasAdapter(
             rowGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
             dividerPostGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
 
-            cargarImagenDesdeStorage(principal, ivPrincipal)
+            cargarImagenDesdeStorage(MenuIdentity.SECTION_MAIN, principalId, ivPrincipal)
             if (tieneGuarnicion) {
-                cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
+                cargarImagenDesdeStorage(MenuIdentity.SECTION_SIDE, guarnicionId, ivGuarnicion)
             }
-            cargarImagenDesdeStorage(postre, ivPostre)
+            cargarImagenDesdeStorage(MenuIdentity.SECTION_DESSERT, postreId, ivPostre)
         }
 
-        private fun cargarImagenDesdeStorage(nombrePlato: String?, imageView: ImageView) {
-            val fallbackImage = imageForSelection(nombrePlato)
-            val nombreNormalizado = normalizarNombre(nombrePlato.orEmpty())
-            if (nombreNormalizado.isBlank()) {
+        private fun cargarImagenDesdeStorage(sectionId: String, dishId: String?, imageView: ImageView) {
+            val visibleName = MenuRepository.nombrePlato(sectionId, dishId)
+            val fallbackImage = imageForSelection(visibleName)
+            val normalizedDishId = dishId.orEmpty().trim()
+            if (normalizedDishId.isBlank()) {
                 imageView.setImageResource(fallbackImage)
                 return
             }
 
-            val imagePath = imageByDishNormalized[nombreNormalizado].orEmpty()
+            val imagePath = imageByDishId[normalizedDishId].orEmpty()
             if (imagePath.isBlank()) {
                 imageView.setImageResource(fallbackImage)
                 return
             }
 
-            imageView.tag = nombreNormalizado
+            imageView.tag = normalizedDishId
 
             when {
                 imagePath.startsWith("http", ignoreCase = true) -> {
@@ -123,7 +126,7 @@ class MisReservasAdapter(
                 imagePath.startsWith("gs://", ignoreCase = true) -> {
                     storage.getReferenceFromUrl(imagePath).downloadUrl
                         .addOnSuccessListener { uri ->
-                            aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                            aplicarImagenSiCorresponde(imageView, normalizedDishId, uri, fallbackImage)
                         }
                         .addOnFailureListener {
                             imageView.setImageResource(fallbackImage)
@@ -133,7 +136,7 @@ class MisReservasAdapter(
                 else -> {
                     storage.reference.child(imagePath.trimStart('/')).downloadUrl
                         .addOnSuccessListener { uri ->
-                            aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                            aplicarImagenSiCorresponde(imageView, normalizedDishId, uri, fallbackImage)
                         }
                         .addOnFailureListener {
                             imageView.setImageResource(fallbackImage)
@@ -157,11 +160,5 @@ class MisReservasAdapter(
                 .into(imageView)
         }
 
-        private fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {
-            return selecciones.entries.firstOrNull { (key, _) ->
-                val keyNormalized = key.lowercase()
-                aliases.all { keyNormalized.contains(it.lowercase()) }
-            }?.value
-        }
     }
 }

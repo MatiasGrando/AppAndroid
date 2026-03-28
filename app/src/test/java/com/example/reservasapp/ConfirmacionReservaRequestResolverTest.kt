@@ -11,7 +11,7 @@ class ConfirmacionReservaRequestResolverTest {
         val resolution = resolveConfirmacionReservaRequest(
             rawRequest = baseRawRequest(
                 hasSeleccionesPendientesExtra = true,
-                seleccionesPendientesRaw = linkedMapOf("Plato principal" to "   ")
+                seleccionesPendientesRaw = linkedMapOf(MenuIdentity.SECTION_MAIN to "   ")
             ),
             sanitizeSelecciones = { emptyMap() },
             canCreateReservationDate = { true }
@@ -42,8 +42,8 @@ class ConfirmacionReservaRequestResolverTest {
             rawRequest = baseRawRequest(
                 hasSeleccionesPendientesExtra = true,
                 seleccionesPendientesRaw = linkedMapOf(
-                    " Plato principal " to " Milanesa napolitana ",
-                    "Guarniciones" to " Pure mixto "
+                    " ${MenuIdentity.SECTION_MAIN} " to " dish-main ",
+                    MenuIdentity.SECTION_SIDE to " dish-side "
                 )
             ),
             sanitizeSelecciones = { raw -> raw.mapKeys { it.key.trim() }.mapValues { it.value.trim() } },
@@ -55,8 +55,8 @@ class ConfirmacionReservaRequestResolverTest {
         assertEquals(1_717_171_717_000L, request.fechaMillis)
         assertEquals(
             linkedMapOf(
-                "Plato principal" to "Milanesa napolitana",
-                "Guarniciones" to "Pure mixto"
+                MenuIdentity.SECTION_MAIN to "dish-main",
+                MenuIdentity.SECTION_SIDE to "dish-side"
             ),
             request.seleccionesPendientes
         )
@@ -81,7 +81,7 @@ class ConfirmacionReservaRequestResolverTest {
         val reserva = Reserva(
             id = "reserva-99",
             fechaMillis = 1_719_191_919_000L,
-            selecciones = mapOf("Postres" to "Flan"),
+            selecciones = mapOf(MenuIdentity.SECTION_DESSERT to "dish-dessert"),
             userId = "user-1"
         )
 
@@ -110,7 +110,7 @@ class ConfirmacionReservaRequestResolverTest {
         val reserva = Reserva(
             id = "reserva-100",
             fechaMillis = 1_719_191_919_000L,
-            selecciones = mapOf("Postres" to "Flan"),
+            selecciones = mapOf(MenuIdentity.SECTION_DESSERT to "dish-dessert"),
             userId = "user-1"
         )
 

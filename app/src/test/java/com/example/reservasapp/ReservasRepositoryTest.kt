@@ -75,24 +75,25 @@ class ReservasRepositoryTest {
     @Test
     fun formatearSeleccionesLimpiaEspaciosYDescartaEntradasVacias() {
         val selecciones = linkedMapOf(
-            " Plato principal " to " Milanesa napolitana ",
-            "Guarniciones" to "   ",
+            " ${MenuIdentity.SECTION_MAIN} " to " dish-main-1 ",
+            MenuIdentity.SECTION_SIDE to "   ",
             "   " to "No deberia entrar",
-            "Postres" to " Flan casero "
+            MenuIdentity.SECTION_DESSERT to " dish-dessert-1 "
         )
 
         val resultado = ReservasRepository.formatearSelecciones(selecciones)
 
-        assertEquals("Plato principal: Milanesa napolitana | Postres: Flan casero", resultado)
+        assertEquals("Plato principal: dish-main-1 | Postres: dish-dessert-1", resultado)
     }
 
     @Test
-    fun seleccionesSonValidasParaMenuAceptaClavesYValoresNormalizados() {
-        val selecciones = linkedMapOf(
-            " plato principal " to "  milanesa napolitana ",
-            " Guarniciones " to " Pure de papas ",
-            "Postres" to " flan casero "
+    fun seleccionesSonValidasParaMenuAceptaSeleccionesSanitizadas() {
+        val seleccionesCrudas = linkedMapOf(
+            " ${MenuIdentity.SECTION_MAIN} " to " dish-main-1 ",
+            " ${MenuIdentity.SECTION_SIDE} " to " dish-side-1 ",
+            MenuIdentity.SECTION_DESSERT to " dish-dessert-1 "
         )
+        val selecciones = ReservasRepository.sanitizeSelecciones(seleccionesCrudas)
 
         assertTrue(ReservasRepository.seleccionesSonValidasParaMenu(menuBase(), selecciones))
     }
@@ -100,8 +101,8 @@ class ReservasRepositoryTest {
     @Test
     fun seleccionesSonValidasParaMenuRechazaGuarnicionSiElPrincipalNoLaPermite() {
         val selecciones = linkedMapOf(
-            "Plato principal" to "Pasta del dia",
-            "Guarniciones" to "Pure de papas"
+            MenuIdentity.SECTION_MAIN to "dish-main-2",
+            MenuIdentity.SECTION_SIDE to "dish-side-1"
         )
 
         assertFalse(ReservasRepository.seleccionesSonValidasParaMenu(menuBase(), selecciones))
@@ -110,8 +111,8 @@ class ReservasRepositoryTest {
     @Test
     fun seleccionesSonValidasParaMenuRechazaCuandoFaltaElPrincipal() {
         val selecciones = linkedMapOf(
-            "Guarniciones" to "Pure de papas",
-            "Postres" to "Flan casero"
+            MenuIdentity.SECTION_SIDE to "dish-side-1",
+            MenuIdentity.SECTION_DESSERT to "dish-dessert-1"
         )
 
         assertFalse(ReservasRepository.seleccionesSonValidasParaMenu(menuBase(), selecciones))
@@ -120,15 +121,18 @@ class ReservasRepositoryTest {
     private fun menuBase(): List<MenuSection> {
         return listOf(
             MenuSection(
+                id = MenuIdentity.SECTION_MAIN,
                 nombre = "Plato principal",
                 opciones = mutableListOf(
                     MenuDish(
+                        id = "dish-main-1",
                         nombre = "Milanesa napolitana",
                         detalle = "",
                         imageUrl = "",
                         guarnicion = true
                     ),
                     MenuDish(
+                        id = "dish-main-2",
                         nombre = "Pasta del dia",
                         detalle = "",
                         imageUrl = "",
@@ -137,9 +141,11 @@ class ReservasRepositoryTest {
                 )
             ),
             MenuSection(
+                id = MenuIdentity.SECTION_SIDE,
                 nombre = "Guarniciones",
                 opciones = mutableListOf(
                     MenuDish(
+                        id = "dish-side-1",
                         nombre = "Pure de papas",
                         detalle = "",
                         imageUrl = "",
@@ -148,9 +154,11 @@ class ReservasRepositoryTest {
                 )
             ),
             MenuSection(
+                id = MenuIdentity.SECTION_DESSERT,
                 nombre = "Postres",
                 opciones = mutableListOf(
                     MenuDish(
+                        id = "dish-dessert-1",
                         nombre = "Flan casero",
                         detalle = "",
                         imageUrl = "",

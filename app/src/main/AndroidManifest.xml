@@ -11,6 +11,12 @@
         android:theme="@style/Theme.ReservasApp" >
 
         <activity
+            android:name=".AdminConfiguracionReservasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminArchivoExportacionActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetallePedidosUsuariosActivity"
             android:exported="false" />
         <activity

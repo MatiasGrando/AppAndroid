@@ -8,7 +8,8 @@ import java.util.Calendar
 data class BookingAvailabilityConfig(
     val enabledWeekdays: Set<Int>,
     val initialDelayDays: Int,
-    val windowLengthDays: Int
+    val windowLengthDays: Int,
+    val archiveRetentionDays: Int? = null
 )
 
 object BookingAvailabilityRepository {
@@ -17,12 +18,14 @@ object BookingAvailabilityRepository {
     private const val FIELD_ENABLED_WEEKDAYS = "enabledWeekdays"
     private const val FIELD_INITIAL_DELAY_DAYS = "initialDelayDays"
     private const val FIELD_WINDOW_LENGTH_DAYS = "windowLengthDays"
+    private const val FIELD_ARCHIVE_RETENTION_DAYS = "archiveRetentionDays"
     private const val FIELD_UPDATED_AT_MILLIS = "updatedAtMillis"
 
     private const val PREFS_NAME = "booking_availability_prefs"
     private const val PREF_ENABLED_WEEKDAYS = "enabled_weekdays"
     private const val PREF_INITIAL_DELAY_DAYS = "initial_delay_days"
     private const val PREF_WINDOW_LENGTH_DAYS = "window_length_days"
+    private const val PREF_ARCHIVE_RETENTION_DAYS = "archive_retention_days"
 
     private val firestore by lazy { FirebaseFirestore.getInstance() }
 
@@ -35,7 +38,13 @@ object BookingAvailabilityRepository {
             return current
         }
 
-        return readLocalConfig().also { cachedConfig = it }
+        val localConfig = readLocalConfigOrNull()
+        if (localConfig != null) {
+            cachedConfig = localConfig
+            return localConfig
+        }
+
+        return defaultConfig()
     }
 
     fun cargarConfiguracion(onComplete: (Boolean, BookingAvailabilityConfig) -> Unit) {
@@ -54,7 +63,8 @@ object BookingAvailabilityRepository {
                 val config = BookingAvailabilityConfig(
                     enabledWeekdays = normalizePersistedWeekdays(rawWeekdays),
                     initialDelayDays = normalizePersistedInitialDelayDays(doc.getLong(FIELD_INITIAL_DELAY_DAYS)?.toInt()),
-                    windowLengthDays = normalizePersistedWindowLengthDays(doc.getLong(FIELD_WINDOW_LENGTH_DAYS)?.toInt())
+                    windowLengthDays = normalizePersistedWindowLengthDays(doc.getLong(FIELD_WINDOW_LENGTH_DAYS)?.toInt()),
+                    archiveRetentionDays = normalizePersistedArchiveRetentionDays(doc.getLong(FIELD_ARCHIVE_RETENTION_DAYS)?.toInt())
                 )
                 updateLocalConfig(config)
                 onComplete(true, config)
@@ -68,13 +78,15 @@ object BookingAvailabilityRepository {
         enabledWeekdays: Set<Int>,
         initialDelayDays: Int,
         windowLengthDays: Int,
+        archiveRetentionDays: Int?,
         onComplete: (Boolean) -> Unit
     ) {
         val config = sanitizeConfig(
             BookingAvailabilityConfig(
                 enabledWeekdays = enabledWeekdays,
                 initialDelayDays = initialDelayDays,
-                windowLengthDays = windowLengthDays
+                windowLengthDays = windowLengthDays,
+                archiveRetentionDays = archiveRetentionDays
             )
         )
         if (config.enabledWeekdays.isEmpty()) {
@@ -86,6 +98,7 @@ object BookingAvailabilityRepository {
             FIELD_ENABLED_WEEKDAYS to DAY_ORDER.filter { config.enabledWeekdays.contains(it) },
             FIELD_INITIAL_DELAY_DAYS to config.initialDelayDays,
             FIELD_WINDOW_LENGTH_DAYS to config.windowLengthDays,
+            FIELD_ARCHIVE_RETENTION_DAYS to config.archiveRetentionDays,
             FIELD_UPDATED_AT_MILLIS to System.currentTimeMillis()
         )
 
@@ -105,9 +118,25 @@ object BookingAvailabilityRepository {
         return isWeekdayEnabled(fechaMillis, obtenerConfiguracionActual().enabledWeekdays)
     }
 
+    fun obtenerFechaMaximaArchivable(referenceMillis: Long = System.currentTimeMillis()): Long? {
+        return calculateArchiveRetentionLimitMillis(
+            referenceMillis = referenceMillis,
+            retentionDays = obtenerConfiguracionActual().archiveRetentionDays
+        )
+    }
+
+    fun esRangoArchivable(hastaMillis: Long, referenceMillis: Long = System.currentTimeMillis()): Boolean {
+        return isArchiveRangeAllowed(
+            hastaMillis = hastaMillis,
+            referenceMillis = referenceMillis,
+            retentionDays = obtenerConfiguracionActual().archiveRetentionDays
+        )
+    }
+
     private fun updateLocalConfig(config: BookingAvailabilityConfig) {
         cachedConfig = config
-        val prefs = ReservasApp.instance.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = ReservasApp.instanceOrNull()?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            ?: return
         prefs.edit()
             .putString(
                 PREF_ENABLED_WEEKDAYS,
@@ -115,11 +144,19 @@ object BookingAvailabilityRepository {
             )
             .putInt(PREF_INITIAL_DELAY_DAYS, config.initialDelayDays)
             .putInt(PREF_WINDOW_LENGTH_DAYS, config.windowLengthDays)
+            .apply {
+                if (config.archiveRetentionDays != null) {
+                    putInt(PREF_ARCHIVE_RETENTION_DAYS, config.archiveRetentionDays)
+                } else {
+                    remove(PREF_ARCHIVE_RETENTION_DAYS)
+                }
+            }
             .apply()
     }
 
-    private fun readLocalConfig(): BookingAvailabilityConfig {
-        val prefs = ReservasApp.instance.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private fun readLocalConfigOrNull(): BookingAvailabilityConfig? {
+        val prefs = ReservasApp.instanceOrNull()?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            ?: return null
         val storedWeekdays = prefs.getString(PREF_ENABLED_WEEKDAYS, null)
             ?.split(',')
             ?.mapNotNull { value -> value.toIntOrNull() }
@@ -131,8 +168,15 @@ object BookingAvailabilityRepository {
             ),
             windowLengthDays = normalizePersistedWindowLengthDays(
                 prefs.takeIf { it.contains(PREF_WINDOW_LENGTH_DAYS) }?.getInt(PREF_WINDOW_LENGTH_DAYS, DEFAULT_WINDOW_LENGTH_DAYS)
+            ),
+            archiveRetentionDays = normalizePersistedArchiveRetentionDays(
+                prefs.takeIf { it.contains(PREF_ARCHIVE_RETENTION_DAYS) }?.getInt(PREF_ARCHIVE_RETENTION_DAYS, 0)
             )
         )
+    }
+
+    internal fun clearCache() {
+        cachedConfig = null
     }
 }
 
@@ -189,12 +233,44 @@ internal fun normalizePersistedWindowLengthDays(rawWindowLengthDays: Int?): Int 
     return sanitizeWindowLengthDays(rawWindowLengthDays ?: DEFAULT_WINDOW_LENGTH_DAYS)
 }
 
+internal fun normalizePersistedArchiveRetentionDays(rawArchiveRetentionDays: Int?): Int? {
+    return sanitizeArchiveRetentionDays(rawArchiveRetentionDays)
+}
+
+internal fun sanitizeArchiveRetentionDays(rawArchiveRetentionDays: Int?): Int? {
+    return rawArchiveRetentionDays?.coerceIn(0, MAX_BOOKING_WINDOW_DAYS)
+}
+
 internal fun sanitizeConfig(rawConfig: BookingAvailabilityConfig): BookingAvailabilityConfig {
     return BookingAvailabilityConfig(
         enabledWeekdays = sanitizeWeekdays(rawConfig.enabledWeekdays),
         initialDelayDays = sanitizeInitialDelayDays(rawConfig.initialDelayDays),
-        windowLengthDays = sanitizeWindowLengthDays(rawConfig.windowLengthDays)
+        windowLengthDays = sanitizeWindowLengthDays(rawConfig.windowLengthDays),
+        archiveRetentionDays = sanitizeArchiveRetentionDays(rawConfig.archiveRetentionDays)
     )
+}
+
+internal fun defaultConfig(): BookingAvailabilityConfig {
+    return BookingAvailabilityConfig(
+        enabledWeekdays = defaultEnabledWeekdays(),
+        initialDelayDays = DEFAULT_INITIAL_DELAY_DAYS,
+        windowLengthDays = DEFAULT_WINDOW_LENGTH_DAYS,
+        archiveRetentionDays = null
+    )
+}
+
+internal fun calculateArchiveRetentionLimitMillis(referenceMillis: Long, retentionDays: Int?): Long? {
+    val sanitizedRetentionDays = sanitizeArchiveRetentionDays(retentionDays) ?: return null
+    return Calendar.getInstance().apply {
+        timeInMillis = referenceMillis
+        clearTime()
+        add(Calendar.DAY_OF_MONTH, -sanitizedRetentionDays)
+    }.timeInMillis
+}
+
+internal fun isArchiveRangeAllowed(hastaMillis: Long, referenceMillis: Long, retentionDays: Int?): Boolean {
+    val retentionLimitMillis = calculateArchiveRetentionLimitMillis(referenceMillis, retentionDays) ?: return true
+    return hastaMillis <= retentionLimitMillis
 }
 
 internal fun isWeekdayEnabled(fechaMillis: Long, enabledWeekdays: Set<Int>): Boolean {
@@ -203,4 +279,11 @@ internal fun isWeekdayEnabled(fechaMillis: Long, enabledWeekdays: Set<Int>): Boo
     }.get(Calendar.DAY_OF_WEEK)
 
     return sanitizeWeekdays(enabledWeekdays).contains(dayOfWeek)
+}
+
+private fun Calendar.clearTime(): Calendar = apply {
+    set(Calendar.HOUR_OF_DAY, 0)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
 }

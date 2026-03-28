@@ -58,7 +58,7 @@ class MisReservasActivity : BaseActivity() {
         val reservas = ReservasRepository.obtenerReservasProximosSieteDias()
         val imageUrlsByDish = MenuRepository.obtenerSecciones()
             .flatMap { seccion -> seccion.opciones }
-            .associate { plato -> plato.nombre to plato.imageUrl }
+            .associate { plato -> plato.id to plato.imageUrl }
 
         recyclerView.adapter = MisReservasAdapter(
             reservas = reservas,

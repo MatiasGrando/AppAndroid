@@ -49,7 +49,7 @@ class AdminMenuFechaActivity : BaseActivity() {
                     return@cargarSecciones
                 }
 
-                MenuRepository.obtenerClavesPlatosHabilitados(selectedConfigDateMillis) { okConfig, dishKeys ->
+                MenuRepository.obtenerIdsPlatosHabilitados(selectedConfigDateMillis, loadedSections) { okConfig, dishIds ->
                     runOnUiThread {
                         if (!okConfig) {
                             Toast.makeText(this, R.string.error_cargar_menu_fecha, Toast.LENGTH_SHORT).show()
@@ -60,7 +60,7 @@ class AdminMenuFechaActivity : BaseActivity() {
                             section.opciones.map { dish ->
                                 DishConfigOption(
                                     label = "${section.nombre} • ${dish.nombre}",
-                                    dishKey = MenuRepository.clavePlato(section.nombre, dish.nombre)
+                                    dishId = dish.id
                                 )
                             }
                         }
@@ -73,9 +73,9 @@ class AdminMenuFechaActivity : BaseActivity() {
                             labels
                         )
 
-                        val useFallback = dishKeys == null
+                        val useFallback = dishIds == null
                         platosConfigurables.forEachIndexed { index, option ->
-                            val checked = if (useFallback) true else dishKeys.contains(option.dishKey)
+                            val checked = if (useFallback) true else dishIds.contains(option.dishId)
                             listPlatosFecha.setItemChecked(index, checked)
                         }
                     }
@@ -113,7 +113,7 @@ class AdminMenuFechaActivity : BaseActivity() {
             val selectedKeys = mutableSetOf<String>()
             for (i in platosConfigurables.indices) {
                 if (listPlatosFecha.isItemChecked(i)) {
-                    selectedKeys.add(platosConfigurables[i].dishKey)
+                    selectedKeys.add(platosConfigurables[i].dishId)
                 }
             }
 
@@ -139,5 +139,5 @@ class AdminMenuFechaActivity : BaseActivity() {
 
 private data class DishConfigOption(
     val label: String,
-    val dishKey: String
+    val dishId: String
 )

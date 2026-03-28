@@ -21,10 +21,10 @@ class MenuOptionAdapter(
     private var selectedPosition = RecyclerView.NO_POSITION
     private var themePalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
 
-    fun updateItems(newItems: List<MenuItemOption>, selectedName: String?) {
+    fun updateItems(newItems: List<MenuItemOption>, selectedId: String?) {
         items = newItems
-        selectedPosition = selectedName?.let { name ->
-            items.indexOfFirst { it.name == name }
+        selectedPosition = selectedId?.let { id ->
+            items.indexOfFirst { it.id == id }
         }?.takeIf { it >= 0 } ?: RecyclerView.NO_POSITION
         notifyDataSetChanged()
     }

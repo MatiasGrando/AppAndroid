@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
@@ -23,26 +24,30 @@ class AdminMenuActivity : BaseActivity() {
 
         setContentView(R.layout.activity_admin_menu)
 
-        val etNombrePlato = findViewById<android.widget.EditText>(R.id.etNombrePlato)
-        val etDetallePlato = findViewById<android.widget.EditText>(R.id.etDetallePlato)
-        val etImagenUrl = findViewById<android.widget.EditText>(R.id.etImagenUrl)
+        val etNombrePlato = findViewById<EditText>(R.id.etNombrePlato)
+        val etDetallePlato = findViewById<EditText>(R.id.etDetallePlato)
+        val etImagenUrl = findViewById<EditText>(R.id.etImagenUrl)
         val selectorSeccion = findViewById<AutoCompleteTextView>(R.id.actvSeccionPlato)
+        val tvModoFormulario = findViewById<TextView>(R.id.tvModoFormularioPlato)
         val tvGuarnicion = findViewById<TextView>(R.id.tvGuarnicion)
         val layoutGuarnicionChecks = findViewById<LinearLayout>(R.id.layoutGuarnicionChecks)
         val cbGuarnicionSi = findViewById<CheckBox>(R.id.cbGuarnicionSi)
         val cbGuarnicionNo = findViewById<CheckBox>(R.id.cbGuarnicionNo)
-        val btnCrearPlato = findViewById<Button>(R.id.btnCrearPlato)
+        val btnGuardarPlato = findViewById<Button>(R.id.btnCrearPlato)
+        val btnCancelarEdicion = findViewById<Button>(R.id.btnCancelarEdicionPlato)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
 
         val secciones = MenuRepository.seccionesPermitidas()
+        var platosListado: List<AdminDishListItem> = emptyList()
+        var editingDishId: String? = null
+
         selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
         selectorSeccion.threshold = 0
         selectorSeccion.setOnClickListener { selectorSeccion.showDropDown() }
         selectorSeccion.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) selectorSeccion.showDropDown()
         }
-        selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
 
         cbGuarnicionSi.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) cbGuarnicionNo.isChecked = false
@@ -51,37 +56,77 @@ class AdminMenuActivity : BaseActivity() {
             if (isChecked) cbGuarnicionSi.isChecked = false
         }
 
+        fun seleccionarGuarnicion(value: Boolean?) {
+            cbGuarnicionSi.isChecked = value == true
+            cbGuarnicionNo.isChecked = value == false
+        }
+
         fun actualizarVisibilidadGuarnicion() {
-            val esPrincipal = selectorSeccion.text.toString().trim() == "Plato principal"
-            val visibilidad = if (esPrincipal) View.VISIBLE else View.GONE
-            tvGuarnicion.visibility = visibilidad
-            layoutGuarnicionChecks.visibility = visibilidad
+            val esPrincipal = MenuIdentity.normalizeSectionId(
+                rawSectionId = null,
+                rawSectionName = selectorSeccion.text.toString().trim()
+            ) == MenuIdentity.SECTION_MAIN
+            val visibility = if (esPrincipal) View.VISIBLE else View.GONE
+            tvGuarnicion.visibility = visibility
+            layoutGuarnicionChecks.visibility = visibility
             if (!esPrincipal) {
-                cbGuarnicionSi.isChecked = false
-                cbGuarnicionNo.isChecked = false
+                seleccionarGuarnicion(null)
             }
         }
 
-        selectorSeccion.setOnItemClickListener { _, _, _, _ -> actualizarVisibilidadGuarnicion() }
-        actualizarVisibilidadGuarnicion()
+        fun salirModoEdicion() {
+            editingDishId = null
+            tvModoFormulario.text = getString(R.string.admin_menu_crear_plato)
+            btnGuardarPlato.text = getString(R.string.crear_plato)
+            btnCancelarEdicion.visibility = View.GONE
+            etNombrePlato.setText("")
+            etDetallePlato.setText("")
+            etImagenUrl.setText("")
+            selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
+            seleccionarGuarnicion(null)
+            actualizarVisibilidadGuarnicion()
+        }
+
+        fun cargarPlatoEnFormulario(item: AdminDishListItem) {
+            editingDishId = item.dish.id
+            tvModoFormulario.text = getString(R.string.admin_menu_editar_plato)
+            btnGuardarPlato.text = getString(R.string.guardar_cambios_plato)
+            btnCancelarEdicion.visibility = View.VISIBLE
+            selectorSeccion.setText(item.sectionName, false)
+            etNombrePlato.setText(item.dish.nombre)
+            etDetallePlato.setText(item.dish.detalle)
+            etImagenUrl.setText(item.dish.imageUrl)
+            actualizarVisibilidadGuarnicion()
+            seleccionarGuarnicion(item.dish.guarnicion.takeIf { item.sectionId == MenuIdentity.SECTION_MAIN })
+        }
 
         fun refrescarListadoSecciones() {
             MenuRepository.cargarSecciones { ok, loadedSections ->
                 runOnUiThread {
-                    val items = loadedSections.map { section ->
-                        val platos = if (section.opciones.isEmpty()) {
-                            "(sin platos)"
-                        } else {
-                            section.opciones.joinToString(" | ") { plato ->
-                                val detalleGuarnicion = if (section.nombre == "Plato principal") {
-                                    " (Guarnición: ${if (plato.guarnicion) getString(R.string.si) else getString(R.string.no)})"
-                                } else {
-                                    ""
-                                }
-                                "${plato.nombre} - ${plato.detalle}$detalleGuarnicion"
-                            }
+                    platosListado = loadedSections.flatMap { section ->
+                        section.opciones.map { dish ->
+                            AdminDishListItem(
+                                sectionId = section.id,
+                                sectionName = section.nombre,
+                                dish = dish
+                            )
                         }
-                        "${section.nombre}: $platos"
+                    }
+
+                    val items = if (platosListado.isEmpty()) {
+                        listOf("(sin platos)")
+                    } else {
+                        platosListado.map { item ->
+                            val detalle = item.dish.detalle.takeIf { it.isNotBlank() }
+                                ?.let { " - $it" }
+                                .orEmpty()
+                            val detalleGuarnicion = if (item.sectionId == MenuIdentity.SECTION_MAIN) {
+                                " - ${getString(R.string.label_guarnicion)}: ${if (item.dish.guarnicion) getString(R.string.si) else getString(R.string.no)}"
+                            } else {
+                                ""
+                            }
+                            "${item.sectionName} - ${item.dish.nombre}$detalle$detalleGuarnicion"
+                        }
                     }
                     listSecciones.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
 
@@ -92,9 +137,16 @@ class AdminMenuActivity : BaseActivity() {
             }
         }
 
+        selectorSeccion.setOnItemClickListener { _, _, _, _ -> actualizarVisibilidadGuarnicion() }
+        listSecciones.setOnItemClickListener { _, _, position, _ ->
+            platosListado.getOrNull(position)?.let(::cargarPlatoEnFormulario)
+        }
+        btnCancelarEdicion.setOnClickListener { salirModoEdicion() }
+
+        salirModoEdicion()
         refrescarListadoSecciones()
 
-        btnCrearPlato.setOnClickListener {
+        btnGuardarPlato.setOnClickListener {
             val seccion = selectorSeccion.text.toString().trim()
             val nombre = etNombrePlato.text.toString().trim()
             val detalle = etDetallePlato.text.toString().trim()
@@ -105,7 +157,9 @@ class AdminMenuActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            val guarnicion = if (seccion == "Plato principal") {
+            val guarnicion = if (
+                MenuIdentity.normalizeSectionId(rawSectionId = null, rawSectionName = seccion) == MenuIdentity.SECTION_MAIN
+            ) {
                 when {
                     cbGuarnicionSi.isChecked -> true
                     cbGuarnicionNo.isChecked -> false
@@ -118,28 +172,52 @@ class AdminMenuActivity : BaseActivity() {
                 false
             }
 
-            MenuRepository.agregarPlato(
-                seccion = seccion,
-                nombre = nombre,
-                detalle = detalle,
-                imageUrl = imageUrl,
-                guarnicion = guarnicion
-            ) { ok ->
+            val currentEditingDishId = editingDishId
+            val action: (((Boolean) -> Unit) -> Unit) = if (currentEditingDishId == null) {
+                { onComplete ->
+                    MenuRepository.agregarPlato(
+                        seccion = seccion,
+                        nombre = nombre,
+                        detalle = detalle,
+                        imageUrl = imageUrl,
+                        guarnicion = guarnicion,
+                        onComplete = onComplete
+                    )
+                }
+            } else {
+                { onComplete ->
+                    MenuRepository.actualizarPlato(
+                        dishId = currentEditingDishId,
+                        seccion = seccion,
+                        nombre = nombre,
+                        detalle = detalle,
+                        imageUrl = imageUrl,
+                        guarnicion = guarnicion,
+                        onComplete = onComplete
+                    )
+                }
+            }
+
+            action { ok ->
                 runOnUiThread {
                     if (!ok) {
-                        Toast.makeText(this, R.string.error_guardar_menu, Toast.LENGTH_SHORT).show()
+                        val errorRes = if (currentEditingDishId == null) {
+                            R.string.error_guardar_menu
+                        } else {
+                            R.string.error_actualizar_menu
+                        }
+                        Toast.makeText(this, errorRes, Toast.LENGTH_SHORT).show()
                         return@runOnUiThread
                     }
 
-                    etNombrePlato.setText("")
-                    etDetallePlato.setText("")
-                    etImagenUrl.setText("")
-                    selectorSeccion.setText(secciones.firstOrNull().orEmpty(), false)
-                    cbGuarnicionSi.isChecked = false
-                    cbGuarnicionNo.isChecked = false
-                    actualizarVisibilidadGuarnicion()
+                    salirModoEdicion()
                     refrescarListadoSecciones()
-                    Toast.makeText(this, R.string.mensaje_plato_agregado, Toast.LENGTH_SHORT).show()
+                    val messageRes = if (currentEditingDishId == null) {
+                        R.string.mensaje_plato_agregado
+                    } else {
+                        R.string.mensaje_plato_actualizado
+                    }
+                    Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -153,3 +231,9 @@ class AdminMenuActivity : BaseActivity() {
         }
     }
 }
+
+private data class AdminDishListItem(
+    val sectionId: String,
+    val sectionName: String,
+    val dish: MenuDish
+)

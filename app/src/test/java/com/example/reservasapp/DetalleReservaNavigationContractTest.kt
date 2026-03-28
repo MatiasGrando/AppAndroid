@@ -19,7 +19,7 @@ class DetalleReservaNavigationContractTest {
         val reserva = Reserva(
             id = "reserva-42",
             fechaMillis = 1_718_181_818_000L,
-            selecciones = mapOf("Plato principal" to "Milanesa"),
+            selecciones = mapOf(MenuIdentity.SECTION_MAIN to "dish-main-1"),
             userId = "user-1"
         )
 

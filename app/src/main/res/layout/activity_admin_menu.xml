@@ -12,11 +12,18 @@
             android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
 
         <TextView
+            android:id="@+id/tvModoFormularioPlato"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/admin_menu_crear_plato"
             android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/admin_menu_editar_hint" />
 
         <TextView
             android:layout_width="match_parent"
@@ -91,6 +98,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="@string/crear_plato" />
+
+        <Button
+            style="@style/Widget.ReservasApp.Button.Primary"
+            android:id="@+id/btnCancelarEdicionPlato"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/cancelar_edicion_plato"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="match_parent"

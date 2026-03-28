@@ -18,7 +18,7 @@ import java.util.Locale
 class ConfirmacionReservaActivity : BaseActivity() {
 
     private val storage by lazy { FirebaseStorage.getInstance() }
-    private var imageByDishNormalized: Map<String, String> = emptyMap()
+    private var imageByDishId: Map<String, String> = emptyMap()
 
     companion object {
         const val EXTRA_FECHA = "extra_fecha"
@@ -72,9 +72,12 @@ class ConfirmacionReservaActivity : BaseActivity() {
         } else {
             reserva?.selecciones.orEmpty()
         }
-        val principal = extraerSeleccion(seleccionesVisualizadas, "plato", "principal")
-        val guarnicion = extraerSeleccion(seleccionesVisualizadas, "guarn")
-        val postre = extraerSeleccion(seleccionesVisualizadas, "postre")
+        val principalId = seleccionesVisualizadas[MenuIdentity.SECTION_MAIN]
+        val guarnicionId = seleccionesVisualizadas[MenuIdentity.SECTION_SIDE]
+        val postreId = seleccionesVisualizadas[MenuIdentity.SECTION_DESSERT]
+        val principal = MenuRepository.nombrePlato(MenuIdentity.SECTION_MAIN, principalId)
+        val guarnicion = MenuRepository.nombrePlato(MenuIdentity.SECTION_SIDE, guarnicionId)
+        val postre = MenuRepository.nombrePlato(MenuIdentity.SECTION_DESSERT, postreId)
 
         val formatter = SimpleDateFormat("EEEE d/M/yy", Locale("es", "ES"))
         val fechaVisual = when {
@@ -99,9 +102,9 @@ class ConfirmacionReservaActivity : BaseActivity() {
         ivPostre.setImageResource(imageForSelection(postre))
 
         cargarImagenesMenuDesdeStorage(
-            principal = principal,
-            guarnicion = guarnicion,
-            postre = postre,
+            principalId = principalId,
+            guarnicionId = guarnicionId,
+            postreId = postreId,
             ivPrincipal = ivPrincipal,
             ivGuarnicion = ivGuarnicion,
             ivPostre = ivPostre
@@ -216,54 +219,55 @@ class ConfirmacionReservaActivity : BaseActivity() {
     }
 
     private fun cargarImagenesMenuDesdeStorage(
-        principal: String?,
-        guarnicion: String?,
-        postre: String?,
+        principalId: String?,
+        guarnicionId: String?,
+        postreId: String?,
         ivPrincipal: ImageView,
         ivGuarnicion: ImageView,
         ivPostre: ImageView
     ) {
         val imageUrlsByDish = MenuRepository.obtenerSecciones()
             .flatMap { it.opciones }
-            .associate { plato -> normalizarNombre(plato.nombre) to plato.imageUrl }
+            .associate { plato -> plato.id to plato.imageUrl }
 
-        imageByDishNormalized = imageUrlsByDish
+        imageByDishId = imageUrlsByDish
 
-        if (imageByDishNormalized.isEmpty()) {
+        if (imageByDishId.isEmpty()) {
             MenuRepository.cargarSecciones { ok, secciones ->
                 if (!ok) return@cargarSecciones
 
-                imageByDishNormalized = secciones
+                imageByDishId = secciones
                     .flatMap { it.opciones }
-                    .associate { plato -> normalizarNombre(plato.nombre) to plato.imageUrl }
+                    .associate { plato -> plato.id to plato.imageUrl }
 
-                cargarImagenDesdeStorage(principal, ivPrincipal)
-                cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
-                cargarImagenDesdeStorage(postre, ivPostre)
+                cargarImagenDesdeStorage(MenuIdentity.SECTION_MAIN, principalId, ivPrincipal)
+                cargarImagenDesdeStorage(MenuIdentity.SECTION_SIDE, guarnicionId, ivGuarnicion)
+                cargarImagenDesdeStorage(MenuIdentity.SECTION_DESSERT, postreId, ivPostre)
             }
             return
         }
 
-        cargarImagenDesdeStorage(principal, ivPrincipal)
-        cargarImagenDesdeStorage(guarnicion, ivGuarnicion)
-        cargarImagenDesdeStorage(postre, ivPostre)
+        cargarImagenDesdeStorage(MenuIdentity.SECTION_MAIN, principalId, ivPrincipal)
+        cargarImagenDesdeStorage(MenuIdentity.SECTION_SIDE, guarnicionId, ivGuarnicion)
+        cargarImagenDesdeStorage(MenuIdentity.SECTION_DESSERT, postreId, ivPostre)
     }
 
-    private fun cargarImagenDesdeStorage(nombrePlato: String?, imageView: ImageView) {
-        val fallbackImage = imageForSelection(nombrePlato)
-        val nombreNormalizado = normalizarNombre(nombrePlato.orEmpty())
-        if (nombreNormalizado.isBlank()) {
+    private fun cargarImagenDesdeStorage(sectionId: String, dishId: String?, imageView: ImageView) {
+        val visibleName = MenuRepository.nombrePlato(sectionId, dishId)
+        val fallbackImage = imageForSelection(visibleName)
+        val normalizedDishId = dishId.orEmpty().trim()
+        if (normalizedDishId.isBlank()) {
             imageView.setImageResource(fallbackImage)
             return
         }
 
-        val imagePath = imageByDishNormalized[nombreNormalizado].orEmpty()
+        val imagePath = imageByDishId[normalizedDishId].orEmpty()
         if (imagePath.isBlank()) {
             imageView.setImageResource(fallbackImage)
             return
         }
 
-        imageView.tag = nombreNormalizado
+        imageView.tag = normalizedDishId
 
         when {
             imagePath.startsWith("http", ignoreCase = true) -> {
@@ -277,7 +281,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
             imagePath.startsWith("gs://", ignoreCase = true) -> {
                 storage.getReferenceFromUrl(imagePath).downloadUrl
                     .addOnSuccessListener { uri ->
-                        aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                        aplicarImagenSiCorresponde(imageView, normalizedDishId, uri, fallbackImage)
                     }
                     .addOnFailureListener {
                         imageView.setImageResource(fallbackImage)
@@ -287,7 +291,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
             else -> {
                 storage.reference.child(imagePath.trimStart('/')).downloadUrl
                     .addOnSuccessListener { uri ->
-                        aplicarImagenSiCorresponde(imageView, nombreNormalizado, uri, fallbackImage)
+                        aplicarImagenSiCorresponde(imageView, normalizedDishId, uri, fallbackImage)
                     }
                     .addOnFailureListener {
                         imageView.setImageResource(fallbackImage)
@@ -310,20 +314,6 @@ class ConfirmacionReservaActivity : BaseActivity() {
             .error(fallbackImage)
             .into(imageView)
     }
-}
-
-internal fun extraerSeleccion(selecciones: Map<String, String>, vararg aliases: String): String? {
-    return selecciones.entries.firstOrNull { (key, _) ->
-        val keyNormalized = key.lowercase()
-        aliases.all { keyNormalized.contains(it.lowercase()) }
-    }?.value
-}
-
-internal fun normalizarNombre(nombre: String): String {
-    return nombre
-        .trim()
-        .lowercase(Locale.ROOT)
-        .replace("\\s+".toRegex(), " ")
 }
 
 internal data class ConfirmacionReservaRequest(

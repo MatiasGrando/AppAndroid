@@ -85,14 +85,14 @@ class DetalleReservaActivity : BaseActivity() {
         val pagerAdapter = MenuSectionsPagerAdapter(
             sections = secciones,
             selections = selecciones
-        ) { sectionName, selectedOption, isDoubleTap ->
-            selecciones[sectionName] = selectedOption
+        ) { sectionId, selectedOptionId, isDoubleTap ->
+            selecciones[sectionId] = selectedOptionId
 
             shouldAutoContinueOnNextSelection = isDoubleTap
 
-            if (sectionName.equals("Plato principal", ignoreCase = true)) {
+            if (sectionId == MenuIdentity.SECTION_MAIN) {
                 guarnicionesHabilitadas = false
-                selecciones["Guarniciones"] = null
+                selecciones[MenuIdentity.SECTION_SIDE] = null
                 actualizarEstadoTabGuarnicion(tabLayout, secciones, guarnicionesHabilitadas)
                 refrescarSeccionGuarniciones(viewPager, secciones)
             }
@@ -154,8 +154,8 @@ class DetalleReservaActivity : BaseActivity() {
                     return
                 }
 
-                val indicePrincipal = obtenerIndiceSeccion(secciones, "Plato principal")
-                val indiceGuarnicion = obtenerIndiceSeccion(secciones, "Guarniciones")
+                val indicePrincipal = obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_MAIN)
+                val indiceGuarnicion = obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_SIDE)
                 val destino = when {
                     currentSectionIndex > indiceGuarnicion && !guarnicionesHabilitadas && indicePrincipal != -1 -> indicePrincipal
                     else -> currentSectionIndex - 1
@@ -172,7 +172,7 @@ class DetalleReservaActivity : BaseActivity() {
 
                 guarnicionesHabilitadas = estaGuarnicionHabilitada(secciones, selecciones)
                 if (!guarnicionesHabilitadas) {
-                    selecciones["Guarniciones"] = null
+                    selecciones[MenuIdentity.SECTION_SIDE] = null
                     refrescarSeccionGuarniciones(viewPager, secciones)
                 }
 
@@ -192,24 +192,24 @@ class DetalleReservaActivity : BaseActivity() {
         btnContinuar.setOnClickListener {
             shouldAutoContinueOnNextSelection = false
             val section = secciones.getOrNull(currentSectionIndex) ?: return@setOnClickListener
-            val seleccionActual = selecciones[section.nombre]
+            val seleccionActual = selecciones[section.id]
             if (seleccionActual.isNullOrBlank()) return@setOnClickListener
 
-            if (section.nombre.equals("Plato principal", ignoreCase = true)) {
-                val platoPrincipal = section.opciones.firstOrNull { it.nombre == seleccionActual }
+            if (section.id == MenuIdentity.SECTION_MAIN) {
+                val platoPrincipal = section.opciones.firstOrNull { it.id == seleccionActual }
                 guarnicionesHabilitadas = platoPrincipal?.guarnicion == true
 
                 if (!guarnicionesHabilitadas) {
-                    selecciones["Guarniciones"] = null
+                    selecciones[MenuIdentity.SECTION_SIDE] = null
                     refrescarSeccionGuarniciones(viewPager, secciones)
                 }
 
                 actualizarEstadoTabGuarnicion(tabLayout, secciones, guarnicionesHabilitadas)
 
                 val indiceDestino = if (guarnicionesHabilitadas) {
-                    obtenerIndiceSeccion(secciones, "Guarniciones")
+                    obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_SIDE)
                 } else {
-                    obtenerIndiceSeccion(secciones, "Postres")
+                    obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_DESSERT)
                 }
                 navegarSiExiste(viewPager, indiceDestino)
                 return@setOnClickListener
@@ -284,7 +284,7 @@ class DetalleReservaActivity : BaseActivity() {
         secciones: List<MenuSection>,
         guarnicionesHabilitadas: Boolean
     ) {
-        val indiceGuarnicion = obtenerIndiceSeccion(secciones, "Guarniciones")
+        val indiceGuarnicion = obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_SIDE)
         if (indiceGuarnicion == -1) return
 
         val tabGuarnicion = tabLayout.getTabAt(indiceGuarnicion) ?: return
@@ -292,7 +292,7 @@ class DetalleReservaActivity : BaseActivity() {
     }
 
     private fun refrescarSeccionGuarniciones(viewPager: ViewPager2, secciones: List<MenuSection>) {
-        val indiceGuarnicion = obtenerIndiceSeccion(secciones, "Guarniciones")
+        val indiceGuarnicion = obtenerIndiceSeccion(secciones, MenuIdentity.SECTION_SIDE)
         if (indiceGuarnicion == -1) return
         viewPager.adapter?.notifyItemChanged(indiceGuarnicion)
     }
@@ -304,14 +304,14 @@ class DetalleReservaActivity : BaseActivity() {
         currentSectionIndex: Int
     ) {
         val section = secciones.getOrNull(currentSectionIndex)
-        val isSelected = section != null && !selecciones[section.nombre].isNullOrBlank()
+        val isSelected = section != null && !selecciones[section.id].isNullOrBlank()
         btnContinuar.isEnabled = isSelected
         btnContinuar.alpha = if (isSelected) 1f else 0.5f
         btnContinuar.text = getString(R.string.continuar)
     }
 
-    private fun obtenerIndiceSeccion(secciones: List<MenuSection>, nombre: String): Int {
-        return secciones.indexOfFirst { it.nombre.equals(nombre, ignoreCase = true) }
+    private fun obtenerIndiceSeccion(secciones: List<MenuSection>, sectionId: String): Int {
+        return secciones.indexOfFirst { it.id == sectionId }
     }
 
     private fun navegarSiExiste(viewPager: ViewPager2, index: Int) {
@@ -324,10 +324,10 @@ class DetalleReservaActivity : BaseActivity() {
         secciones: List<MenuSection>,
         selecciones: Map<String, String?>
     ): Boolean {
-        val principal = secciones.firstOrNull { it.nombre.equals("Plato principal", ignoreCase = true) }
+        val principal = secciones.firstOrNull { it.id == MenuIdentity.SECTION_MAIN }
             ?: return false
-        val seleccionPrincipal = selecciones[principal.nombre] ?: return false
-        return principal.opciones.firstOrNull { it.nombre == seleccionPrincipal }?.guarnicion == true
+        val seleccionPrincipal = selecciones[principal.id] ?: return false
+        return principal.opciones.firstOrNull { it.id == seleccionPrincipal }?.guarnicion == true
     }
 
     private fun applyMenuTheme(
@@ -381,7 +381,7 @@ internal fun detalleReservaNavigationForEdit(reserva: Reserva): DetalleReservaNa
 private class MenuSectionsPagerAdapter(
     private var sections: List<MenuSection>,
     private val selections: Map<String, String?>,
-    private val onOptionSelected: (sectionName: String, selectedOption: String, isDoubleTap: Boolean) -> Unit
+    private val onOptionSelected: (sectionId: String, selectedOptionId: String, isDoubleTap: Boolean) -> Unit
 ) : RecyclerView.Adapter<MenuSectionsPagerAdapter.SectionPageViewHolder>() {
 
     private var currentPalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
@@ -405,8 +405,8 @@ private class MenuSectionsPagerAdapter(
         val section = sections[position]
         val items = MenuVisualRepository.buildItemsForSection(section.opciones)
 
-        holder.bind(items, selections[section.nombre], currentPalette) { selectionEvent ->
-            onOptionSelected(section.nombre, selectionEvent.option.name, selectionEvent.isDoubleTap)
+        holder.bind(items, selections[section.id], currentPalette) { selectionEvent ->
+            onOptionSelected(section.id, selectionEvent.option.id, selectionEvent.isDoubleTap)
         }
     }
 

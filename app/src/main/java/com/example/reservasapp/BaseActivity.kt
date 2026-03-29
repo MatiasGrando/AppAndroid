@@ -1,22 +1,41 @@
 package com.example.reservasapp
 
+import android.app.ActivityManager
+import android.graphics.BitmapFactory
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.example.reservasapp.branding.AppRuntime
+import com.example.reservasapp.firebase.FirebaseProvider
 
 open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         AppThemePreference.applySavedMode(this)
         super.onCreate(savedInstanceState)
+        applyBuyerVisibleIdentity()
 
         if (UserSession.state == UserSession.State.Uninitialized) {
             SessionBootstrap.bootstrap()
         }
     }
 
+    protected fun applyBuyerVisibleIdentity() {
+        if (!AppRuntime.isInitialized) {
+            return
+        }
+
+        val branding = AppRuntime.branding
+        title = getString(branding.appNameRes)
+        setTaskDescription(
+            ActivityManager.TaskDescription(
+                getString(branding.appNameRes),
+                BitmapFactory.decodeResource(resources, branding.appLogoRes)
+            )
+        )
+    }
+
     protected fun ensureAuthenticatedSession(): Boolean {
-        return when (BaseActivityGuards.resolveAuthenticatedGuard(UserSession.state, FirebaseAuth.getInstance().currentUser != null)) {
+        return when (BaseActivityGuards.resolveAuthenticatedGuard(UserSession.state, FirebaseProvider.auth().currentUser != null)) {
             AuthenticatedGuardAction.ALLOW -> true
             AuthenticatedGuardAction.BOOTSTRAP_AND_ALLOW -> {
                 SessionBootstrap.bootstrap()

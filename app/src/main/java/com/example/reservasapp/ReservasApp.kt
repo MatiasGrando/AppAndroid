@@ -1,6 +1,8 @@
 package com.example.reservasapp
 
 import android.app.Application
+import com.example.reservasapp.branding.AppRuntime
+import com.example.reservasapp.firebase.FirebaseProvider
 
 class ReservasApp : Application() {
     companion object {
@@ -15,6 +17,8 @@ class ReservasApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        AppRuntime.initialize(this)
+        FirebaseProvider.initialize(this)
         AppThemePreference.applySavedMode(this)
     }
 }

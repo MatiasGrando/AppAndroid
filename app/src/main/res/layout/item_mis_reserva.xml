@@ -50,9 +50,10 @@
                     android:paddingEnd="12dp">
 
                     <TextView
+                        android:id="@+id/tvPlatoPrincipalLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Plato principal"
+                        android:text="@string/label_plato_principal"
                         android:textColor="@color/mis_reserva_section_text"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -80,6 +81,7 @@
             </LinearLayout>
 
             <View
+                android:id="@+id/dividerPreGuarnicion"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="4dp"
@@ -101,9 +103,10 @@
                     android:paddingEnd="12dp">
 
                     <TextView
+                        android:id="@+id/tvGuarnicionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Guarnición"
+                        android:text="@string/label_guarnicion"
                         android:textColor="@color/mis_reserva_section_text"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -152,9 +155,10 @@
                     android:paddingEnd="12dp">
 
                     <TextView
+                        android:id="@+id/tvPostreLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Postre"
+                        android:text="@string/label_postre"
                         android:textColor="@color/mis_reserva_section_text"
                         android:textSize="20sp"
                         android:textStyle="bold" />

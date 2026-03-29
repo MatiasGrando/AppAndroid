@@ -1,5 +1,6 @@
 package com.example.reservasapp
 
+import com.example.reservasapp.firebase.FirebaseProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -43,8 +44,8 @@ object ReservasRepository {
     private const val SECTION_POSTRES = MenuIdentity.SECTION_DESSERT
 
     private val reservas = mutableListOf<Reserva>()
-    private val firestore by lazy { FirebaseFirestore.getInstance() }
-    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val firestore by lazy { FirebaseProvider.firestore() }
+    private val auth by lazy { FirebaseProvider.auth() }
 
     data class DetallePedidoUsuario(
         val empresa: String,

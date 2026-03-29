@@ -1,9 +1,19 @@
 <resources>
-    <string name="app_name">Lunch Point</string>
+    <string name="app_name">Reservas App</string>
+    <string name="branding_lunch_point_app_name">Lunch Point</string>
+    <string name="branding_lunch_point_login_title">Inicia sesión con Google en Lunch Point</string>
+    <string name="branding_lunch_point_home_title">LUNCH POINT</string>
+    <string name="branding_lunch_point_home_primary_action">ENCARGAR VIANDAS</string>
+    <string name="branding_lunch_point_home_secondary_action">VER ENCARGOS</string>
+    <string name="branding_super_viandas_app_name">Super Viandas</string>
+    <string name="branding_super_viandas_login_title">Inicia sesión con Google en Super Viandas</string>
+    <string name="branding_super_viandas_home_title">SUPER VIANDAS</string>
+    <string name="branding_super_viandas_home_primary_action">PEDIR MENÚS</string>
+    <string name="branding_super_viandas_home_secondary_action">VER PEDIDOS</string>
     <string name="titulo_principal">Sistema de Reservas</string>
-    <string name="titulo_landing">LUNCH POINT</string>
-    <string name="encargar_viandas">ENCARGAR VIANDAS</string>
-    <string name="ver_encargos">VER ENCARGOS</string>
+    <string name="titulo_landing">SISTEMA DE RESERVAS</string>
+    <string name="encargar_viandas">HACER RESERVA</string>
+    <string name="ver_encargos">VER RESERVAS</string>
     <string name="mis_reservas">Mis reservas</string>
     <string name="modo_administrador">Modo administrador</string>
     <string name="selecciona_dia">Selecciona un día para tu reserva</string>

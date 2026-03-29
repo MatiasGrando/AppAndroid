@@ -1,9 +1,9 @@
 package com.example.reservasapp
 
-import com.google.firebase.auth.FirebaseAuth
+import com.example.reservasapp.firebase.FirebaseProvider
 
 object SessionBootstrap {
-    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val auth by lazy { FirebaseProvider.auth() }
 
     internal var currentUserUidProvider: () -> String? = { auth.currentUser?.uid }
     internal var clearCacheAction: () -> Unit = { ReservasRepository.clearCache() }

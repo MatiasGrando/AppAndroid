@@ -26,6 +26,28 @@
     <color name="confirm_image_bg">#FFFFFF</color>
     <color name="confirm_image_stroke">#C99A61</color>
 
+    <color name="branding_lunch_point_login_background">#101820</color>
+    <color name="branding_lunch_point_login_overlay">#99000000</color>
+    <color name="branding_lunch_point_home_overlay">#99000000</color>
+    <color name="branding_lunch_point_primary_action">#C45F1A</color>
+    <color name="branding_lunch_point_secondary_action">#455A64</color>
+    <color name="branding_lunch_point_action_text">#FFFFFF</color>
+    <color name="branding_lunch_point_confirmation_title">#F6E9C5</color>
+    <color name="branding_lunch_point_confirmation_body">#D9D2C1</color>
+    <color name="branding_lunch_point_confirmation_card_background">#D9101A24</color>
+    <color name="branding_lunch_point_confirmation_card_stroke">#C99A61</color>
+
+    <color name="branding_super_viandas_login_background">#0F172A</color>
+    <color name="branding_super_viandas_login_overlay">#B3121A2C</color>
+    <color name="branding_super_viandas_home_overlay">#990B1120</color>
+    <color name="branding_super_viandas_primary_action">#2563EB</color>
+    <color name="branding_super_viandas_secondary_action">#0F766E</color>
+    <color name="branding_super_viandas_action_text">#F8FAFC</color>
+    <color name="branding_super_viandas_confirmation_title">#E0F2FE</color>
+    <color name="branding_super_viandas_confirmation_body">#D1FAE5</color>
+    <color name="branding_super_viandas_confirmation_card_background">#CC0F172A</color>
+    <color name="branding_super_viandas_confirmation_card_stroke">#38BDF8</color>
+
     <color name="mis_reserva_card_background">#B3231815</color>
     <color name="mis_reserva_card_stroke">#F0E7DD</color>
     <color name="mis_reserva_header_background">#B85E22</color>

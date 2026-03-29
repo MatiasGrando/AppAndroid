@@ -3,6 +3,7 @@ package com.example.reservasapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
@@ -10,12 +11,15 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.example.reservasapp.branding.AppRuntime
+import com.example.reservasapp.firebase.FirebaseProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : BaseActivity() {
 
@@ -65,7 +69,7 @@ class LoginActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         showLoginUi()
 
-        auth = FirebaseAuth.getInstance()
+        auth = FirebaseProvider.auth()
         if (auth.currentUser != null) {
             cargarDatosInicialesYEntrar()
             return
@@ -91,6 +95,7 @@ class LoginActivity : BaseActivity() {
         loginTitle = findViewById(R.id.tvLoginTitle)
         googleButton = findViewById(R.id.googleButton)
 
+        applyBranding()
         googleSignInClient = buildGoogleClient()
 
         googleButton.setSize(SignInButton.SIZE_WIDE)
@@ -141,17 +146,33 @@ class LoginActivity : BaseActivity() {
         loginDecor.visibility = View.VISIBLE
         loginOverlay.visibility = View.VISIBLE
         loginLogo.visibility = View.VISIBLE
-        loginTitle.text = getString(R.string.login_google_title)
+        loginTitle.setText(AppRuntime.branding.loginTitleRes)
         loginTitle.visibility = View.VISIBLE
         googleButton.visibility = View.VISIBLE
     }
 
     private fun buildGoogleClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(FirebaseProvider.googleWebClientId())
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(this, gso)
+    }
+
+    private fun applyBranding() {
+        val branding = AppRuntime.branding
+        val appName = getString(branding.appNameRes)
+        findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundColor(
+            ContextCompat.getColor(this, branding.loginBackgroundColorRes)
+        )
+        loginDecor.setBackgroundResource(branding.loginDecorRes)
+        loginOverlay.setBackgroundColor(ContextCompat.getColor(this, branding.loginOverlayColorRes))
+        startupLogo.setImageResource(branding.appLogoRes)
+        startupLogo.contentDescription = appName
+        loginLogo.setImageResource(branding.appLogoRes)
+        loginLogo.contentDescription = appName
+        loginTitle.setText(branding.loginTitleRes)
+        title = appName
     }
 
     private fun openMainScreen() {
@@ -166,7 +187,7 @@ class LoginActivity : BaseActivity() {
         loginDecor.visibility = View.VISIBLE
         loginOverlay.visibility = View.VISIBLE
         loginLogo.visibility = View.VISIBLE
-        loginTitle.text = getString(R.string.login_google_title)
+        loginTitle.setText(AppRuntime.branding.loginTitleRes)
         loginTitle.visibility = View.VISIBLE
         googleButton.visibility = View.VISIBLE
 

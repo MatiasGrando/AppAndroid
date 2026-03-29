@@ -1,15 +1,21 @@
 package com.example.reservasapp
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import com.example.reservasapp.branding.AppRuntime
+import com.example.reservasapp.firebase.FirebaseProvider
+import com.google.android.material.button.MaterialButton
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : BaseActivity() {
 
@@ -23,6 +29,7 @@ class MainActivity : BaseActivity() {
         }
 
         setContentView(R.layout.activity_main)
+        applyBranding()
 
         val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         setSupportActionBar(toolbar)
@@ -115,7 +122,7 @@ class MainActivity : BaseActivity() {
     private fun logout() {
         ReservasRepository.clearCache()
         UserSession.setUnauthenticated()
-        FirebaseAuth.getInstance().signOut()
+        FirebaseProvider.auth().signOut()
         googleSignInClient.signOut().addOnCompleteListener {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -126,10 +133,36 @@ class MainActivity : BaseActivity() {
 
     private fun buildGoogleClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(FirebaseProvider.googleWebClientId())
             .requestEmail()
             .build()
         return GoogleSignIn.getClient(this, gso)
+    }
+
+    private fun applyBranding() {
+        val branding = AppRuntime.branding
+        findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundResource(branding.homeBackgroundRes)
+        findViewById<View>(R.id.overlay).setBackgroundColor(
+            ContextCompat.getColor(this, branding.homeOverlayColorRes)
+        )
+        findViewById<TextView>(R.id.tvTitle).setText(branding.homeTitleRes)
+
+        val reservarButton = findViewById<MaterialButton>(R.id.btnReservar)
+        val misReservasButton = findViewById<MaterialButton>(R.id.btnMisReservas)
+
+        reservarButton.setText(branding.homePrimaryActionRes)
+        reservarButton.setTextColor(ContextCompat.getColor(this, branding.actionTextColorRes))
+        reservarButton.backgroundTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(this, branding.primaryActionColorRes)
+        )
+
+        misReservasButton.setText(branding.homeSecondaryActionRes)
+        misReservasButton.setTextColor(ContextCompat.getColor(this, branding.actionTextColorRes))
+        misReservasButton.backgroundTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(this, branding.secondaryActionColorRes)
+        )
+
+        title = getString(branding.appNameRes)
     }
 
     private fun isSessionValidForUi(state: UserSession.State): Boolean {

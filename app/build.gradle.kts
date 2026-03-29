@@ -4,6 +4,24 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+private fun buyerManifestPlaceholders(
+    profileId: String,
+    launcherLabel: String
+): Map<String, String> = mapOf(
+    "clientProfileId" to profileId,
+    "launcherLabel" to launcherLabel
+)
+
+private val lunchPointDefaultManifestPlaceholders = buyerManifestPlaceholders(
+    profileId = "lunch-point",
+    launcherLabel = "@string/branding_lunch_point_app_name"
+)
+
+private val onboardingCheckManifestPlaceholders = buyerManifestPlaceholders(
+    profileId = "super-viandas",
+    launcherLabel = "@string/branding_super_viandas_app_name"
+)
+
 android {
     namespace = "com.example.reservasapp"
     compileSdk = 34
@@ -14,6 +32,11 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        // Keep Lunch Point as the installed default.
+        // For a quick pre-commit onboarding smoke check, temporarily swap to
+        // `onboardingCheckManifestPlaceholders` and then switch back before committing.
+        manifestPlaceholders += lunchPointDefaultManifestPlaceholders
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

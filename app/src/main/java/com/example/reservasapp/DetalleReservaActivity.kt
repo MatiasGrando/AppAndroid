@@ -11,9 +11,11 @@ import android.widget.TextView
 import android.widget.Toast
 
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.reservasapp.branding.AppRuntime
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import java.text.SimpleDateFormat
@@ -67,6 +69,10 @@ class DetalleReservaActivity : BaseActivity() {
         val header = findViewById<LinearLayout>(R.id.header)
         val bottomBar = findViewById<LinearLayout>(R.id.bottomBar)
         val selectionHint = findViewById<TextView>(R.id.tvSeleccionHint)
+        val branding = AppRuntime.branding
+
+        titleText.setText(branding.homeTitleRes)
+        title = getString(branding.appNameRes)
 
         val reservaId = entry.reservaEnEdicion?.id.orEmpty()
         val reservaEnEdicion = entry.reservaEnEdicion
@@ -121,7 +127,7 @@ class DetalleReservaActivity : BaseActivity() {
         pagerAdapter.updateTheme(initialPalette)
 
         applyMenuTheme(
-            palette = initialPalette,
+            branding = branding,
             root = root,
             header = header,
             bottomBar = bottomBar,
@@ -331,7 +337,7 @@ class DetalleReservaActivity : BaseActivity() {
     }
 
     private fun applyMenuTheme(
-        palette: MenuThemePalette,
+        branding: com.example.reservasapp.branding.BrandingConfig,
         root: View,
         header: LinearLayout,
         bottomBar: LinearLayout,
@@ -341,19 +347,26 @@ class DetalleReservaActivity : BaseActivity() {
         selectionHint: TextView,
         btnContinuar: Button
     ) {
-        root.setBackgroundResource(palette.backgroundDrawableRes)
-        header.setBackgroundColor(palette.panelBackgroundColor)
-        bottomBar.setBackgroundColor(palette.panelBackgroundColor)
+        val titleColor = ContextCompat.getColor(this, branding.confirmationTitleColorRes)
+        val bodyColor = ContextCompat.getColor(this, branding.confirmationBodyTextColorRes)
+        val cardColor = ContextCompat.getColor(this, branding.confirmationCardBackgroundColorRes)
+        val strokeColor = ContextCompat.getColor(this, branding.confirmationCardStrokeColorRes)
 
-        titleText.setTextColor(palette.titleColor)
-        dateText.setTextColor(palette.bodyTextColor)
-        selectionHint.setTextColor(palette.hintTextColor)
+        root.setBackgroundResource(branding.homeBackgroundRes)
+        header.setBackgroundColor(cardColor)
+        bottomBar.setBackgroundColor(cardColor)
 
-        tabLayout.setSelectedTabIndicatorColor(palette.tabIndicatorColor)
-        tabLayout.setTabTextColors(palette.tabUnselectedColor, palette.tabSelectedColor)
+        titleText.setTextColor(titleColor)
+        dateText.setTextColor(bodyColor)
+        selectionHint.setTextColor(titleColor)
 
-        btnContinuar.backgroundTintList = ColorStateList.valueOf(palette.buttonBackgroundColor)
-        btnContinuar.setTextColor(palette.buttonTextColor)
+        tabLayout.setSelectedTabIndicatorColor(strokeColor)
+        tabLayout.setTabTextColors(bodyColor, titleColor)
+
+        btnContinuar.backgroundTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(this, branding.primaryActionColorRes)
+        )
+        btnContinuar.setTextColor(ContextCompat.getColor(this, branding.actionTextColorRes))
     }
 }
 

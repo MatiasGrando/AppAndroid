@@ -1,5 +1,6 @@
 package com.example.reservasapp
 
+import com.example.reservasapp.firebase.FirebaseProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -26,8 +27,8 @@ object PerfilRepository {
     private const val FIELD_DNI = "dni"
     private const val FIELD_ADMIN = "admin"
 
-    private val firestore by lazy { FirebaseFirestore.getInstance() }
-    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val firestore by lazy { FirebaseProvider.firestore() }
+    private val auth by lazy { FirebaseProvider.auth() }
 
     fun cargarPerfil(onComplete: (PerfilUsuario?) -> Unit) {
         val uid = auth.currentUser?.uid

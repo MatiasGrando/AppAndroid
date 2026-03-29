@@ -1,5 +1,6 @@
 package com.example.reservasapp
 
+import com.example.reservasapp.firebase.FirebaseProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import java.text.SimpleDateFormat
@@ -21,7 +22,7 @@ object MenuRepository {
     private const val FIELD_ENABLED_DISH_IDS = "enabledDishIds"
     private const val FIELD_ENABLED_DISH_KEYS = "enabledDishKeys"
 
-    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val firestore by lazy { FirebaseProvider.firestore() }
     private val secciones = mutableListOf<MenuSection>()
     private var isLegacyMenuByDateBackfillRunning = false
     private var isLegacyMenuByDateBackfillCompleted = false

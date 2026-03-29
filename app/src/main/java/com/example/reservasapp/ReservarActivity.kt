@@ -1,14 +1,19 @@
 package com.example.reservasapp
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import com.example.reservasapp.branding.AppRuntime
 import android.widget.Toast
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
@@ -18,6 +23,7 @@ class ReservarActivity : BaseActivity() {
     private lateinit var monthLabel: TextView
     private lateinit var gridWeekdays: GridLayout
     private lateinit var gridDays: GridLayout
+    private lateinit var calendarCard: CardView
     private lateinit var continueButton: Button
     private lateinit var flowStatusText: TextView
 
@@ -59,11 +65,14 @@ class ReservarActivity : BaseActivity() {
 
         setContentView(R.layout.activity_reservar)
 
+        calendarCard = findViewById(R.id.calendarCard)
         monthLabel = findViewById(R.id.tvMonth)
         gridWeekdays = findViewById(R.id.gridWeekdays)
         gridDays = findViewById(R.id.gridDays)
         continueButton = findViewById(R.id.btnContinuarConFecha)
         flowStatusText = findViewById(R.id.tvFlowStatus)
+
+        applyBranding()
 
         findViewById<TextView>(R.id.btnPrevMonth).setOnClickListener {
             visibleMonth.add(Calendar.MONTH, -1)
@@ -150,19 +159,27 @@ class ReservarActivity : BaseActivity() {
     }
 
     private fun updateButtonsState() {
+        val branding = AppRuntime.branding
         val hasExistingReservation = selectedDateMillis in reservedDates
         val canCreate = ReservasRepository.puedeCrearReservaEnFecha(selectedDateMillis)
         val canEdit = hasExistingReservation && ReservasRepository.puedeEditarReservaExistenteEnFecha(selectedDateMillis)
         val canContinue = hasUserSelectedDate && (canCreate || canEdit)
+        val buttonColor = ContextCompat.getColor(
+            this,
+            when {
+                !canContinue -> branding.secondaryActionColorRes
+                hasExistingReservation && canEdit -> branding.secondaryActionColorRes
+                else -> branding.primaryActionColorRes
+            }
+        )
 
         continueButton.isEnabled = canContinue
         continueButton.alpha = if (canContinue) 1f else 0.85f
         continueButton.text = getString(
             if (hasExistingReservation && canEdit) R.string.editar_reserva else R.string.reservar
         )
-        continueButton.setBackgroundResource(
-            if (canContinue) R.drawable.bg_button_orange else R.drawable.bg_button_gray
-        )
+        continueButton.backgroundTintList = ColorStateList.valueOf(buttonColor)
+        continueButton.setTextColor(ContextCompat.getColor(this, branding.actionTextColorRes))
 
         flowStatusText.text = getString(
             when {
@@ -175,10 +192,12 @@ class ReservarActivity : BaseActivity() {
 
     private fun renderWeekHeaders() {
         gridWeekdays.removeAllViews()
+        val weekdayColor = ContextCompat.getColor(this, AppRuntime.branding.confirmationBodyTextColorRes)
+
         weekdayLabels.forEach { day ->
             val dayText = TextView(this).apply {
                 text = day
-                setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                setTextColor(weekdayColor)
                 alpha = 0.85f
                 textSize = 20f
                 gravity = Gravity.CENTER
@@ -219,12 +238,19 @@ class ReservarActivity : BaseActivity() {
     }
 
     private fun createDayCell(dayDate: Calendar): View {
+        val branding = AppRuntime.branding
         val isReserved = dayDate.timeInMillis in reservedDates
         val canCreate = ReservasRepository.puedeCrearReservaEnFecha(dayDate.timeInMillis)
         val canEdit = isReserved && ReservasRepository.puedeEditarReservaExistenteEnFecha(dayDate.timeInMillis)
         val isActionable = canCreate || canEdit
         val isSelected = hasUserSelectedDate && dayDate.timeInMillis == selectedDateMillis
         val isToday = dayDate.timeInMillis == today.timeInMillis
+        val actionTextColor = ContextCompat.getColor(this, branding.actionTextColorRes)
+        val titleColor = ContextCompat.getColor(this, branding.confirmationTitleColorRes)
+        val bodyColor = ContextCompat.getColor(this, branding.confirmationBodyTextColorRes)
+        val mutedBodyColor = ColorUtils.setAlphaComponent(bodyColor, (255 * 0.6f).toInt())
+        val createMarkerColor = ContextCompat.getColor(this, branding.primaryActionColorRes)
+        val editMarkerColor = ContextCompat.getColor(this, branding.secondaryActionColorRes)
 
         val cell = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -261,7 +287,7 @@ class ReservarActivity : BaseActivity() {
             }
             setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
             visibility = if (isActionable) View.VISIBLE else View.INVISIBLE
-            setBackgroundColor(if (canEdit) 0xFFE67E22.toInt() else 0xFF3FC77AL.toInt())
+            setBackgroundColor(if (canEdit) editMarkerColor else createMarkerColor)
         }
 
         val dayText = TextView(this).apply {
@@ -270,10 +296,10 @@ class ReservarActivity : BaseActivity() {
             textSize = 24f
             setTextColor(
                 when {
-                    isSelected -> 0xFFF6F1E4.toInt()
-                    canEdit -> 0xFFFFE0BF.toInt()
-                    canCreate -> 0xFFDAECCE.toInt()
-                    else -> 0xFFE8CF9F.toInt()
+                    isSelected -> actionTextColor
+                    canEdit -> titleColor
+                    canCreate -> bodyColor
+                    else -> mutedBodyColor
                 }
             )
             layoutParams = LinearLayout.LayoutParams(40.dp(), 40.dp())
@@ -293,6 +319,26 @@ class ReservarActivity : BaseActivity() {
         cell.addView(marker)
         cell.addView(dayText)
         return cell
+    }
+
+    private fun applyBranding() {
+        val branding = AppRuntime.branding
+        val root = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+        val titleColor = ContextCompat.getColor(this, branding.confirmationTitleColorRes)
+        val bodyColor = ContextCompat.getColor(this, branding.confirmationBodyTextColorRes)
+
+        root.setBackgroundResource(branding.homeBackgroundRes)
+        calendarCard.setCardBackgroundColor(
+            ContextCompat.getColor(this, branding.confirmationCardBackgroundColorRes)
+        )
+
+        findViewById<TextView>(R.id.tvSeleccionaDia).setTextColor(titleColor)
+        monthLabel.setTextColor(titleColor)
+        findViewById<TextView>(R.id.btnPrevMonth).setTextColor(titleColor)
+        findViewById<TextView>(R.id.btnNextMonth).setTextColor(titleColor)
+        flowStatusText.setTextColor(bodyColor)
+        continueButton.setTextColor(ContextCompat.getColor(this, branding.actionTextColorRes))
+        title = getString(branding.appNameRes)
     }
 
     private fun createEmptyCell(): View = View(this).apply {

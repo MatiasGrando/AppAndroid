@@ -82,7 +82,9 @@ object ReservasRepository {
 
     data class ArchivoReservasOperacion(
         val id: String,
-        val archivoNombre: String
+        val archivoNombre: String,
+        val operadorUid: String,
+        val operadorEmail: String?
     )
 
     fun clearCache() {
@@ -425,13 +427,20 @@ object ReservasRepository {
     }
 
     fun obtenerUltimaFechaArchivadaExportada(onComplete: (Boolean, Long?) -> Unit) {
-        consultarUltimaOperacionArchivada(FIELD_FINALIZADO_EN) { ok, lastDate ->
+        consultarUltimaOperacionArchivada(FIELD_FINALIZADO_EN) { ok, lastDate, error ->
             if (ok && lastDate != null) {
                 onComplete(true, lastDate)
                 return@consultarUltimaOperacionArchivada
             }
 
-            consultarUltimaOperacionArchivada(FIELD_ARCHIVADO_EN, onComplete)
+            consultarUltimaOperacionArchivada(FIELD_ARCHIVADO_EN) { fallbackOk, fallbackDate, fallbackError ->
+                when {
+                    fallbackOk -> onComplete(true, fallbackDate)
+                    puedeDegradarConsultaUltimaOperacion(error) ||
+                        puedeDegradarConsultaUltimaOperacion(fallbackError) -> onComplete(true, null)
+                    else -> onComplete(false, null)
+                }
+            }
         }
     }
 
@@ -479,7 +488,9 @@ object ReservasRepository {
                     true,
                     ArchivoReservasOperacion(
                         id = operationRef.id,
-                        archivoNombre = archivoNombre
+                        archivoNombre = archivoNombre,
+                        operadorUid = operadorUid,
+                        operadorEmail = currentUser?.email?.takeIf { it.isNotBlank() }
                     )
                 )
             }
@@ -538,6 +549,9 @@ object ReservasRepository {
         desdeMillis: Long,
         hastaMillis: Long,
         operacionId: String,
+        archivoNombre: String,
+        operadorUid: String,
+        operadorEmail: String?,
         onComplete: (Boolean, ArchivoReservasResult?) -> Unit
     ) {
         val cantidadReservas = rows.size
@@ -576,10 +590,18 @@ object ReservasRepository {
             FIELD_DESDE_MILLIS to desdeNormalizado,
             FIELD_HASTA_MILLIS to hastaNormalizado,
             FIELD_CANTIDAD_RESERVAS to cantidadReservas,
+            FIELD_ARCHIVO_NOMBRE to archivoNombre,
+            FIELD_RESERVA_IDS to rows.map { it.id },
             FIELD_ARCHIVADO_EN to archivedAt,
             FIELD_FINALIZADO_EN to archivedAt,
             FIELD_ERROR_MESSAGE to FieldValue.delete()
         )
+        operadorUid
+            .takeIf { it.isNotBlank() }
+            ?.let { operationPayload[FIELD_OPERADOR_UID] = it }
+        operadorEmail
+            ?.takeIf { it.isNotBlank() }
+            ?.let { operationPayload[FIELD_OPERADOR_EMAIL] = it }
         batch.set(operationRef, operationPayload, com.google.firebase.firestore.SetOptions.merge())
 
         batch.commit()
@@ -778,7 +800,7 @@ object ReservasRepository {
 
     private fun consultarUltimaOperacionArchivada(
         orderByField: String,
-        onComplete: (Boolean, Long?) -> Unit
+        onComplete: (Boolean, Long?, Exception?) -> Unit
     ) {
         firestore.collection(COLLECTION_RESERVAS_ARCHIVO_OPERACIONES)
             .whereEqualTo(FIELD_ESTADO, ESTADO_ARCHIVADO)
@@ -787,19 +809,24 @@ object ReservasRepository {
             .get()
             .addOnSuccessListener { snapshot ->
                 val lastDate = snapshot.documents.firstOrNull()?.let(::extraerFechaOperacionArchivada)
-                onComplete(true, lastDate)
+                onComplete(true, lastDate, null)
             }
-            .addOnFailureListener {
-                onComplete(false, null)
+            .addOnFailureListener { error ->
+                onComplete(false, null, error)
             }
+    }
+
+    private fun puedeDegradarConsultaUltimaOperacion(error: Exception?): Boolean {
+        val firestoreError = error as? com.google.firebase.firestore.FirebaseFirestoreException ?: return false
+        return firestoreError.code == com.google.firebase.firestore.FirebaseFirestoreException.Code.FAILED_PRECONDITION
     }
 
     private fun extraerFechaOperacionArchivada(
         doc: com.google.firebase.firestore.DocumentSnapshot
     ): Long? {
-        val value = doc.getTimestamp(FIELD_FINALIZADO_EN)?.toDate()?.time
+        val value = doc.getLong(FIELD_HASTA_MILLIS)
+            ?: doc.getTimestamp(FIELD_FINALIZADO_EN)?.toDate()?.time
             ?: doc.getTimestamp(FIELD_ARCHIVADO_EN)?.toDate()?.time
-            ?: doc.getLong(FIELD_HASTA_MILLIS)
         return value?.let(::normalizarFecha)
     }
 

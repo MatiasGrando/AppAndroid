@@ -10,9 +10,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import android.widget.Toast
+import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class ReservarActivity : BaseActivity() {
     private lateinit var monthLabel: TextView
@@ -35,6 +35,20 @@ class ReservarActivity : BaseActivity() {
     private var reservedDates: Set<Long> = emptySet()
     private var lastTappedDateMillis: Long = -1L
     private var lastDateTapTimestamp: Long = 0L
+    private val monthFormatter = SimpleDateFormat("MMMM yyyy", spanishDateLocale)
+    private val weekdayLabels by lazy {
+        DateFormatSymbols(spanishDateLocale).shortWeekdays.let { weekdays ->
+            listOf(
+                weekdays[Calendar.MONDAY],
+                weekdays[Calendar.TUESDAY],
+                weekdays[Calendar.WEDNESDAY],
+                weekdays[Calendar.THURSDAY],
+                weekdays[Calendar.FRIDAY],
+                weekdays[Calendar.SATURDAY],
+                weekdays[Calendar.SUNDAY]
+            ).map { it.replaceFirstChar { char -> char.titlecase(spanishDateLocale) } }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,8 +175,7 @@ class ReservarActivity : BaseActivity() {
 
     private fun renderWeekHeaders() {
         gridWeekdays.removeAllViews()
-        val dayLabels = listOf("S", "M", "T", "W", "T", "F", "S")
-        dayLabels.forEach { day ->
+        weekdayLabels.forEach { day ->
             val dayText = TextView(this).apply {
                 text = day
                 setTextColor(ContextCompat.getColor(context, android.R.color.white))
@@ -180,9 +193,8 @@ class ReservarActivity : BaseActivity() {
     }
 
     private fun renderCalendar() {
-        val formatter = SimpleDateFormat("MMMM yyyy", Locale.ENGLISH)
-        monthLabel.text = formatter.format(visibleMonth.time).replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
+        monthLabel.text = monthFormatter.format(visibleMonth.time).replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(spanishDateLocale) else it.toString()
         }
 
         gridDays.removeAllViews()
@@ -190,7 +202,7 @@ class ReservarActivity : BaseActivity() {
         val firstDayOfMonth = (visibleMonth.clone() as Calendar).apply {
             set(Calendar.DAY_OF_MONTH, 1)
         }
-        val leadingSpaces = firstDayOfMonth.get(Calendar.DAY_OF_WEEK) - 1
+        val leadingSpaces = (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7
         val totalDays = firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         repeat(42) { index ->

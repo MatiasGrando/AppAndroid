@@ -1,6 +1,5 @@
 package com.example.reservasapp
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -12,7 +11,7 @@ import java.util.Locale
 
 class PedidosPorDiaActivity : BaseActivity() {
 
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", spanishDateLocale)
     private var selectedDateMillis: Long = Calendar.getInstance().clearTime().timeInMillis
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,19 +75,10 @@ class PedidosPorDiaActivity : BaseActivity() {
         actualizarTextoFecha()
 
         btnSeleccionarFecha.setOnClickListener {
-            val calendar = Calendar.getInstance().clearTime().apply { timeInMillis = selectedDateMillis }
-            DatePickerDialog(
-                this,
-                { _, year, month, dayOfMonth ->
-                    selectedDateMillis = Calendar.getInstance().clearTime().apply {
-                        set(year, month, dayOfMonth)
-                    }.timeInMillis
-                    actualizarTextoFecha()
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
+            createSpanishDatePickerDialog(selectedDateMillis) { selectedMillis ->
+                selectedDateMillis = selectedMillis
+                actualizarTextoFecha()
+            }.show()
         }
 
         btnGenerarResumen.setOnClickListener {

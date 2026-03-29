@@ -1,6 +1,5 @@
 package com.example.reservasapp
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -14,7 +13,7 @@ import java.util.Locale
 
 class AdminMenuFechaActivity : BaseActivity() {
 
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", spanishDateLocale)
     private var selectedConfigDateMillis: Long = Calendar.getInstance().clearTime().timeInMillis
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,21 +86,11 @@ class AdminMenuFechaActivity : BaseActivity() {
         cargarOpcionesPorFecha()
 
         btnSeleccionarFecha.setOnClickListener {
-            val calendar = Calendar.getInstance().clearTime().apply { timeInMillis = selectedConfigDateMillis }
-            DatePickerDialog(
-                this,
-                { _, year, month, dayOfMonth ->
-                    val selected = Calendar.getInstance().clearTime().apply {
-                        set(year, month, dayOfMonth)
-                    }
-                    selectedConfigDateMillis = selected.timeInMillis
-                    actualizarTextoFecha()
-                    cargarOpcionesPorFecha()
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
+            createSpanishDatePickerDialog(selectedConfigDateMillis) { selectedMillis ->
+                selectedConfigDateMillis = selectedMillis
+                actualizarTextoFecha()
+                cargarOpcionesPorFecha()
+            }.show()
         }
 
         btnGuardarFecha.setOnClickListener {

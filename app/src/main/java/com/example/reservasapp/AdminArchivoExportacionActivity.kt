@@ -1,6 +1,5 @@
 package com.example.reservasapp
 
-import android.app.DatePickerDialog
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -18,7 +17,7 @@ import java.util.Locale
 
 class AdminArchivoExportacionActivity : BaseActivity() {
 
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", spanishDateLocale)
     private val fileDateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private var desdeMillis: Long? = null
     private var hastaMillis: Long = Calendar.getInstance().clearTime().timeInMillis
@@ -365,7 +364,15 @@ class AdminArchivoExportacionActivity : BaseActivity() {
             return
         }
 
-        ReservasRepository.archivarReservasExportadas(rows, desde, hastaMillis, archivoOperacion.id) { ok, result ->
+        ReservasRepository.archivarReservasExportadas(
+            rows,
+            desde,
+            hastaMillis,
+            archivoOperacion.id,
+            archivoOperacion.archivoNombre,
+            archivoOperacion.operadorUid,
+            archivoOperacion.operadorEmail
+        ) { ok, result ->
             runOnUiThread {
                 if (!ok || result == null) {
                     ReservasRepository.fallarOperacionArchivoReservas(
@@ -503,20 +510,7 @@ class AdminArchivoExportacionActivity : BaseActivity() {
     }
 
     private fun showDatePicker(initialMillis: Long, onDateSelected: (Long) -> Unit) {
-        val calendar = Calendar.getInstance().clearTime().apply { timeInMillis = initialMillis }
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                onDateSelected(
-                    Calendar.getInstance().clearTime().apply {
-                        set(year, month, dayOfMonth)
-                    }.timeInMillis
-                )
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        createSpanishDatePickerDialog(initialMillis, onDateSelected).show()
     }
 
     private fun buildFileName(desdeMillis: Long, hastaMillis: Long): String {

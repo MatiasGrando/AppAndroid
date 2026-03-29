@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.SimpleAdapter
 import android.widget.TextView
 import android.widget.Toast
 
@@ -30,6 +31,7 @@ class AdminMenuActivity : BaseActivity() {
         val selectorSeccion = findViewById<AutoCompleteTextView>(R.id.actvSeccionPlato)
         val tvModoFormulario = findViewById<TextView>(R.id.tvModoFormularioPlato)
         val tvGuarnicion = findViewById<TextView>(R.id.tvGuarnicion)
+        val tvGuarnicionHint = findViewById<TextView>(R.id.tvGuarnicionHint)
         val layoutGuarnicionChecks = findViewById<LinearLayout>(R.id.layoutGuarnicionChecks)
         val cbGuarnicionSi = findViewById<CheckBox>(R.id.cbGuarnicionSi)
         val cbGuarnicionNo = findViewById<CheckBox>(R.id.cbGuarnicionNo)
@@ -37,10 +39,13 @@ class AdminMenuActivity : BaseActivity() {
         val btnCancelarEdicion = findViewById<Button>(R.id.btnCancelarEdicionPlato)
         val btnVolverMenu = findViewById<Button>(R.id.btnVolverMenuAdmin)
         val listSecciones = findViewById<ListView>(R.id.listSeccionesMenu)
+        val tvEmptyMenuList = findViewById<TextView>(R.id.tvEmptyMenuList)
 
         val secciones = MenuRepository.seccionesPermitidas()
         var platosListado: List<AdminDishListItem> = emptyList()
         var editingDishId: String? = null
+
+        listSecciones.emptyView = tvEmptyMenuList
 
         selectorSeccion.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, secciones))
         selectorSeccion.threshold = 0
@@ -68,6 +73,7 @@ class AdminMenuActivity : BaseActivity() {
             ) == MenuIdentity.SECTION_MAIN
             val visibility = if (esPrincipal) View.VISIBLE else View.GONE
             tvGuarnicion.visibility = visibility
+            tvGuarnicionHint.visibility = visibility
             layoutGuarnicionChecks.visibility = visibility
             if (!esPrincipal) {
                 seleccionarGuarnicion(null)
@@ -113,22 +119,34 @@ class AdminMenuActivity : BaseActivity() {
                         }
                     }
 
-                    val items = if (platosListado.isEmpty()) {
-                        listOf("(sin platos)")
-                    } else {
-                        platosListado.map { item ->
-                            val detalle = item.dish.detalle.takeIf { it.isNotBlank() }
-                                ?.let { " - $it" }
-                                .orEmpty()
-                            val detalleGuarnicion = if (item.sectionId == MenuIdentity.SECTION_MAIN) {
-                                " - ${getString(R.string.label_guarnicion)}: ${if (item.dish.guarnicion) getString(R.string.si) else getString(R.string.no)}"
+                    val items = platosListado.map { item ->
+                        val detalle = item.dish.detalle.takeIf { it.isNotBlank() }
+                            ?: getString(R.string.admin_menu_list_detail_empty)
+                        val subtituloDetalle = if (item.sectionId == MenuIdentity.SECTION_MAIN) {
+                            if (item.dish.guarnicion) {
+                                listOf(detalle, getString(R.string.admin_menu_guarnicion_si)).joinToString(" - ")
                             } else {
-                                ""
+                                listOf(detalle, getString(R.string.admin_menu_guarnicion_no)).joinToString(" - ")
                             }
-                            "${item.sectionName} - ${item.dish.nombre}$detalle$detalleGuarnicion"
+                        } else {
+                            detalle
                         }
+                        mapOf(
+                            "title" to item.dish.nombre,
+                            "subtitle" to getString(
+                                R.string.admin_menu_list_subtitle,
+                                item.sectionName,
+                                subtituloDetalle
+                            )
+                        )
                     }
-                    listSecciones.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
+                    listSecciones.adapter = SimpleAdapter(
+                        this,
+                        items,
+                        R.layout.item_admin_menu_dish,
+                        arrayOf("title", "subtitle"),
+                        intArrayOf(R.id.tvDishTitle, R.id.tvDishSubtitle)
+                    )
 
                     if (!ok) {
                         Toast.makeText(this, R.string.error_cargar_menu, Toast.LENGTH_SHORT).show()

@@ -1,0 +1,37 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/branding_lunch_point_login_background" />
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0.82"
+                android:centerY="0.14"
+                android:endColor="@android:color/transparent"
+                android:gradientRadius="360dp"
+                android:startColor="@color/branding_lunch_point_band_glow"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0.12"
+                android:centerY="0.84"
+                android:endColor="@android:color/transparent"
+                android:gradientRadius="400dp"
+                android:startColor="@color/branding_lunch_point_band_shadow"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0.56"
+                android:centerY="0.44"
+                android:endColor="@android:color/transparent"
+                android:gradientRadius="320dp"
+                android:startColor="@color/branding_lunch_point_band_highlight"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/pattern_lunch_point_lines" />
+</layer-list>

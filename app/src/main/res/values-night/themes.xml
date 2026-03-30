@@ -1,9 +1,0 @@
-<resources>
-    <style name="Theme.App" parent="Theme.App.Dark" />
-    <style name="Theme.ReservasApp" parent="Theme.App">
-        <item name="android:windowBackground">@drawable/landing_background</item>
-    </style>
-    <style name="Theme.ReservasApp.Launcher" parent="Theme.ReservasApp">
-        <item name="android:windowBackground">@color/app_dark_background</item>
-    </style>
-</resources>

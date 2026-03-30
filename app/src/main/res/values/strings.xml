@@ -3,6 +3,7 @@
     <string name="branding_lunch_point_app_name">Lunch Point</string>
     <string name="branding_lunch_point_login_title">Inicia sesión con Google en Lunch Point</string>
     <string name="branding_lunch_point_home_title">LUNCH POINT</string>
+    <string name="branding_lunch_point_home_subtitle">Planifica tus comidas</string>
     <string name="branding_lunch_point_home_primary_action">ENCARGAR VIANDAS</string>
     <string name="branding_lunch_point_home_secondary_action">VER ENCARGOS</string>
     <string name="branding_super_viandas_app_name">Super Viandas</string>
@@ -99,8 +100,6 @@
     <string name="error_google_login">Error al autenticar con Firebase</string>
     <string name="error_google_login_cancelled">Inicio de sesión cancelado o fallido</string>
     <string name="menu_profile">Perfil</string>
-    <string name="menu_theme_to_dark">Cambiar a tema oscuro</string>
-    <string name="menu_theme_to_light">Cambiar a tema claro</string>
     <string name="admin_panel_menu">Panel Administrador</string>
     <string name="admin_panel_title">Panel Administrador</string>
     <string name="admin_panel_description">Accedé a cada área administrativa desde una pantalla dedicada.</string>
@@ -147,6 +146,7 @@
     <string name="pedidos_por_dia_fecha">Fecha seleccionada: %1$s</string>
     <string name="pedidos_por_dia_fecha_default">Fecha seleccionada: -</string>
     <string name="pedidos_por_dia_generar_resumen">Generar resumen</string>
+    <string name="pedidos_por_dia_exportar_csv">Exportar resumen CSV</string>
     <string name="pedidos_por_dia_header">Plato                          Cantidad</string>
     <string name="pedidos_por_dia_sin_datos">No hay pedidos para la fecha seleccionada.</string>
     <string name="pedidos_por_dia_cargando">Cargando pedidos...</string>
@@ -154,10 +154,15 @@
     <string name="admin_panel_detalle_pedidos_usuarios">Detalle de pedidos de Usuarios</string>
     <string name="detalle_pedidos_usuarios_titulo">Detalle de pedidos de usuarios</string>
     <string name="detalle_pedidos_usuarios_generar">Generar detalle</string>
+    <string name="detalle_pedidos_usuarios_exportar_csv">Exportar detalle CSV</string>
     <string name="detalle_pedidos_usuarios_sin_datos">No hay pedidos para la fecha seleccionada.</string>
     <string name="error_cargar_detalle_pedidos_usuarios">No se pudo cargar el detalle de pedidos.</string>
     <string name="detalle_pedidos_empresa">Empresa %1$s</string>
     <string name="detalle_pedidos_usuario_sin_nombre">Usuario sin nombre</string>
+    <string name="admin_csv_export_loading">Preparando exportación CSV...</string>
+    <string name="admin_csv_export_cancelled">Guardado cancelado. El CSV no se exportó.</string>
+    <string name="admin_csv_export_save_error">No se pudo guardar el archivo CSV.</string>
+    <string name="admin_csv_export_success">CSV exportado correctamente.</string>
     <string name="profile_data_title">Perfil / datos personales</string>
     <string name="profile_data_message">Email: %1$s
 Nombre y apellido: %2$s

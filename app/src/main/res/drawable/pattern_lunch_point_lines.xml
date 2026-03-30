@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="800dp"
+    android:viewportWidth="360"
+    android:viewportHeight="800">
+
+    <path
+        android:fillColor="@color/branding_lunch_point_band_secondary"
+        android:pathData="M-64,112 C-10,36 90,22 168,70 C236,112 248,192 196,246 C138,308 44,300 -20,244 C-78,192 -98,156 -64,112 Z" />
+
+    <path
+        android:fillColor="@color/branding_lunch_point_band_primary"
+        android:pathData="M138,206 C232,144 336,184 386,272 C430,350 412,444 332,500 C246,560 124,548 64,468 C8,392 34,280 138,206 Z" />
+
+    <path
+        android:fillColor="@color/branding_lunch_point_band_secondary"
+        android:pathData="M-56,540 C4,462 120,450 208,510 C286,566 304,664 242,734 C180,804 62,820 -28,766 C-112,716 -122,624 -56,540 Z" />
+
+    <path
+        android:fillColor="@color/branding_lunch_point_band_primary"
+        android:pathData="M214,500 C296,446 396,468 450,544 C500,614 484,712 406,766 C324,822 208,814 152,744 C96,674 122,560 214,500 Z" />
+
+    <path
+        android:fillColor="@color/branding_lunch_point_band_highlight"
+        android:pathData="M208,-34 C282,-34 348,2 376,66 C402,126 386,206 330,242 C268,282 178,274 128,216 C82,160 84,84 132,34 C154,10 182,-34 208,-34 Z" />
+
+    <path
+        android:pathData="M-18,210 C34,164 92,138 152,142 C214,146 264,178 324,238"
+        android:strokeColor="@color/branding_lunch_point_lines_stroke"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3" />
+
+    <path
+        android:pathData="M24,388 C94,324 170,296 240,308 C300,318 330,360 372,430"
+        android:strokeColor="@color/branding_lunch_point_lines_stroke_secondary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.4" />
+
+    <path
+        android:pathData="M-12,662 C54,598 132,566 212,580 C286,592 334,642 378,716"
+        android:strokeColor="@color/branding_lunch_point_lines_stroke"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.6" />
+
+    <path
+        android:pathData="M186,18 C242,38 286,86 300,146 C316,214 294,280 236,330"
+        android:strokeColor="@color/branding_lunch_point_lines_stroke_secondary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2.6" />
+</vector>

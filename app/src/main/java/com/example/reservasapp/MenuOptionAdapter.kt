@@ -19,7 +19,7 @@ class MenuOptionAdapter(
     private var lastTapTimestamp = 0L
 
     private var selectedPosition = RecyclerView.NO_POSITION
-    private var themePalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
+    private var themePalette = MenuThemeRegistry.palette()
 
     fun updateItems(newItems: List<MenuItemOption>, selectedId: String?) {
         items = newItems

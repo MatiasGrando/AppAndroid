@@ -2,7 +2,6 @@ package com.example.reservasapp
 
 import android.app.DatePickerDialog
 import android.content.Context
-import android.content.res.Configuration
 import java.util.Calendar
 import java.util.Locale
 
@@ -13,10 +12,9 @@ internal fun Context.createSpanishDatePickerDialog(
     onDateSelected: (Long) -> Unit
 ): DatePickerDialog {
     val calendar = Calendar.getInstance().clearTime().apply { timeInMillis = initialMillis }
-    val localizedContext = createSpanishDatePickerContext()
 
     return DatePickerDialog(
-        localizedContext,
+        this,
         { _, year, month, dayOfMonth ->
             onDateSelected(
                 Calendar.getInstance().clearTime().apply {
@@ -30,15 +28,6 @@ internal fun Context.createSpanishDatePickerDialog(
     ).apply {
         datePicker.firstDayOfWeek = Calendar.MONDAY
     }
-}
-
-private fun Context.createSpanishDatePickerContext(): Context {
-    val configuration = Configuration(resources.configuration).apply {
-        setLocale(spanishDateLocale)
-        setLayoutDirection(spanishDateLocale)
-    }
-
-    return createConfigurationContext(configuration)
 }
 
 private fun Calendar.clearTime(): Calendar = apply {

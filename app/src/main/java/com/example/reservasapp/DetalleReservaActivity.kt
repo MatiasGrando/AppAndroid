@@ -118,13 +118,7 @@ class DetalleReservaActivity : BaseActivity() {
         viewPager.adapter = pagerAdapter
         viewPager.isUserInputEnabled = false
 
-        val currentTheme = if (AppThemePreference.isDarkModeEnabled(this)) {
-            MenuVisualTheme.DARK
-        } else {
-            MenuVisualTheme.LIGHT
-        }
-        val initialPalette = MenuThemeRegistry.palette(currentTheme)
-        pagerAdapter.updateTheme(initialPalette)
+        pagerAdapter.updateTheme(MenuThemeRegistry.palette())
 
         applyMenuTheme(
             branding = branding,
@@ -397,7 +391,7 @@ private class MenuSectionsPagerAdapter(
     private val onOptionSelected: (sectionId: String, selectedOptionId: String, isDoubleTap: Boolean) -> Unit
 ) : RecyclerView.Adapter<MenuSectionsPagerAdapter.SectionPageViewHolder>() {
 
-    private var currentPalette = MenuThemeRegistry.palette(MenuVisualTheme.DARK)
+    private var currentPalette = MenuThemeRegistry.palette()
 
     fun updateSections(newSections: List<MenuSection>) {
         sections = newSections

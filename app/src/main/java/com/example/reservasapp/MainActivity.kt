@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -79,13 +80,6 @@ class MainActivity : BaseActivity() {
         val popupMenu = PopupMenu(this, anchor)
         popupMenu.menuInflater.inflate(R.menu.menu_main, popupMenu.menu)
         popupMenu.menu.findItem(R.id.action_admin_panel)?.isVisible = UserSession.isAdmin
-
-        val titleRes = if (AppThemePreference.isDarkModeEnabled(this)) {
-            R.string.menu_theme_to_light
-        } else {
-            R.string.menu_theme_to_dark
-        }
-        popupMenu.menu.findItem(R.id.action_toggle_theme)?.setTitle(titleRes)
         popupMenu.setOnMenuItemClickListener { item -> handleMenuItemSelection(item) }
         popupMenu.show()
     }
@@ -94,12 +88,6 @@ class MainActivity : BaseActivity() {
         return when (item.itemId) {
             R.id.action_profile -> {
                 startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java))
-                true
-            }
-
-            R.id.action_toggle_theme -> {
-                AppThemePreference.toggle(this)
-                invalidateOptionsMenu()
                 true
             }
 
@@ -145,7 +133,33 @@ class MainActivity : BaseActivity() {
         findViewById<View>(R.id.overlay).setBackgroundColor(
             ContextCompat.getColor(this, branding.homeOverlayColorRes)
         )
-        findViewById<TextView>(R.id.tvTitle).setText(branding.homeTitleRes)
+        val accentColor = ContextCompat.getColor(this, branding.confirmationTitleColorRes)
+        val subtitleColor = ContextCompat.getColor(this, branding.confirmationBodyTextColorRes)
+
+        findViewById<TextView>(R.id.tvTitle).apply {
+            setText(branding.appNameRes)
+            setTextColor(accentColor)
+        }
+
+        findViewById<TextView>(R.id.tvSubtitle).apply {
+            if (branding.homeSubtitleRes != 0) {
+                visibility = View.VISIBLE
+                setText(branding.homeSubtitleRes)
+                setTextColor(subtitleColor)
+            } else {
+                visibility = View.GONE
+            }
+        }
+
+        findViewById<ImageView>(R.id.ivBrandLogo).apply {
+            if (branding.appLogoRes != 0) {
+                visibility = View.VISIBLE
+                setImageResource(branding.appLogoRes)
+                contentDescription = getString(branding.appNameRes)
+            } else {
+                visibility = View.GONE
+            }
+        }
 
         val reservarButton = findViewById<MaterialButton>(R.id.btnReservar)
         val misReservasButton = findViewById<MaterialButton>(R.id.btnMisReservas)

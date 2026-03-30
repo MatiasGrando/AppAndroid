@@ -35,6 +35,14 @@
         android:layout_marginTop="8dp"
         android:text="@string/pedidos_por_dia_generar_resumen" />
 
+    <Button
+        style="@style/Widget.ReservasApp.Button.Primary"
+        android:id="@+id/btnExportarResumenPedidosCsv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/pedidos_por_dia_exportar_csv" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -34,8 +34,6 @@ class LoginActivity : BaseActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var startupLogo: ImageView
-    private lateinit var loginDecor: View
-    private lateinit var loginOverlay: View
     private lateinit var loading: ProgressBar
     private lateinit var loginLogo: ImageView
     private lateinit var loginTitle: TextView
@@ -88,8 +86,6 @@ class LoginActivity : BaseActivity() {
         setContentView(R.layout.activity_login)
 
         startupLogo = findViewById(R.id.startupLogo)
-        loginDecor = findViewById(R.id.loginDecor)
-        loginOverlay = findViewById(R.id.loginOverlay)
         loading = findViewById(R.id.loading)
         loginLogo = findViewById(R.id.ivLogo)
         loginTitle = findViewById(R.id.tvLoginTitle)
@@ -111,20 +107,14 @@ class LoginActivity : BaseActivity() {
         }
         hasAnimatedLoginEntrance = false
         startupLogo.animate().cancel()
-        loginDecor.animate().cancel()
-        loginOverlay.animate().cancel()
         loginLogo.animate().cancel()
         loginTitle.animate().cancel()
         googleButton.animate().cancel()
         resetAnimatedView(startupLogo)
-        resetAnimatedView(loginDecor)
-        resetAnimatedView(loginOverlay)
         resetAnimatedView(loginLogo)
         resetAnimatedView(loginTitle)
         resetAnimatedView(googleButton)
         startupLogo.visibility = View.VISIBLE
-        loginDecor.visibility = View.GONE
-        loginOverlay.visibility = View.GONE
         loginLogo.visibility = View.GONE
         loginTitle.visibility = View.GONE
         googleButton.visibility = View.GONE
@@ -143,8 +133,6 @@ class LoginActivity : BaseActivity() {
         }
 
         startupLogo.visibility = View.GONE
-        loginDecor.visibility = View.VISIBLE
-        loginOverlay.visibility = View.VISIBLE
         loginLogo.visibility = View.VISIBLE
         loginTitle.setText(AppRuntime.branding.loginTitleRes)
         loginTitle.visibility = View.VISIBLE
@@ -165,8 +153,6 @@ class LoginActivity : BaseActivity() {
         findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundColor(
             ContextCompat.getColor(this, branding.loginBackgroundColorRes)
         )
-        loginDecor.setBackgroundResource(branding.loginDecorRes)
-        loginOverlay.setBackgroundColor(ContextCompat.getColor(this, branding.loginOverlayColorRes))
         startupLogo.setImageResource(branding.appLogoRes)
         startupLogo.contentDescription = appName
         loginLogo.setImageResource(branding.appLogoRes)
@@ -184,15 +170,11 @@ class LoginActivity : BaseActivity() {
     private fun animateLoginEntrance() {
         hasAnimatedLoginEntrance = true
 
-        loginDecor.visibility = View.VISIBLE
-        loginOverlay.visibility = View.VISIBLE
         loginLogo.visibility = View.VISIBLE
         loginTitle.setText(AppRuntime.branding.loginTitleRes)
         loginTitle.visibility = View.VISIBLE
         googleButton.visibility = View.VISIBLE
 
-        prepareLoginEntranceView(loginDecor)
-        prepareLoginEntranceView(loginOverlay)
         prepareLoginEntranceView(loginLogo)
         prepareLoginEntranceView(loginTitle)
         prepareLoginEntranceView(googleButton)
@@ -214,8 +196,6 @@ class LoginActivity : BaseActivity() {
             }
             .start()
 
-        animateLoginEntranceView(loginDecor, 0f, 1f, 0L)
-        animateLoginEntranceView(loginOverlay, 0f, 1f, 0L)
         animateLoginEntranceView(loginLogo, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY)
         animateLoginEntranceView(loginTitle, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY * 2)
         animateLoginEntranceView(googleButton, LOGIN_CONTENT_TRANSLATION_Y, 1f, LOGIN_CONTENT_STAGGER_DELAY * 3)

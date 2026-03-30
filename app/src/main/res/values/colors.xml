@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="app_light_background">#F7F2E7</color>
-    <color name="app_light_on_background">#1F1B16</color>
-    <color name="app_light_surface">#FFF8F2</color>
-    <color name="app_light_on_surface">#2A2118</color>
-
     <color name="app_dark_background">#101820</color>
     <color name="app_dark_on_background">#F4E7D2</color>
     <color name="app_dark_surface">#1B2A33</color>
@@ -26,16 +21,24 @@
     <color name="confirm_image_bg">#FFFFFF</color>
     <color name="confirm_image_stroke">#C99A61</color>
 
-    <color name="branding_lunch_point_login_background">#101820</color>
-    <color name="branding_lunch_point_login_overlay">#99000000</color>
-    <color name="branding_lunch_point_home_overlay">#99000000</color>
-    <color name="branding_lunch_point_primary_action">#C45F1A</color>
-    <color name="branding_lunch_point_secondary_action">#455A64</color>
-    <color name="branding_lunch_point_action_text">#FFFFFF</color>
-    <color name="branding_lunch_point_confirmation_title">#F6E9C5</color>
-    <color name="branding_lunch_point_confirmation_body">#D9D2C1</color>
-    <color name="branding_lunch_point_confirmation_card_background">#D9101A24</color>
-    <color name="branding_lunch_point_confirmation_card_stroke">#C99A61</color>
+    <color name="branding_lunch_point_login_background">#142028</color>
+    <color name="branding_lunch_point_login_overlay">#B30D141A</color>
+    <color name="branding_lunch_point_home_overlay">#B30D141A</color>
+    <color name="branding_lunch_point_primary_action">#B86A2B</color>
+    <color name="branding_lunch_point_secondary_action">#2F3E46</color>
+    <color name="branding_lunch_point_action_text">#F5F5F5</color>
+    <color name="branding_lunch_point_confirmation_title">#E6C79C</color>
+    <color name="branding_lunch_point_confirmation_body">#CFC7B5</color>
+    <color name="branding_lunch_point_confirmation_card_background">#E6162028</color>
+    <color name="branding_lunch_point_confirmation_card_stroke">#A97C50</color>
+    <color name="branding_lunch_point_band_primary">#33B86A2B</color>
+    <color name="branding_lunch_point_band_secondary">#262F3E46</color>
+    <color name="branding_lunch_point_band_highlight">#22E6C79C</color>
+    <color name="branding_lunch_point_band_shadow">#222F3E46</color>
+    <color name="branding_lunch_point_band_glow">#24B86A2B</color>
+    <color name="branding_lunch_point_lines_stroke">#66D8B07F</color>
+    <color name="branding_lunch_point_lines_stroke_secondary">#4AE6C79C</color>
+    <color name="branding_lunch_point_clean_surface">#101820</color>
 
     <color name="branding_super_viandas_login_background">#0F172A</color>
     <color name="branding_super_viandas_login_overlay">#B3121A2C</color>

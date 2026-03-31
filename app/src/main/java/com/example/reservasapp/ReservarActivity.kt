@@ -13,12 +13,19 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import com.example.reservasapp.booking.BookingCalendarLoadResult
+import com.example.reservasapp.booking.BookingCalendarState
+import com.example.reservasapp.booking.BookingDetailDestination
+import com.example.reservasapp.booking.BookingFlowService
 import com.example.reservasapp.branding.AppRuntime
 import android.widget.Toast
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
+/**
+ * Pantalla de entrada al flujo de reservas: muestra la ventana disponible y deriva a crear o editar.
+ */
 class ReservarActivity : BaseActivity() {
     private lateinit var monthLabel: TextView
     private lateinit var gridWeekdays: GridLayout
@@ -38,7 +45,6 @@ class ReservarActivity : BaseActivity() {
     }
     private var selectedDateMillis: Long = today.timeInMillis
     private var hasUserSelectedDate: Boolean = false
-    private var reservedDates: Set<Long> = emptySet()
     private var lastTappedDateMillis: Long = -1L
     private var lastDateTapTimestamp: Long = 0L
     private val monthFormatter = SimpleDateFormat("MMMM yyyy", spanishDateLocale)
@@ -88,13 +94,7 @@ class ReservarActivity : BaseActivity() {
         renderCalendar()
 
         continueButton.setOnClickListener {
-            val reserva = ReservasRepository.obtenerReservaPorFecha(selectedDateMillis)
-            val intent = if (reserva != null) {
-                DetalleReservaActivity.editIntent(this, reserva)
-            } else {
-                DetalleReservaActivity.createIntent(this, selectedDateMillis)
-            }
-            startActivity(intent)
+            navegarADetalleSeleccionado()
         }
     }
 
@@ -105,65 +105,68 @@ class ReservarActivity : BaseActivity() {
             return
         }
 
-        validarPerfilAntesDeReservar { puedeReservar ->
-            if (!puedeReservar) {
-                finish()
-                return@validarPerfilAntesDeReservar
-            }
-
-            BookingAvailabilityRepository.cargarConfiguracion { _, _ ->
-                ReservasRepository.cargarReservasUsuario { ok ->
-                    if (!ok) {
-                        Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
-                    }
-                    refreshCurrentDateRange()
-                    renderCalendar()
-                }
-            }
-        }
-    }
-
-
-    private fun validarPerfilAntesDeReservar(onResult: (Boolean) -> Unit) {
-        PerfilRepository.cargarPerfil { perfil ->
+        BookingFlowService.cargarEstadoCalendarioInicial(selectedDateMillis, hasUserSelectedDate) { result ->
             runOnUiThread {
-                val completo = perfil?.estaCompleto() == true
-                if (!completo) {
-                    Toast.makeText(this, R.string.profile_required_for_booking, Toast.LENGTH_LONG).show()
-                    startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java).apply {
-                        putExtra(EXTRA_OPENED_FROM_BOOKING, true)
-                    })
-                    onResult(false)
-                    return@runOnUiThread
+                when (result) {
+                    BookingCalendarLoadResult.ProfileIncomplete -> {
+                        Toast.makeText(this, R.string.profile_required_for_booking, Toast.LENGTH_LONG).show()
+                        startActivity(Intent(this, PerfilDatosPersonalesActivity::class.java).apply {
+                            putExtra(EXTRA_OPENED_FROM_BOOKING, true)
+                        })
+                        finish()
+                    }
+
+                    is BookingCalendarLoadResult.Ready -> {
+                        if (!result.reservasLoaded) {
+                            Toast.makeText(this, R.string.error_cargar_reservas, Toast.LENGTH_SHORT).show()
+                        }
+                        applyCalendarState(result.state)
+                        renderCalendar()
+                    }
                 }
-                onResult(true)
             }
         }
     }
 
-    private fun refreshCurrentDateRange() {
-        today = Calendar.getInstance().clearTime()
-        val config = BookingAvailabilityRepository.obtenerConfiguracionActual()
-        minReservableDate = (today.clone() as Calendar).apply {
-            add(Calendar.DAY_OF_YEAR, config.initialDelayDays)
-        }
-        maxReservableDate = (minReservableDate.clone() as Calendar).apply {
-            add(Calendar.DAY_OF_YEAR, config.windowLengthDays - 1)
-        }
-        reservedDates = ReservasRepository.obtenerFechasReservadas()
-        if (selectedDateMillis < today.timeInMillis || selectedDateMillis > maxReservableDate.timeInMillis) {
-            selectedDateMillis = today.timeInMillis
-            hasUserSelectedDate = false
-        }
+    /**
+     * Aplica al estado local el resultado calculado por el servicio para no duplicar reglas de ventana.
+     */
+    private fun applyCalendarState(state: BookingCalendarState) {
+        today = Calendar.getInstance().clearTime().apply { timeInMillis = state.todayMillis }
+        minReservableDate = Calendar.getInstance().clearTime().apply { timeInMillis = state.minReservableDateMillis }
+        maxReservableDate = Calendar.getInstance().clearTime().apply { timeInMillis = state.maxReservableDateMillis }
+        selectedDateMillis = state.selectedDateMillis
+        hasUserSelectedDate = state.hasUserSelectedDate
         updateButtonsState()
     }
 
+    /**
+     * Decide alta o edicion a traves del servicio para que la Activity no consulte directo el repository.
+     */
+    private fun navegarADetalleSeleccionado() {
+        val destination = BookingFlowService.resolverDestinoDetalle(selectedDateMillis) ?: return
+        val intent = when (destination) {
+            is BookingDetailDestination.Create -> {
+                DetalleReservaActivity.createIntent(this, destination.selectedDateMillis)
+            }
+
+            is BookingDetailDestination.Edit -> {
+                DetalleReservaActivity.editIntent(this, destination.reserva)
+            }
+        }
+        startActivity(intent)
+    }
+
+    /**
+     * Traduce el estado de negocio de la fecha seleccionada al copy y habilitacion del CTA.
+     */
     private fun updateButtonsState() {
         val branding = AppRuntime.branding
-        val hasExistingReservation = selectedDateMillis in reservedDates
-        val canCreate = ReservasRepository.puedeCrearReservaEnFecha(selectedDateMillis)
-        val canEdit = hasExistingReservation && ReservasRepository.puedeEditarReservaExistenteEnFecha(selectedDateMillis)
-        val canContinue = hasUserSelectedDate && (canCreate || canEdit)
+        val dateAvailability = BookingFlowService.resolverAccionFecha(selectedDateMillis)
+        val hasExistingReservation = dateAvailability.reservaExistente != null
+        val canCreate = dateAvailability.canCreate
+        val canEdit = dateAvailability.canEdit
+        val canContinue = hasUserSelectedDate && dateAvailability.canContinue
         val buttonColor = ContextCompat.getColor(
             this,
             when {
@@ -237,12 +240,15 @@ class ReservarActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Pinta una celda del calendario segun disponibilidad y reserva existente para esa fecha.
+     */
     private fun createDayCell(dayDate: Calendar): View {
         val branding = AppRuntime.branding
-        val isReserved = dayDate.timeInMillis in reservedDates
-        val canCreate = ReservasRepository.puedeCrearReservaEnFecha(dayDate.timeInMillis)
-        val canEdit = isReserved && ReservasRepository.puedeEditarReservaExistenteEnFecha(dayDate.timeInMillis)
-        val isActionable = canCreate || canEdit
+        val dateAvailability = BookingFlowService.resolverAccionFecha(dayDate.timeInMillis)
+        val canCreate = dateAvailability.canCreate
+        val canEdit = dateAvailability.canEdit
+        val isActionable = dateAvailability.canContinue
         val isSelected = hasUserSelectedDate && dayDate.timeInMillis == selectedDateMillis
         val isToday = dayDate.timeInMillis == today.timeInMillis
         val actionTextColor = ContextCompat.getColor(this, branding.actionTextColorRes)

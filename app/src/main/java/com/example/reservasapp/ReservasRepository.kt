@@ -1,9 +1,7 @@
 package com.example.reservasapp
 
 import com.example.reservasapp.firebase.FirebaseProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -57,6 +55,11 @@ object ReservasRepository {
     )
 
     data class ResultadoAgregarReserva(
+        val reservaCreada: Reserva? = null,
+        val reservaExistente: Reserva? = null
+    )
+
+    private data class ResultadoAgregarReservaTransaccional(
         val reservaCreada: Reserva? = null,
         val reservaExistente: Reserva? = null
     )
@@ -200,29 +203,80 @@ object ReservasRepository {
                                 FIELD_EMPRESA to perfil?.empresa.orEmpty()
                             )
 
-                            firestore.collection(COLLECTION_RESERVAS)
-                                .add(payload)
-                                .addOnSuccessListener { docRef ->
-                                    val reserva = Reserva(
-                                        id = docRef.id,
-                                        fechaMillis = fechaNormalizada,
-                                        selecciones = seleccionesNormalizadas,
-                                        userId = uid
-                                    )
-                                    reservas.add(reserva)
-                                    reservas.sortBy { it.fechaMillis }
-                                    onComplete(ResultadoAgregarReserva(reservaCreada = reserva))
-                                }
-                                .addOnFailureListener {
-                                    onComplete(ResultadoAgregarReserva())
-                                }
-                            }
+                            agregarReservaConDocumentoDeterministico(
+                                uid = uid,
+                                fechaNormalizada = fechaNormalizada,
+                                seleccionesNormalizadas = seleccionesNormalizadas,
+                                payload = payload,
+                                onComplete = onComplete
+                            )
+                        }
                     }
                     .addOnFailureListener {
                         onComplete(ResultadoAgregarReserva())
                     }
             }
         }
+    }
+
+    private fun agregarReservaConDocumentoDeterministico(
+        uid: String,
+        fechaNormalizada: Long,
+        seleccionesNormalizadas: Map<String, String>,
+        payload: Map<String, Any>,
+        onComplete: (ResultadoAgregarReserva) -> Unit
+    ) {
+        val documentId = buildReservaDocumentId(uid, fechaNormalizada)
+        val reservaRef = firestore.collection(COLLECTION_RESERVAS).document(documentId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(reservaRef)
+            if (snapshot.exists()) {
+                ResultadoAgregarReservaTransaccional(
+                    reservaExistente = mapearReserva(snapshot, uid) ?: Reserva(
+                        id = snapshot.id,
+                        fechaMillis = fechaNormalizada,
+                        selecciones = extraerSelecciones(snapshot),
+                        userId = uid
+                    )
+                )
+            } else {
+                transaction.set(reservaRef, payload)
+                ResultadoAgregarReservaTransaccional(
+                    reservaCreada = Reserva(
+                        id = documentId,
+                        fechaMillis = fechaNormalizada,
+                        selecciones = seleccionesNormalizadas,
+                        userId = uid
+                    )
+                )
+            }
+        }
+            .addOnSuccessListener { resultado ->
+                when {
+                    resultado.reservaExistente != null -> {
+                        val reservaExistente = resultado.reservaExistente
+                        if (reservas.none { it.id == reservaExistente.id }) {
+                            reservas.add(reservaExistente)
+                            reservas.sortBy { it.fechaMillis }
+                        }
+                        onComplete(ResultadoAgregarReserva(reservaExistente = reservaExistente))
+                    }
+
+                    resultado.reservaCreada != null -> {
+                        val reservaCreada = resultado.reservaCreada
+                        reservas.removeAll { it.id == reservaCreada.id }
+                        reservas.add(reservaCreada)
+                        reservas.sortBy { it.fechaMillis }
+                        onComplete(ResultadoAgregarReserva(reservaCreada = reservaCreada))
+                    }
+
+                    else -> onComplete(ResultadoAgregarReserva())
+                }
+            }
+            .addOnFailureListener {
+                onComplete(ResultadoAgregarReserva())
+            }
     }
 
     private fun mapearReserva(doc: com.google.firebase.firestore.DocumentSnapshot, uid: String): Reserva? {
@@ -283,10 +337,6 @@ object ReservasRepository {
         val fechaNormalizada = normalizarFecha(fechaMillis)
         return reservas.firstOrNull { it.fechaMillis == fechaNormalizada }
     }
-
-    fun obtenerFechasReservadas(): Set<Long> = reservas
-        .map { reserva -> reserva.fechaMillis }
-        .toSet()
 
     fun obtenerReservasProximosSieteDias(): List<Reserva> {
         val ventanaReservaActual = ventanaEdicionActual()
@@ -704,6 +754,10 @@ object ReservasRepository {
                 ?.opciones
                 ?.any { opcion -> opcion.id == plato } == true
         }
+    }
+
+    private fun buildReservaDocumentId(uid: String, fechaMillis: Long): String {
+        return "${uid.trim()}_${normalizarFecha(fechaMillis)}"
     }
 
     private fun normalizarFecha(fechaMillis: Long): Long {

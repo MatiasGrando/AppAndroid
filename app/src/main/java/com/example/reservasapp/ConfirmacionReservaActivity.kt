@@ -13,6 +13,12 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.example.reservasapp.booking.BookingConfirmationPreview
+import com.example.reservasapp.booking.BookingConfirmationRequest
+import com.example.reservasapp.booking.BookingConfirmationRequestResolution
+import com.example.reservasapp.booking.BookingConfirmationSubmitResult
+import com.example.reservasapp.booking.BookingFlowService
+import com.example.reservasapp.booking.BookingMenuCoordinator
 import com.example.reservasapp.branding.AppRuntime
 import com.example.reservasapp.firebase.FirebaseProvider
 import com.google.android.material.card.MaterialCardView
@@ -20,6 +26,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Pantalla final del flujo: resume la seleccion y delega al servicio la confirmacion efectiva.
+ */
 class ConfirmacionReservaActivity : BaseActivity() {
 
     private val storage by lazy { FirebaseProvider.storage() }
@@ -48,12 +57,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
 
         setContentView(R.layout.activity_confirmacion_reserva)
 
-        val fecha = request.fecha
-        val detalleSeleccion = request.detalleSeleccion
-        val reservaId = request.reservaId
         val esEdicion = request.esEdicion
-        val fechaMillis = request.fechaMillis
-        val seleccionesPendientes = request.seleccionesPendientes
         val reserva = request.reserva
 
         val titulo = findViewById<TextView>(R.id.tvTituloConfirmacion)
@@ -66,8 +70,7 @@ class ConfirmacionReservaActivity : BaseActivity() {
         val ivGuarnicion = findViewById<ImageView>(R.id.ivGuarnicion)
         val ivPostre = findViewById<ImageView>(R.id.ivPostre)
         val cardPrincipal = findViewById<MaterialCardView>(R.id.cardPlatoPrincipal)
-        val cardGuarnicion = findViewById<View>(R.id.cardGuarnicion)
-        val cardGuarnicionMaterial = findViewById<MaterialCardView>(R.id.cardGuarnicion)
+        val cardGuarnicion = findViewById<MaterialCardView>(R.id.cardGuarnicion)
         val cardPostre = findViewById<MaterialCardView>(R.id.cardPostre)
         val accionPrincipal = findViewById<Button>(R.id.btnVolverMenu)
 
@@ -79,67 +82,52 @@ class ConfirmacionReservaActivity : BaseActivity() {
             guarnicion = tvGuarnicion,
             postre = tvPostre,
             accionPrincipal = accionPrincipal,
-            cards = listOf(cardPrincipal, cardGuarnicionMaterial, cardPostre)
+            cards = listOf(cardPrincipal, cardGuarnicion, cardPostre)
         )
 
         titulo.text = getString(
             if (esEdicion) R.string.titulo_confirmacion_edicion else R.string.titulo_confirmacion
         )
 
-        val seleccionesVisualizadas = if (seleccionesPendientes.isNotEmpty()) {
-            seleccionesPendientes
-        } else {
-            reserva?.selecciones.orEmpty()
-        }
-        val principalId = seleccionesVisualizadas[MenuIdentity.SECTION_MAIN]
-        val guarnicionId = seleccionesVisualizadas[MenuIdentity.SECTION_SIDE]
-        val postreId = seleccionesVisualizadas[MenuIdentity.SECTION_DESSERT]
-        val principal = MenuRepository.nombrePlato(MenuIdentity.SECTION_MAIN, principalId)
-        val guarnicion = MenuRepository.nombrePlato(MenuIdentity.SECTION_SIDE, guarnicionId)
-        val postre = MenuRepository.nombrePlato(MenuIdentity.SECTION_DESSERT, postreId)
-
         val formatter = SimpleDateFormat("EEEE d/M/yy", Locale("es", "ES"))
         val fechaVisual = when {
             reserva != null -> Date(reserva.fechaMillis)
-            fechaMillis > 0L -> Date(fechaMillis)
+            request.fechaMillis > 0L -> Date(request.fechaMillis)
             else -> null
         }
 
         tvFechaReserva.text = fechaVisual?.let {
             formatter.format(it).uppercase(Locale("es", "ES"))
-        } ?: fecha.uppercase(Locale("es", "ES"))
+        } ?: request.fecha.uppercase(Locale("es", "ES"))
 
-        val tieneGuarnicion = !guarnicion.isNullOrBlank()
-
-        tvPrincipal.text = principal ?: "-"
-        tvGuarnicion.text = guarnicion.orEmpty()
-        tvPostre.text = postre ?: "-"
-        cardGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
-
-        ivPrincipal.setImageResource(imageForSelection(principal))
-        ivGuarnicion.setImageResource(imageForSelection(guarnicion))
-        ivPostre.setImageResource(imageForSelection(postre))
-
-        cargarImagenesMenuDesdeStorage(
-            principalId = principalId,
-            guarnicionId = guarnicionId,
-            postreId = postreId,
-            ivPrincipal = ivPrincipal,
-            ivGuarnicion = ivGuarnicion,
-            ivPostre = ivPostre
-        )
-
-        if (reserva != null || seleccionesPendientes.isNotEmpty()) {
+        if (reserva != null || request.seleccionesPendientes.isNotEmpty()) {
             detalle.visibility = View.GONE
         } else {
             detalle.visibility = View.VISIBLE
-            detalle.text = getString(R.string.resumen_reserva_generico, fecha, detalleSeleccion)
+            detalle.text = getString(R.string.resumen_reserva_generico, request.fecha, request.detalleSeleccion)
         }
 
-        val hayConfirmacionPendiente = seleccionesPendientes.isNotEmpty()
+        val hayConfirmacionPendiente = request.seleccionesPendientes.isNotEmpty()
         accionPrincipal.text = getString(
             if (hayConfirmacionPendiente) R.string.confirmar_pedido else R.string.volver_menu
         )
+
+        // La pantalla final ya habla con el coordinador de menu/preview y deja a BookingFlowService
+        // como fachada de reglas del flujo, no de composicion visual.
+        BookingMenuCoordinator.cargarVistaPreviaConfirmacion(request) { _, preview ->
+            runOnUiThread {
+                aplicarVistaPreviaConfirmacion(
+                    preview = preview,
+                    tvPrincipal = tvPrincipal,
+                    tvGuarnicion = tvGuarnicion,
+                    tvPostre = tvPostre,
+                    cardGuarnicion = cardGuarnicion,
+                    ivPrincipal = ivPrincipal,
+                    ivGuarnicion = ivGuarnicion,
+                    ivPostre = ivPostre
+                )
+            }
+        }
 
         accionPrincipal.setOnClickListener {
             if (!hayConfirmacionPendiente) {
@@ -148,84 +136,72 @@ class ConfirmacionReservaActivity : BaseActivity() {
             }
 
             accionPrincipal.isEnabled = false
-            val selecciones = seleccionesPendientes
+            BookingFlowService.confirmarReserva(request) { result ->
+                runOnUiThread {
+                    when (result) {
+                        BookingConfirmationSubmitResult.Success -> {
+                            Toast.makeText(this, R.string.pedido_confirmado_exito, Toast.LENGTH_SHORT).show()
+                            volverAMenuPrincipal()
+                        }
 
-            if (esEdicion) {
-                if (reservaId.isBlank()) {
-                    Toast.makeText(this, R.string.error_actualizar_reserva, Toast.LENGTH_LONG).show()
-                    accionPrincipal.isEnabled = true
-                    return@setOnClickListener
-                }
+                        BookingConfirmationSubmitResult.ExistingReservation -> {
+                            Toast.makeText(this, R.string.reserva_ya_existente_en_fecha, Toast.LENGTH_LONG).show()
+                            accionPrincipal.isEnabled = true
+                        }
 
-                ReservasRepository.actualizarReserva(
-                    id = reservaId,
-                    selecciones = selecciones
-                ) { actualizada ->
-                    if (actualizada == null) {
-                        Toast.makeText(this, R.string.error_actualizar_reserva, Toast.LENGTH_LONG).show()
-                        accionPrincipal.isEnabled = true
-                        return@actualizarReserva
-                    }
-
-                    Toast.makeText(this, R.string.pedido_confirmado_exito, Toast.LENGTH_SHORT).show()
-                    volverAMenuPrincipal()
-                }
-                return@setOnClickListener
-            }
-
-            if (fechaMillis <= 0L) {
-                Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
-                accionPrincipal.isEnabled = true
-                return@setOnClickListener
-            }
-
-            ReservasRepository.agregarReserva(
-                fechaMillis = fechaMillis,
-                selecciones = selecciones
-            ) { resultado ->
-                when {
-                    resultado.reservaCreada != null -> {
-                        Toast.makeText(this, R.string.pedido_confirmado_exito, Toast.LENGTH_SHORT).show()
-                        volverAMenuPrincipal()
-                    }
-
-                    resultado.reservaExistente != null -> {
-                        Toast.makeText(this, R.string.reserva_ya_existente_en_fecha, Toast.LENGTH_LONG).show()
-                        accionPrincipal.isEnabled = true
-                    }
-
-                    else -> {
-                        Toast.makeText(this, R.string.error_guardar_reserva, Toast.LENGTH_LONG).show()
-                        accionPrincipal.isEnabled = true
+                        is BookingConfirmationSubmitResult.Error -> {
+                            Toast.makeText(this, result.messageRes, Toast.LENGTH_LONG).show()
+                            accionPrincipal.isEnabled = true
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun resolveRequest(): ConfirmacionReservaRequest? {
-        val rawRequest = ConfirmacionReservaRawRequest(
-            esEdicion = intent.getBooleanExtra(EXTRA_ES_EDICION, false),
-            fecha = intent.getStringExtra(EXTRA_FECHA).orEmpty(),
-            detalleSeleccion = intent.getStringExtra(EXTRA_DETALLE).orEmpty(),
-            reservaId = intent.getStringExtra(EXTRA_RESERVA_ID).orEmpty(),
-            fechaMillis = intent.getLongExtra(EXTRA_FECHA_MILLIS, -1L),
-            hasSeleccionesPendientesExtra = intent.hasExtra(EXTRA_SELECCIONES_PENDIENTES),
-            seleccionesPendientesRaw = run {
-                @Suppress("DEPRECATION")
-                intent.getSerializableExtra(EXTRA_SELECCIONES_PENDIENTES) as? HashMap<String, String>
-            }.orEmpty()
-        )
-
-        return when (val resolution = resolveConfirmacionReservaRequest(rawRequest)) {
-            is ConfirmacionReservaRequestResolution.Invalid -> invalidRequest(resolution.messageRes)
-            is ConfirmacionReservaRequestResolution.Valid -> resolution.request
+    /**
+     * Normaliza y valida los extras entrantes antes de tocar la UI o persistencia.
+     */
+    private fun resolveRequest(): BookingConfirmationRequest? {
+        return when (val resolution = BookingFlowService.resolverConfirmacion(intent.toConfirmacionReservaRawRequest())) {
+            is BookingConfirmationRequestResolution.Invalid -> invalidRequest(resolution.messageRes)
+            is BookingConfirmationRequestResolution.Valid -> resolution.request
         }
     }
 
-    private fun invalidRequest(@StringRes messageRes: Int): ConfirmacionReservaRequest? {
+    private fun invalidRequest(@StringRes messageRes: Int): BookingConfirmationRequest? {
         Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
         return null
+    }
+
+    /**
+     * Mapea la vista previa del servicio a la UI y mantiene los fallbacks visuales existentes.
+     */
+    private fun aplicarVistaPreviaConfirmacion(
+        preview: BookingConfirmationPreview,
+        tvPrincipal: TextView,
+        tvGuarnicion: TextView,
+        tvPostre: TextView,
+        cardGuarnicion: View,
+        ivPrincipal: ImageView,
+        ivGuarnicion: ImageView,
+        ivPostre: ImageView
+    ) {
+        imageByDishId = preview.imageUrlsByDishId
+
+        val tieneGuarnicion = !preview.guarnicion.isNullOrBlank()
+        tvPrincipal.text = preview.principal ?: "-"
+        tvGuarnicion.text = preview.guarnicion.orEmpty()
+        tvPostre.text = preview.postre ?: "-"
+        cardGuarnicion.visibility = if (tieneGuarnicion) View.VISIBLE else View.GONE
+
+        ivPrincipal.setImageResource(imageForSelection(preview.principal))
+        ivGuarnicion.setImageResource(imageForSelection(preview.guarnicion))
+        ivPostre.setImageResource(imageForSelection(preview.postre))
+
+        cargarImagenDesdeStorage(preview.principalId, ivPrincipal, preview.principal)
+        cargarImagenDesdeStorage(preview.guarnicionId, ivGuarnicion, preview.guarnicion)
+        cargarImagenDesdeStorage(preview.postreId, ivPostre, preview.postre)
     }
 
     private fun applyBranding(
@@ -278,42 +254,10 @@ class ConfirmacionReservaActivity : BaseActivity() {
         finish()
     }
 
-    private fun cargarImagenesMenuDesdeStorage(
-        principalId: String?,
-        guarnicionId: String?,
-        postreId: String?,
-        ivPrincipal: ImageView,
-        ivGuarnicion: ImageView,
-        ivPostre: ImageView
-    ) {
-        val imageUrlsByDish = MenuRepository.obtenerSecciones()
-            .flatMap { it.opciones }
-            .associate { plato -> plato.id to plato.imageUrl }
-
-        imageByDishId = imageUrlsByDish
-
-        if (imageByDishId.isEmpty()) {
-            MenuRepository.cargarSecciones { ok, secciones ->
-                if (!ok) return@cargarSecciones
-
-                imageByDishId = secciones
-                    .flatMap { it.opciones }
-                    .associate { plato -> plato.id to plato.imageUrl }
-
-                cargarImagenDesdeStorage(MenuIdentity.SECTION_MAIN, principalId, ivPrincipal)
-                cargarImagenDesdeStorage(MenuIdentity.SECTION_SIDE, guarnicionId, ivGuarnicion)
-                cargarImagenDesdeStorage(MenuIdentity.SECTION_DESSERT, postreId, ivPostre)
-            }
-            return
-        }
-
-        cargarImagenDesdeStorage(MenuIdentity.SECTION_MAIN, principalId, ivPrincipal)
-        cargarImagenDesdeStorage(MenuIdentity.SECTION_SIDE, guarnicionId, ivGuarnicion)
-        cargarImagenDesdeStorage(MenuIdentity.SECTION_DESSERT, postreId, ivPostre)
-    }
-
-    private fun cargarImagenDesdeStorage(sectionId: String, dishId: String?, imageView: ImageView) {
-        val visibleName = MenuRepository.nombrePlato(sectionId, dishId)
+    /**
+     * Usa el mapa de imagenes resuelto por el servicio y cae al drawable local si falta URL.
+     */
+    private fun cargarImagenDesdeStorage(dishId: String?, imageView: ImageView, visibleName: String?) {
         val fallbackImage = imageForSelection(visibleName)
         val normalizedDishId = dishId.orEmpty().trim()
         if (normalizedDishId.isBlank()) {
@@ -373,81 +317,5 @@ class ConfirmacionReservaActivity : BaseActivity() {
             .placeholder(fallbackImage)
             .error(fallbackImage)
             .into(imageView)
-    }
-}
-
-internal data class ConfirmacionReservaRequest(
-    val fecha: String,
-    val detalleSeleccion: String,
-    val reserva: Reserva?,
-    val esEdicion: Boolean,
-    val fechaMillis: Long,
-    val seleccionesPendientes: Map<String, String>
-) {
-    val reservaId: String
-        get() = reserva?.id.orEmpty()
-}
-
-internal data class ConfirmacionReservaRawRequest(
-    val esEdicion: Boolean,
-    val fecha: String,
-    val detalleSeleccion: String,
-    val reservaId: String,
-    val fechaMillis: Long,
-    val hasSeleccionesPendientesExtra: Boolean,
-    val seleccionesPendientesRaw: Map<String, String>
-)
-
-internal sealed interface ConfirmacionReservaRequestResolution {
-    data class Valid(val request: ConfirmacionReservaRequest) : ConfirmacionReservaRequestResolution
-    data class Invalid(@StringRes val messageRes: Int) : ConfirmacionReservaRequestResolution
-}
-
-internal fun resolveConfirmacionReservaRequest(
-    rawRequest: ConfirmacionReservaRawRequest,
-    sanitizeSelecciones: (Map<String, String>) -> Map<String, String> = ReservasRepository::sanitizeSelecciones,
-    reservaById: (String) -> Reserva? = ReservasRepository::obtenerReservaPorId,
-    canEditReservationDate: (Long) -> Boolean = ReservasRepository::puedeEditarReservaExistenteEnFecha,
-    canCreateReservationDate: (Long) -> Boolean = ReservasRepository::puedeCrearReservaEnFecha
-): ConfirmacionReservaRequestResolution {
-    val seleccionesPendientes = sanitizeSelecciones(rawRequest.seleccionesPendientesRaw)
-
-    if (rawRequest.hasSeleccionesPendientesExtra && seleccionesPendientes.isEmpty()) {
-        return ConfirmacionReservaRequestResolution.Invalid(
-            if (rawRequest.esEdicion) R.string.error_actualizar_reserva else R.string.error_guardar_reserva
-        )
-    }
-
-    if (rawRequest.esEdicion) {
-        val reserva = reservaById(rawRequest.reservaId)
-        return if (rawRequest.reservaId.isBlank() || reserva == null || !canEditReservationDate(reserva.fechaMillis)) {
-            ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
-        } else {
-            ConfirmacionReservaRequestResolution.Valid(
-                ConfirmacionReservaRequest(
-                    fecha = rawRequest.fecha,
-                    detalleSeleccion = rawRequest.detalleSeleccion,
-                    reserva = reserva,
-                    esEdicion = true,
-                    fechaMillis = reserva.fechaMillis,
-                    seleccionesPendientes = seleccionesPendientes
-                )
-            )
-        }
-    }
-
-    return if (rawRequest.fechaMillis <= 0L || !canCreateReservationDate(rawRequest.fechaMillis)) {
-        ConfirmacionReservaRequestResolution.Invalid(R.string.error_detalle_reserva_no_disponible)
-    } else {
-        ConfirmacionReservaRequestResolution.Valid(
-            ConfirmacionReservaRequest(
-                fecha = rawRequest.fecha,
-                detalleSeleccion = rawRequest.detalleSeleccion,
-                reserva = null,
-                esEdicion = false,
-                fechaMillis = rawRequest.fechaMillis,
-                seleccionesPendientes = seleccionesPendientes
-            )
-        )
     }
 }

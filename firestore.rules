@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/perfiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/perfiles/$(request.auth.uid)).data.get('admin', false) == true;
+    }
+
+    function isCurrentUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function reservaIdHasCurrentUserPrefix(reservaId) {
+      return signedIn() &&
+        reservaId.size() > request.auth.uid.size() + 1 &&
+        reservaId[0:request.auth.uid.size()] == request.auth.uid &&
+        reservaId[request.auth.uid.size():request.auth.uid.size() + 1] == '_';
+    }
+
+    function reservaIdMatchesCurrentUserAndFecha(reservaId, fechaMillis) {
+      return reservaIdHasCurrentUserPrefix(reservaId) &&
+        reservaId[request.auth.uid.size() + 1:reservaId.size()] == string(fechaMillis);
+    }
+
+    function reservaKeysAreValid(data) {
+      return data.keys().hasAll([
+          'userId',
+          'fechaMillis',
+          'selecciones',
+          'nombre',
+          'apellido',
+          'empresa'
+        ]) &&
+        data.keys().hasOnly([
+          'userId',
+          'fechaMillis',
+          'selecciones',
+          'nombre',
+          'apellido',
+          'empresa'
+        ]);
+    }
+
+    function seleccionesAreValid(selecciones) {
+      return selecciones is map &&
+        selecciones.keys().hasAll(['main']) &&
+        selecciones.keys().hasOnly(['main', 'side', 'dessert']) &&
+        selecciones.main is string &&
+        selecciones.main.size() > 0 &&
+        (!selecciones.keys().hasAny(['side']) ||
+          (selecciones.side is string && selecciones.side.size() > 0)) &&
+        (!selecciones.keys().hasAny(['dessert']) ||
+          (selecciones.dessert is string && selecciones.dessert.size() > 0));
+    }
+
+    function reservaCreateIsValid(reservaId) {
+      return reservaKeysAreValid(request.resource.data) &&
+        request.resource.data.userId is string &&
+        isCurrentUser(request.resource.data.userId) &&
+        request.resource.data.fechaMillis is int &&
+        request.resource.data.fechaMillis > 0 &&
+        request.resource.data.nombre is string &&
+        request.resource.data.apellido is string &&
+        request.resource.data.empresa is string &&
+        seleccionesAreValid(request.resource.data.selecciones) &&
+        reservaIdMatchesCurrentUserAndFecha(reservaId, request.resource.data.fechaMillis);
+    }
+
+    function reservaUpdateIsValid() {
+      return isCurrentUser(resource.data.userId) &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.fechaMillis == resource.data.fechaMillis &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['selecciones']) &&
+        seleccionesAreValid(request.resource.data.selecciones);
+    }
+
+    function perfilFieldsAreValid(data) {
+      return data.keys().hasOnly(['nombre', 'apellido', 'empresa', 'dni', 'admin']) &&
+        data.get('nombre', '') is string &&
+        data.get('apellido', '') is string &&
+        data.get('empresa', '') is string &&
+        data.get('dni', '') is string &&
+        data.get('admin', false) is bool;
+    }
+
+    match /reservas/{reservaId} {
+      allow get: if isAdmin() ||
+        (reservaIdHasCurrentUserPrefix(reservaId) &&
+          (resource == null || isCurrentUser(resource.data.userId)));
+      allow list: if isAdmin() || isCurrentUser(resource.data.userId);
+      allow create: if reservaCreateIsValid(reservaId);
+      allow update: if reservaUpdateIsValid();
+      allow delete: if isAdmin();
+    }
+
+    match /perfiles/{userId} {
+      allow get, list: if isAdmin() || isCurrentUser(userId);
+      allow create: if isAdmin() ||
+        (isCurrentUser(userId) &&
+          perfilFieldsAreValid(request.resource.data) &&
+          request.resource.data.get('admin', false) == false);
+      allow update: if isAdmin() ||
+        (isCurrentUser(userId) &&
+          perfilFieldsAreValid(request.resource.data) &&
+          request.resource.data.get('admin', false) == resource.data.get('admin', false));
+      allow delete: if false;
+    }
+
+    match /configuracion_app/{documentId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /menu/{documentId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /menu_por_fecha/{documentId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /reservas_archivo/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /reservas_archivo_operaciones/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
